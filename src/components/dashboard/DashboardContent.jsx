@@ -1,0 +1,153 @@
+'use client';
+import React from 'react';
+import { Pie } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+
+ChartJS.register(ArcElement, Tooltip, Legend);
+
+export default function DashboardContent() {
+  const attendanceData = {
+    labels: ['Present', 'Absent'],
+    datasets: [
+      {
+        data: [27, 3],
+        backgroundColor: ['#36FF09', '#FF0000'], // Blue & Orange
+        borderWidth: 0,
+      },
+    ],
+  };
+
+  return (
+    <main className="bg-[#ffffff] px-4 sm:px-6 lg:px-8 py-2 min-h-screen font-sans">
+      <div className="flex items-center mb-4">
+        <div className="w-1 h-5 bg-red-600 mr-2 rounded" />
+        <h2 className="text-lg font-semibold text-[#2c2c2c]">Overview</h2>
+      </div>
+
+      <div className="mt-4 flex flex-wrap justify-start gap-4 sm:gap-6">
+
+        {/* Check-in / Out Card */}
+        <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[450px]">
+          <div className="bg-[#AAB491] px-4 py-2 rounded-t-lg">
+            <h2 className="text-base font-semibold text-black text-center">Check-in /Out Status</h2>
+          </div>
+          <div className="p-5 pt-7 space-y-4">
+            <div className="flex justify-center items-center gap-2 text-sm font-semibold text-black">
+              <span>Status:</span>
+              <span className="text-[#FF7700]">Pending Check-in</span>
+            </div>
+            <div className="flex justify-center items-center gap-2 text-sm font-semibold text-black">
+              <span>Time:</span>
+              <span>10:20:30 AM</span>
+            </div>
+            <div className="pt-4 flex justify-center">
+              <button className="bg-[#AAB491] text-black text-sm font-semibold px-4 py-2 rounded shadow hover:opacity-90">
+                Check-In Now
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Attendance Summary */}
+        <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[450px]">
+          <div className="bg-[#AAB491] px-4 py-2 rounded-t-lg flex items-center justify-between">
+            <h2 className="text-base font-semibold text-black">Attendance Summary</h2>
+            <select className="text-sm text-black rounded px-2 py-1 bg-white">
+              <option>Day</option>
+              <option>Week</option>
+              <option>Month</option>
+            </select>
+          </div>
+
+          <div className="p-5 pt-6 flex">
+            {/* Legend */}
+            <div className="space-y-3 text-sm mt-2">
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-[#36FF09]"></span>
+                <span className="text-black font-medium">Present</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-[#FF0000]"></span>
+                <span className="text-black font-medium">Absent</span>
+              </div>
+            </div>
+
+            {/* Pie Chart */}
+            <div className="flex-1 flex justify-center items-center">
+              <div className="relative w-32 h-32">
+                <Pie
+                  data={attendanceData}
+                  options={{
+                    cutout: '40%',
+                    plugins: {
+                      legend: { display: false },
+                    },
+                  }}
+                />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <p className="text-sm text-gray-500">Total</p>
+                    <p className="text-lg font-bold text-black">30</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Room Inspection Schedule */}
+        <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[450px] h-[200px]">
+          <div className="bg-[#AAB491] px-4 py-2 rounded-t-lg">
+            <h2 className="text-base font-semibold text-black">Room Inspection Schedule</h2>
+          </div>
+          <div className="p-4 flex flex-col gap-3.5 text-sm font-semibold text-black">
+            <div className="flex justify-between"><span>Next Inspection:</span><span>21th July 2025</span></div>
+            <div className="flex justify-between"><span>Time:</span><span>10:00 AM</span></div>
+            <div className="flex justify-between"><span>Status:</span><span className="text-[#06FF0E] font-semibold">Scheduled</span></div>
+          </div>
+        </div>
+
+        {/* Bed Allotment */}
+        <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[450px] h-[200px]">
+          <div className="bg-[#AAB491] px-4 py-2 rounded-t-lg">
+            <h2 className="text-base font-semibold text-black">Bed Allotment</h2>
+          </div>
+          <div className="p-4 flex flex-col gap-3.5 text-sm font-semibold text-black">
+            <div className="flex justify-between"><span>Room no:</span><span>A-203</span></div>
+            <div className="flex justify-between"><span>Beds Occupied:</span><span>2/2</span></div>
+            <div className="flex justify-between"><span>Roommate:</span><span className="truncate max-w-[60%]">Chinmay Gawade</span></div>
+          </div>
+        </div>
+
+        {/* Fee Alerts */}
+        <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[450px] h-[200px]">
+          <div className="bg-[#AAB491] px-4 py-1 rounded-t-lg">
+            <h2 className="text-base font-semibold text-black">Fee Alerts</h2>
+          </div>
+          <div className="p-4 flex flex-col gap-3.5 text-sm font-semibold text-black">
+            <div className="flex justify-between"><span>Hostel Fee:</span><span className="text-red-600">Overdue</span></div>
+            <div className="flex justify-between"><span>Due Date:</span><span>21th Oct 2025</span></div>
+            <div className="flex justify-between"><span>Amount:</span><span>INR 10,000</span></div>
+          </div>
+        </div>
+
+        {/* Leave Approval Status */}
+        <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[450px] h-[200px]">
+          <div className="bg-[#AAB491] px-4 py-1 rounded-t-lg">
+            <h2 className="text-base font-semibold text-black">Leave Approval Status</h2>
+          </div>
+          <div className="p-4 flex flex-col gap-3.5 text-sm font-semibold text-black">
+            <div className="flex justify-between"><span>Last request:</span><span className="truncate max-w-[60%]">Overnight Stay</span></div>
+            <div className="flex justify-between"><span>Status:</span><span className="text-[#36FF09] font-semibold">Approved</span></div>
+            <div className="flex justify-between"><span>Valid until:</span><span>21th Oct 2025</span></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}
