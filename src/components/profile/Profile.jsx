@@ -17,8 +17,8 @@ export default function Profile() {
       {/* Cards Section */}
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Profile Card */}
-        <div className="bg-[#BEC5AD] rounded-lg p-6 w-full lg:w-[35%] flex flex-col items-center justify-center shadow min-h-[480px]">
-          <div className="w-32 h-32 rounded-full bg-white mb-4" />
+          <div className="bg-[#BEC5AD] rounded-lg p-6 w-full lg:w-[35%] flex flex-col items-center justify-center shadow min-h-[330px] lg:min-h-[480px]">
+    <div className="w-32 h-32 rounded-full bg-white mb-4" />
           <h2 className="text-lg font-bold text-black mb-1">Nouman Khan</h2>
           <p className="text-sm font-semibold text-black">Student ID: HFL-001</p>
         </div>

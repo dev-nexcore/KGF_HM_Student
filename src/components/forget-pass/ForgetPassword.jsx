@@ -4,18 +4,18 @@ export default function ForgetPassword() {
   return (
     <div className="min-h-screen bg-[#a1ad92] flex items-center justify-center px-4">
       <div className="bg-white rounded-2xl shadow-md w-full max-w-4xl px-16 py-14 min-h-[500px] flex flex-col justify-center">
-        <h1 className="text-3xl font-bold text-center mb-10">Forget Password</h1>
+        <h1 className="text-3xl font-bold text-center mb-10 text-black">Forget Password</h1>
 
         <form className="space-y-6 max-w-md mx-auto w-full">
           <div>
-            <label htmlFor="email" className="block text-sm font-semibold mb-2 text-left">
+            <label htmlFor="email" className="block text-sm font-semibold mb-2 text-left text-black">
               Email ID
             </label>
             <input
               id="email"
               type="email"
               placeholder="Enter Your Email ID"
-              className="w-full px-4 py-3 rounded-xl shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none"
+              className="w-full px-4 py-3 rounded-xl shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none text-[#757575]"
             />
           </div>
 

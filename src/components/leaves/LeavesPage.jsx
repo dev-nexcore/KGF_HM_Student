@@ -9,9 +9,9 @@ export default function LeavesPage() {
       </h2>
 
       {/* Leave Application Form */}
-      <div className="bg-white rounded-lg sm:rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.25)] mb-6 sm:mb-10 w-full max-w-xl mx-auto lg:mx-0 lg:ml-0">
+      <div className="bg-white rounded-lg sm:rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.25)] mb-6 sm:mb-10 w-full max-w-xl lg:mx-0 lg:ml-0">
         {/* Header */}
-        <div className="bg-[#BEC5AD] rounded-t-lg sm:rounded-t-xl px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 font-semibold text-sm sm:text-base md:text-lg">
+        <div className="bg-[#A4B494] rounded-t-lg sm:rounded-t-xl px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 font-semibold text-sm sm:text-base md:text-lg">
           Leave Application Form
         </div>
 
@@ -70,7 +70,7 @@ export default function LeavesPage() {
       </div>
 
       {/* Leave History */}
-      <div className="bg-white min-h-[280px] sm:min-h-[340px] rounded-lg sm:rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.25)] px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8 w-full max-w-6xl mx-auto">
+      <div className="bg-white min-h-[280px] sm:min-h-[340px] rounded-lg sm:rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.25)] px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8 w-full max-w-6xl lg:mx-0 lg:ml-0">
         <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-3 sm:mb-4 text-gray-800">
           Leave History
         </h3>
@@ -78,7 +78,7 @@ export default function LeavesPage() {
         {/* Desktop Table - Unchanged */}
         <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-sm text-gray-800 min-w-full">
-            <thead className="bg-gray-300 text-left">
+            <thead className="bg-gray-200 text-left">
               <tr>
                 <th className="p-3 font-semibold">Leave Type</th>
                 <th className="p-3 font-semibold">Start Date</th>

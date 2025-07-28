@@ -4,27 +4,31 @@ import Image from 'next/image';
 
 export default function Navbar() {
   return (
-    <nav className="flex items-start justify-between px-6 py-4 bg-[#BEC5AD]">
+    <nav className="flex items-center justify-between px-4 sm:px-6 py-4 bg-[#BEC5AD] h-20 min-h-[80px]">
       {/* Left Text */}
-      <div className="pl-10 md:pl-0">
-        <h2 className="text-xl font-semibold text-gray-800">Welcome Back, Nouman</h2>
-        <p className="text-sm text-gray-600">- have a great day</p>
+      <div className="pl-13 sm:pl-6 md:pl-10 lg:pl-0 flex-1 min-w-0">
+        <h2 className="text-base sm:text-lg md:text-xl font-semibold text-gray-800 truncate">
+          Welcome Back, Nouman
+        </h2>
+        <p className="text-xs sm:text-sm text-gray-600 truncate">
+          - have a great day
+        </p>
       </div>
 
       {/* Right Icons aligned on same line */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
         {/* PNG Notification Icon */}
         <Image
-          src="/icons/notifications.png"  // ✅ Make sure this file exists in public/icons/
+          src="/icons/notifications.png"
           alt="Notifications"
-          width={22}
-          height={22}
-          className="cursor-pointer mt-1" // mt-1 aligns it better with text
+          width={20}
+          height={20}
+          className="cursor-pointer sm:w-[22px] sm:h-[22px]"
         />
 
         {/* Profile Icon */}
         <Link href="/profile" aria-label="Go to profile">
-          <div className="w-10 h-10 rounded-full bg-white border border-gray-300 cursor-pointer" />
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white border border-gray-300 cursor-pointer flex-shrink-0" />
         </Link>
       </div>
     </nav>

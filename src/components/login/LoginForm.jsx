@@ -10,11 +10,11 @@ export default function Login() {
         </h2>
 
         <div className="flex items-center justify-center mb-6">
-          <div className="bg-white flex items-center justify-center w-52 h-52 md:w-60 md:h-60 rounded-[16px] shadow-lg">
+          <div className="flex items-center justify-center w-60 h-60 md:w-72 md:h-72">
             <img
-              src="images/kokan-logo.jpg"
+              src="kokan-logo.jpg"
               alt="Kokan Global Foundation"
-              className="w-36 h-36 md:w-44 md:h-44 object-contain"
+              className="w-60 h-60 md:w-68 md:h-68 object-cover rounded-[20px] shadow-lg"
             />
           </div>
         </div>
@@ -59,7 +59,7 @@ export default function Login() {
             />
           </div>
           <div className="flex justify-end">
-            <a href="#" className="text-sm text-blue-500 hover:underline">
+            <a href="/forget-password" className="text-sm text-blue-500 hover:underline">
               Forget Password?
             </a>
           </div>
