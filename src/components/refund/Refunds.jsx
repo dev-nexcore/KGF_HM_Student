@@ -1,6 +1,63 @@
 'use client';
 
+import React, { useState, useEffect } from 'react';
+import api from '@/lib/api';
+
 export default function Refunds() {
+  const [refundType, setRefundType] = useState('');
+  const [amount, setAmount] = useState('');
+  const [reason, setReason] = useState('');
+  const [refunds, setRefunds] = useState([]);
+
+  const [studentId, setStudentId] = useState(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setStudentId(localStorage.getItem('studentId'));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!studentId) return;
+
+    const fetchRefunds = async () => {
+      try {
+        const res = await api.get(`/refunds/${studentId}`);
+        setRefunds(res.data.refunds);
+      } catch (error) {
+        console.error('Error fetching refund history:', error);
+      }
+    };
+
+    fetchRefunds();
+  }, [studentId]);
+
+  // Submit refund form
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!refundType || !amount || !reason) return;
+
+    try {
+      await api.post('/refund', {
+        studentId,
+        refundType,
+        amount,
+        reason,
+      });
+
+      // Re-fetch history after successful submission
+      const res = await api.get(`/refunds/${studentId}`);
+      setRefunds(res.data.refunds);
+
+      // Clear form
+      setRefundType('');
+      setAmount('');
+      setReason('');
+    } catch (err) {
+      console.error('Error submitting refund:', err);
+    }
+  };
+
   return (
     <div className="bg-white text-black p-4 sm:p-6 md:p-8 overflow-hidden min-h-screen">
       

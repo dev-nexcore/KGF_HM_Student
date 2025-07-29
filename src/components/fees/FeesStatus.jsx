@@ -1,16 +1,43 @@
 'use client';
 import React, { useState, useEffect } from 'react';
+import api from '@/lib/api';
 import PaymentModal from './PaymentModal';
 
 export default function FeesStatus() {
   const [showModal, setShowModal] = useState(false);
-  const [isClient, setIsClient] = useState(false); // To ensure client-side rendering
+  const [currentFees, setCurrentFees] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [studentId, setStudentId] = useState(null);
+  const [ready, setReady] = useState(false); // Replaces isClient
+  const [selectedFeeAmount, setSelectedFeeAmount] = useState(null);
 
   useEffect(() => {
-    setIsClient(true);
+    // Run only on client
+    const id = localStorage.getItem('studentId');
+    if (id) setStudentId(id);
+    setReady(true); // Now it's safe to run other logic
   }, []);
 
-  if (!isClient) return null; // Prevent hydration error
+  useEffect(() => {
+    const fetchFees = async () => {
+      try {
+        const res = await api.get(`/feeStatus/${studentId}`);
+        setCurrentFees(res.data.fees || []);
+      } catch (err) {
+        console.error("Error fetching current fee status:", err);
+        setError('Failed to fetch fee status');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (ready && studentId) {
+      fetchFees();
+    }
+  }, [ready, studentId]);
+
+  if (!ready) return null; // Prevent premature render
 
   const paymentHistory = [
     { date: '23-03-2025', amount: '6,000', email: 'xyz@gmail.com', status: 'Paid' },
@@ -131,7 +158,14 @@ export default function FeesStatus() {
 
 
       {/* Payment Modal */}
-      <PaymentModal isOpen={showModal} onClose={() => setShowModal(false)} />
+      <PaymentModal
+        isOpen={showModal}
+        onClose={() => {
+          setShowModal(false);
+          setSelectedFeeAmount(null);
+        }}
+        amount={selectedFeeAmount}
+      />
     </div>
   );
 }

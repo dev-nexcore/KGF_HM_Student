@@ -3,6 +3,55 @@
 import React from 'react';
 
 export default function LeavesPage() {
+  const [leaveType, setLeaveType] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [reason, setReason] = useState('');
+  const [leaveHistory, setLeaveHistory] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const studentId = typeof window !== 'undefined' ? localStorage.getItem('studentId') : null;
+
+  const fetchLeaveHistory = async () => {
+    try {
+      const res = await api.get(`/leaves/${studentId}`);
+      setLeaveHistory(res.data.leaves);
+    } catch (err) {
+      console.error('Error fetching leave history:', err);
+    }
+  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!leaveType || !startDate || !endDate || !reason) return alert('All fields are required');
+
+    setLoading(true);
+    try {
+      await api.post('/leave', {
+        studentId,
+        leaveType,
+        startDate,
+        endDate,
+        reason,
+      });
+      alert('Leave applied successfully');
+      setLeaveType('');
+      setStartDate('');
+      setEndDate('');
+      setReason('');
+      fetchLeaveHistory();
+    } catch (err) {
+      console.error('Apply leave error:', err);
+      alert('Failed to apply for leave');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (studentId) {
+      fetchLeaveHistory();
+    }
+  }, [studentId]);
+
   return (
     <div className="bg-white text-black p-4 sm:p-6 md:p-8 overflow-hidden min-h-screen">
       
@@ -33,12 +82,13 @@ export default function LeavesPage() {
             </select>
           </div>
 
-          {/* Dates */}
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 md:gap-4">
             <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 flex-1">
               <label className="text-xs sm:text-sm font-semibold whitespace-nowrap">Start Date:</label>
               <input
                 type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
                 className="w-full sm:w-auto px-2 sm:px-3 py-1.5 sm:py-2 rounded-md shadow-md border border-gray-300 text-xs sm:text-sm"
               />
             </div>
@@ -46,12 +96,13 @@ export default function LeavesPage() {
               <label className="text-xs sm:text-sm font-semibold whitespace-nowrap">End Date:</label>
               <input
                 type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
                 className="w-full sm:w-auto px-2 sm:px-3 py-1.5 sm:py-2 rounded-md shadow-md border border-gray-300 text-xs sm:text-sm"
               />
             </div>
           </div>
 
-          {/* Reason */}
           <div className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-3">
             <label className="text-xs sm:text-sm font-semibold sm:pt-2 whitespace-nowrap">
               Reason For Leave:
@@ -59,13 +110,13 @@ export default function LeavesPage() {
             <textarea className="w-full px-3 sm:px-4 py-2 rounded-lg shadow-md h-16 sm:h-20 resize-none border border-gray-300 text-xs" />
           </div>
 
-          {/* Submit Button */}
           <div className="flex justify-center pt-2">
             <button
               type="submit"
+              disabled={loading}
               className="bg-[#BEC5AD] text-black px-4 sm:px-6 md:px-8 py-1.5 sm:py-2 rounded-md shadow hover:opacity-90 text-xs sm:text-sm font-medium w-full sm:w-auto"
             >
-              Submit
+              {loading ? 'Submitting...' : 'Submit'}
             </button>
           </div>
         </form>

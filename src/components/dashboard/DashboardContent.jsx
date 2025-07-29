@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Pie } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -7,10 +7,20 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import api from '@/lib/api';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 export default function DashboardContent() {
+  const [studentId, setStudentId] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [checkStatus, setCheckStatus] = useState('Pending Check-in');
+  const [checkTime, setCheckTime] = useState('--:--:--');
+  const [roomNo, setRoomNo] = useState('');
+  const [roommateName, setRoommateName] = useState('');
+  const [bedAllotment, setBedAllotment] = useState('');
+
+
   const attendanceData = {
     labels: ['Present', 'Absent'],
     datasets: [
@@ -21,6 +31,75 @@ export default function DashboardContent() {
       },
     ],
   };
+
+  useEffect(() => {
+    const id = localStorage.getItem('studentId');
+    setStudentId(id);
+  }, []);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await api.get(`/profile/${studentId}`);
+
+        if (res.status === 200) {
+          const data = res.data;
+          setCheckStatus(data.checkStatus || "Pending Check-in");
+          setCheckTime(data.checkTime || "--:--:--");
+          setRoomNo(data.roomNo);
+          setRoommateName(data.roommateName);
+          setBedAllotment(data.bedAllotment);
+        }
+      } catch (err) {
+        console.error("Failed to fetch student profile:", err);
+      }
+    };
+
+    if (studentId) {
+      fetchProfile();
+    }
+  }, [studentId]);
+
+  async function handleCheckIn() {
+    setLoading(true);
+    try {
+      // Assuming your backend API expects studentId in body or headers
+      const res = await api.post('/check-in', { studentId });
+
+      if (res.status === 200) {
+        const data = res.data;
+        setCheckStatus('Checked In');
+        setCheckTime(data.checkInDate || new Date().toLocaleTimeString());
+        alert(data.message || 'Checked in successfully');
+      } else {
+        alert(res.data.message || 'Failed to check in');
+      }
+    } catch (err) {
+      alert('Error checking in');
+      console.error(err);
+    }
+    setLoading(false);
+  }
+
+  async function handleCheckOut() {
+    setLoading(true);
+    try {
+      const res = await api.post('/check-out', { studentId });
+
+      if (res.status === 200) {
+        const data = res.data;
+        setCheckStatus('Checked Out');
+        setCheckTime(data.checkInDate || new Date().toLocaleTimeString());
+        alert(data.message || 'Checked out successfully');
+      } else {
+        alert(res.data.message || 'Failed to check out');
+      }
+    } catch (err) {
+      alert('Error checking out');
+      console.error(err);
+    }
+    setLoading(false);
+  }
 
   return (
     <main className="bg-[#ffffff] px-4 sm:px-6 lg:px-8 py-2 min-h-screen font-sans">
@@ -39,11 +118,20 @@ export default function DashboardContent() {
           <div className="p-6 pt-7 space-y-5">
             <div className="flex justify-center items-center gap-3 text-[1.05rem] font-semibold text-black">
               <span>Status:</span>
-              <span className="text-[#FF7700]">Pending Check-in</span>
+              <span
+                className={`${checkStatus === 'Checked In'
+                  ? 'text-green-600'
+                  : checkStatus === 'Checked Out'
+                    ? 'text-blue-600'
+                    : 'text-[#FF7700]'
+                  }`}
+              >
+                {checkStatus}
+              </span>
             </div>
             <div className="flex justify-center items-center gap-3 text-[1.05rem] font-semibold text-black">
               <span>Time:</span>
-              <span>10:20:30 AM</span>
+              <span>{checkTime}</span>
             </div>
             <div className="pt-5 flex justify-center">
               <button className="bg-[#AAB491] text-black text-[1.05rem] font-semibold px-5 py-2.5 rounded shadow hover:opacity-90">
@@ -125,7 +213,7 @@ export default function DashboardContent() {
           <div className="p-5 flex flex-col gap-6 text-[1.05rem] font-semibold text-black">
             <div className="flex justify-between"><span>Room no:</span><span>A-203</span></div>
             <div className="flex justify-between"><span>Beds Occupied:</span><span>2/2</span></div>
-            <div className="flex justify-between"><span>Roommate:</span><span className="truncate max-w-[60%]">Chinmay Gawade</span></div>
+            <div className="flex justify-between"><span>Roommate:</span><span className="truncate max-w-[60%]">{roommateName}</span></div>
           </div>
         </div>
 

@@ -1,8 +1,69 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import api from '@/lib/api';
+import toast from 'react-hot-toast'; // optional for feedback
 
 export default function Complaints() {
+  const [complaintType, setComplaintType] = useState('');
+  const [subject, setSubject] = useState('');
+  const [description, setDescription] = useState('');
+  const [complaints, setComplaints] = useState([]);
+  const [studentId, setStudentId] = useState(null);
+
+  // Get student ID from localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const id = localStorage.getItem('studentId');
+      setStudentId(id);
+    }
+  }, []);
+
+  // Fetch complaint history
+  useEffect(() => {
+    if (!studentId) return;
+
+    const fetchComplaints = async () => {
+      try {
+        const res = await api.get(`/complaints/${studentId}`);
+        setComplaints(res.data.complaints);
+      } catch (err) {
+        console.error("Error fetching complaint history:", err);
+      }
+    };
+
+    fetchComplaints();
+  }, [studentId]);
+
+  // Submit form
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!complaintType || !subject || !description) return;
+
+    try {
+      await api.post('/complaint', {
+        studentId,
+        complaintType,
+        subject,
+        description
+      });
+
+      toast.success("Complaint filed successfully");
+
+      // Reset form
+      setComplaintType('');
+      setSubject('');
+      setDescription('');
+
+      // Re-fetch history
+      const res = await api.get(`/complaints/${studentId}`);
+      setComplaints(res.data.complaints);
+    } catch (err) {
+      console.error("Error filing complaint:", err);
+      toast.error("Something went wrong!");
+    }
+  };
+
   return (
     <div className="bg-white text-black p-4 sm:p-6 md:p-8 overflow-hidden min-h-screen">
       
