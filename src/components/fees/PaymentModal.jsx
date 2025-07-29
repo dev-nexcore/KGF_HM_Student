@@ -22,7 +22,7 @@ export default function PaymentModal({ isOpen, onClose }) {
     <div className="fixed inset-0 flex items-center justify-center bg-black/20 z-50 p-4">
       <div
         ref={modalRef}
-        className="bg-white rounded-xl shadow-lg p-6 sm:p-8 md:p-10 w-full max-w-sm sm:max-w-md md:max-w-xl lg:max-w-2xl max-h-[90vh] overflow-y-auto"
+        className="bg-white rounded-xl shadow-lg p-6 sm:p-8 md:p-10 w-full max-w-sm sm:max-w-md md:max-w-xl lg:max-w-2xl max-h-[90vh] overflow-hidden"
       >
         {/* Heading with underline */}
         <h2 className="text-xl sm:text-2xl font-bold text-black mb-2">Fees Payment</h2>
@@ -83,12 +83,13 @@ export default function PaymentModal({ isOpen, onClose }) {
           </label>
         </div>
 
-        {/* Proceed Button */}
-        <div className="flex justify-center">
-          <button className="bg-[#a1b294] text-black font-medium py-2 sm:py-3 px-6 sm:px-8 text-xs sm:text-sm rounded-lg shadow w-full sm:w-48 md:w-40 hover:bg-[#8fa082] transition-colors">
-            Proceed To Pay
-          </button>
-        </div>
+       {/* Proceed Button */}
+<div className="flex justify-center">
+  <button className="bg-[#a1b294] text-black font-medium py-2 sm:py-3 px-6 sm:px-8 text-xs sm:text-sm rounded-lg shadow w-full sm:w-auto whitespace-nowrap hover:bg-[#8fa082] transition-colors">
+    Proceed To Pay
+  </button>
+</div>
+
       </div>
     </div>
   );

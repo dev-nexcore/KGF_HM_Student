@@ -15,7 +15,7 @@ export default function ForgetPassword() {
               id="email"
               type="email"
               placeholder="Enter Your Email ID"
-              className="w-full px-4 py-3 rounded-xl shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none text-[#757575]"
+              className="w-full px-4 py-3 rounded-xl shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none text-[#000000]"
             />
           </div>
 

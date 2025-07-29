@@ -4,176 +4,186 @@ import React from 'react';
 
 export default function Complaints() {
   return (
-    <div className="py-4 sm:py-6 px-2 sm:px-0">
-      {/* Page Heading */}
-      <h3 className="text-lg sm:text-xl md:text-2xl font-bold border-l-4 border-red-500 pl-3 mb-4 sm:mb-5 text-black">
+    <div className="bg-white text-black p-4 sm:p-6 md:p-8 overflow-hidden min-h-screen">
+      
+      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold border-l-4 border-red-600 pl-3 mb-6 sm:mb-8 mt-[-7px] -ml-2 text-[#2c2c2c]">
         Complaints
-      </h3>
+      </h1>
 
-      {/* Complaint Form Card */}
-      <div className="w-full max-w-full lg:w-2/4 rounded-[16px] shadow-[0_12px_32px_rgba(0,0,0,0.2)] overflow-hidden mb-8 sm:mb-10 bg-white ml-0 mr-auto">
+      {/* Complaint Application Form - Increased width for desktop */}
+      {/* Complaint Application Form - Increased width for desktop */}
+<div className="bg-white rounded-lg sm:rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.25)] mb-6 sm:mb-10 w-full max-w-3xl">
+
         {/* Header */}
-        <div className="bg-[#A4B494] p-3 sm:p-4 rounded-t-[16px]">
-          <h4 className="text-sm sm:text-base lg:text-lg font-bold text-black">File a Complaint</h4>
+        <div className="bg-[#A4B494] rounded-t-lg sm:rounded-t-xl px-6 py-3 font-bold text-base md:text-lg">
+          Complaint Application Form
         </div>
 
-        {/* Form Body */}
-        <div className="p-3 sm:p-4 lg:p-6">
-          <form className="w-full flex flex-col gap-4 sm:gap-5">
-            {/* Complaint Type */}
-            <div className="w-full">
-              <label htmlFor="complaintType" className="block text-black font-semibold mb-1 text-xs sm:text-sm lg:text-base">
-                Complaint type
-              </label>
-              <select
-                id="complaintType"
-                name="type"
-                required
-                className="w-full px-3 sm:px-4 py-2 rounded-md shadow-[0_6px_20px_rgba(0,0,0,0.2)] bg-white text-black focus:outline-none focus:ring-2 focus:ring-[#A4AE97] text-xs sm:text-sm"
-              >
-                <option value="">Select Complaint Type</option>
-                <option>Noise Disturbance</option>
-                <option>Maintenance issue</option>
-                <option>Damages fee</option>
-              </select>
-            </div>
+        <form className="space-y-4 px-6 py-6">
+          {/* Complaint Type */}
+          <div>
+            <label className="block mb-1 text-sm font-semibold text-gray-800">
+              Complaint Type
+            </label>
+            <select className="w-full px-4 py-2 rounded-md shadow-md border border-gray-300 text-sm">
+              <option value="">Select Complaint Type</option>
+              <option>Noise Disturbance</option>
+              <option>Maintenance issue</option>
+              <option>Damages fee</option>
+            </select>
+          </div>
 
-            {/* Subject */}
-            <div className="w-full">
-              <label htmlFor="subject" className="block text-black font-semibold mb-1 text-xs sm:text-sm lg:text-base">
-                Subject
-              </label>
-              <input
-                type="text"
-                id="subject"
-                name="subject"
-                required
-                placeholder="Enter The Subject"
-                className="w-full px-3 sm:px-4 py-2 rounded-md shadow-[0_6px_20px_rgba(0,0,0,0.2)] placeholder:text-gray-400 text-black bg-white focus:outline-none focus:ring-2 focus:ring-[#A4AE97] text-xs sm:text-sm"
-              />
-            </div>
+          {/* Subject */}
+          <div>
+            <label className="block mb-1 text-sm font-semibold text-gray-800">
+              Subject
+            </label>
+            <input
+              type="text"
+              placeholder="Enter The Subject"
+              className="w-full px-4 py-2 rounded-md shadow-md border border-gray-300 text-sm placeholder:text-gray-400"
+            />
+          </div>
 
-            {/* Description */}
-            <div className="w-full flex flex-col lg:flex-row lg:items-start gap-1 lg:gap-2">
-              <label
-                htmlFor="description"
-                className="lg:w-[120px] text-black font-semibold text-xs sm:text-sm lg:text-base lg:pt-1"
-              >
-                Description
-              </label>
-              <textarea
-                id="description"
-                name="description"
-                rows={4}
-                required
-                className="w-full lg:flex-1 px-3 sm:px-4 py-2 rounded-md shadow-[0_6px_20px_rgba(0,0,0,0.2)] text-black bg-white focus:outline-none focus:ring-2 focus:ring-[#A4AE97] text-xs sm:text-sm"
-              ></textarea>
-            </div>
+          {/* Description */}
+          <div className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-3">
+            <label className="text-xs sm:text-sm font-semibold sm:pt-2 whitespace-nowrap">
+              Description:
+            </label>
+            <textarea 
+              className="w-full px-3 sm:px-4 py-2 rounded-lg shadow-md h-16 sm:h-20 resize-none border border-gray-300 text-xs"
+              placeholder="Enter complaint description"
+            />
+          </div>
 
-            {/* Submit Button */}
-            <div className="w-full flex justify-center">
-              <button
-                type="submit"
-                className="bg-[#A4AE97] text-black px-4 sm:px-6 py-2 rounded-md shadow-[0_6px_20px_rgba(0,0,0,0.25)] font-semibold hover:bg-[#9aa78f] transition w-full sm:w-auto text-xs sm:text-sm"
-              >
-                Submit
-              </button>
-            </div>
-          </form>
-        </div>
+          {/* Submit Button */}
+          <div className="flex justify-center pt-2">
+            <button
+              type="submit"
+              className="bg-[#A4AE97] text-black px-4 sm:px-6 md:px-8 py-1.5 sm:py-2 rounded-md shadow hover:opacity-90 text-xs sm:text-sm font-medium w-full sm:w-auto"
+            >
+              Submit
+            </button>
+          </div>
+        </form>
       </div>
 
+      {/* Rest of your code remains the same... */}
       {/* Complaint History */}
-      <div className="bg-white rounded-[16px] shadow-[0_6px_20px_rgba(0,0,0,0.25)] w-full overflow-x-auto p-3 sm:p-4 lg:p-6">
-        <h4 className="text-base sm:text-lg lg:text-xl font-extrabold mb-3 sm:mb-4 text-black">Complaint History</h4>
-        
-        {/* Mobile Card View */}
-        <div className="block lg:hidden space-y-3">
-          <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-            <div className="flex justify-between items-start mb-2">
-              <h5 className="font-semibold text-gray-800 text-sm">Noise Disturbance</h5>
-              <span className="bg-[#39FF14] text-black py-1 px-2 rounded-[4px] font-bold text-xs">
-                Approved
-              </span>
-            </div>
-            <div className="text-xs text-gray-600 space-y-1">
-              <div><span className="font-medium">Subject:</span> Noisy Neighbour in Room 305</div>
-              <div><span className="font-medium">Filed Date:</span> 23-03-2025</div>
-            </div>
-          </div>
-          
-          <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-            <div className="flex justify-between items-start mb-2">
-              <h5 className="font-semibold text-gray-800 text-sm">Maintenance issue</h5>
-              <span className="bg-red-500 text-white py-1 px-2 rounded-[4px] font-bold text-xs">
-                Rejected
-              </span>
-            </div>
-            <div className="text-xs text-gray-600 space-y-1">
-              <div><span className="font-medium">Subject:</span> Broken Shower Head - 2nd floor</div>
-              <div><span className="font-medium">Filed Date:</span> 23-03-2025</div>
-            </div>
-          </div>
-          
-          <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-            <div className="flex justify-between items-start mb-2">
-              <h5 className="font-semibold text-gray-800 text-sm">Damages fee</h5>
-              <span className="bg-yellow-400 text-white py-1 px-2 rounded-[4px] font-bold text-xs">
-                Rejected
-              </span>
-            </div>
-            <div className="text-xs text-gray-600 space-y-1">
-              <div><span className="font-medium">Subject:</span> Internet Connectivity issues</div>
-              <div><span className="font-medium">Filed Date:</span> 23-03-2025</div>
-            </div>
-          </div>
+      <div className="bg-white min-h-[280px] sm:min-h-[340px] rounded-lg sm:rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.25)] px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8 w-full max-w-6xl lg:mx-0 lg:ml-0">
+        <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-3 sm:mb-4 text-gray-800">
+          Complaint History
+        </h3>
+
+        {/* Desktop Table */}
+        <div className="hidden sm:block overflow-x-auto">
+          <table className="w-full text-sm text-gray-800 min-w-full">
+            <thead className="bg-gray-200 text-center">
+              <tr>
+                <th className="p-3 font-semibold">Complaint Type</th>
+                <th className="p-3 font-semibold">Subject</th>
+                <th className="p-3 font-semibold">Filed Date</th>
+                <th className="p-3 font-semibold">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="bg-white hover:bg-gray-50">
+
+                <td className="p-3 text-center">Noise Disturbance</td>
+                <td className="p-3 text-center">Noisy Neighbour in Room 305</td>
+                <td className="p-3 text-center">23-03-2025</td>
+                <td className="p-3 text-center">
+                  <span className="bg-green-500 text-black px-2 py-1 rounded-md text-xs font-medium">
+                    Approved
+                  </span>
+                </td>
+              </tr>
+             <tr className="bg-white hover:bg-gray-50">
+
+                <td className="p-3 text-center">Maintenance issue</td>
+                <td className="p-3 text-center">Broken Shower Head - 2nd floor</td>
+                <td className="p-3 text-center">23-03-2025</td>
+                <td className="p-3 text-center">
+                  <span className="bg-red-500 text-white px-2 py-1 rounded-md text-xs font-medium">
+                    Rejected
+                  </span>
+                </td>
+              </tr>
+             <tr className="bg-white hover:bg-gray-50">
+
+                <td className="p-3 text-center">Damages fee</td>
+                <td className="p-3 text-center">Internet Connectivity issues</td>
+                <td className="p-3 text-center">23-03-2025</td>
+                <td className="p-3 text-center">
+                  <span className="bg-yellow-400 text-white px-2 py-1 rounded-md text-xs font-medium">
+                    Pending
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
-        {/* Desktop Table View - UNCHANGED */}
-        <div className="hidden lg:block">
-          <div className="min-w-[600px]">
-            <table className="w-full text-sm border-separate border-spacing-y-3">
-              <thead>
-                <tr className="bg-[#e0e0e0] text-black">
-                  <th className="px-4 py-3 text-left whitespace-nowrap">Complaint Type</th>
-                  <th className="px-17 py-3 text-left whitespace-nowrap">Subject</th>
-                  <th className="px-5 py-3 text-left whitespace-nowrap">Filed Date</th>
-                  <th className="px-10 py-3 text-left whitespace-nowrap">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="text-black bg-white">
-                  <td className="px-4 py-4">Noise Disturbance</td>
-                  <td className="px-4 py-4">Noisy Neighbour in Room 305</td>
-                  <td className="px-4 py-4">23-03-2025</td>
-                  <td className="px-4 py-4">
-                    <span className="bg-[#39FF14] text-black py-1 px-4 rounded-[4px] font-bold block w-max">
-                      Approved
-                    </span>
-                  </td>
-                </tr>
-                <tr className="text-black bg-white">
-                  <td className="px-4 py-4">Maintenance issue</td>
-                  <td className="px-4 py-4">Broken Shower Head - 2nd floor</td>
-                  <td className="px-4 py-4">23-03-2025</td>
-                  <td className="px-4 py-4">
-                    <span className="bg-red-500 text-white py-1 px-4 rounded-[4px] font-bold block w-max">
-                      Rejected
-                    </span>
-                  </td>
-                </tr>
-                <tr className="text-black bg-white">
-                  <td className="px-4 py-4">Damages fee</td>
-                  <td className="px-4 py-4">Internet Connectivity issues</td>
-                  <td className="px-4 py-4">23-03-2025</td>
-                  <td className="px-4 py-4">
-                    <span className="bg-yellow-400 text-white py-1 px-4 rounded-[4px] font-bold block w-max">
-                      Rejected
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+        {/* Mobile Cards */}
+        <div className="sm:hidden space-y-1">
+          {/* Card 1 */}
+          <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 text-center">
+            <div className="flex justify-center items-center mb-2 space-x-2">
+              <h4 className="font-semibold text-gray-800 text-xs">Noise Disturbance</h4>
+              <span className="bg-green-500 text-white px-1.5 py-0.5 rounded text-[10px] font-medium">
+                Resolved
+              </span>
+            </div>
+            <div className="space-y-1.5 text-[10px]">
+              <div className="flex justify-center space-x-1">
+                <span className="text-gray-600">Subject:</span>
+                <span className="font-medium text-gray-800">Noisy Neighbour in Room 305</span>
+              </div>
+              <div className="flex justify-center space-x-1">
+                <span className="text-gray-600">Filed Date:</span>
+                <span className="font-medium text-gray-800">23-03-2025</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 2 */}
+          <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 text-center">
+            <div className="flex justify-center items-center mb-2 space-x-2">
+              <h4 className="font-semibold text-gray-800 text-xs">Maintenance issue</h4>
+              <span className="bg-red-500 text-white px-1.5 py-0.5 rounded text-[10px] font-medium">
+                Rejected
+              </span>
+            </div>
+            <div className="space-y-1.5 text-[10px]">
+              <div className="flex justify-center space-x-1">
+                <span className="text-gray-600">Subject:</span>
+                <span className="font-medium text-gray-800">Broken Shower Head - 2nd floor</span>
+              </div>
+              <div className="flex justify-center space-x-1">
+                <span className="text-gray-600">Filed Date:</span>
+                <span className="font-medium text-gray-800">23-03-2025</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 3 */}
+          <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 text-center">
+            <div className="flex justify-center items-center mb-2 space-x-2">
+              <h4 className="font-semibold text-gray-800 text-xs">Damages fee</h4>
+              <span className="bg-yellow-400 text-black px-1.5 py-0.5 rounded text-[10px] font-medium">
+                Pending
+              </span>
+            </div>
+            <div className="space-y-1.5 text-[10px]">
+              <div className="flex justify-center space-x-1">
+                <span className="text-gray-600">Subject:</span>
+                <span className="font-medium text-gray-800">Internet Connectivity issues</span>
+              </div>
+              <div className="flex justify-center space-x-1">
+                <span className="text-gray-600">Filed Date:</span>
+                <span className="font-medium text-gray-800">23-03-2025</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

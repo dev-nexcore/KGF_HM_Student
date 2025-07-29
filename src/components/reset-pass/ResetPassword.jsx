@@ -17,7 +17,7 @@ export default function ResetPassword() {
             <input
               type="text"
               placeholder="Enter OTP"
-              className="w-full px-4 py-3 rounded-xl shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none text-sm text-[#757575]"
+              className="w-full px-4 py-3 rounded-xl shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none text-sm text-[#000000]"
             />
           </div>
 
@@ -26,7 +26,7 @@ export default function ResetPassword() {
             <input
               type="password"
               placeholder="Enter New Password"
-              className="w-full px-4 py-3 rounded-xl shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none text-sm text-[#757575]"
+              className="w-full px-4 py-3 rounded-xl shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none text-sm text-[#000000]"
             />
           </div>
 
@@ -35,7 +35,7 @@ export default function ResetPassword() {
             <input
               type="password"
               placeholder="Confirm New Password"
-              className="w-full px-4 py-3 rounded-xl shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none text-sm text-[#757575]"
+              className="w-full px-4 py-3 rounded-xl shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none text-sm text-[#000000]"
             />
           </div>
 

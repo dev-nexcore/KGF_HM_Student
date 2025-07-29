@@ -2,175 +2,200 @@
 
 export default function Refunds() {
   return (
-    <div className="py-4 sm:py-6 px-2 sm:px-0">
-      <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold border-l-4 border-red-500 pl-2 sm:pl-3 mb-3 sm:mb-4 lg:mb-5 text-black">
+    <div className="bg-white text-black p-4 sm:p-6 md:p-8 overflow-hidden min-h-screen">
+      
+      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold border-l-4 border-red-600 pl-3 mb-6 sm:mb-8 mt-[-7px] -ml-2 text-[#2c2c2c]">
         Refunds
-      </h3>
+      </h1>
 
-      {/* Refund Form */}
-      <div className="w-full max-w-full lg:w-2/4 rounded-[16px] shadow-[0_12px_32px_rgba(0,0,0,0.2)] overflow-hidden mb-6 sm:mb-8 lg:mb-10 bg-white ml-0 mr-auto">
+      {/* Refund Application Form */}
+   
+<div className="bg-white rounded-lg sm:rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.25)] mb-6 sm:mb-10 w-full max-w-3xl">
+
         {/* Header */}
-        <div className="bg-[#A4B494] p-2 sm:p-3 lg:p-4 rounded-t-[16px]">
-          <h4 className="text-xs sm:text-sm lg:text-base xl:text-lg font-bold text-black">Request a Refund</h4>
+        <div className="bg-[#A4B494] rounded-t-lg sm:rounded-t-xl px-6 py-3 font-bold text-base md:text-lg">
+          Refund Application Form
         </div>
 
-        {/* Form Body */}
-        <div className="p-2 sm:p-3 lg:p-4 xl:p-6">
-          <form className="w-full flex flex-col gap-3 sm:gap-4 lg:gap-5">
-            {/* Refund Type */}
-            <div className="w-full">
-              <label className="block text-black font-semibold mb-1 text-xs sm:text-sm lg:text-base">
-                Refund type
-              </label>
-              <select className="w-full px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 rounded-md shadow-[0_6px_20px_rgba(0,0,0,0.2)] bg-white text-black focus:outline-none focus:ring-2 focus:ring-[#A4AE97] text-xs sm:text-sm min-h-[36px] sm:min-h-[40px]">
-                <option value="">Choose Refund Type</option>
-                <option>Mess fee Overpayment</option>
-                <option>Security Deposit</option>
-                <option>Damages fee</option>
-              </select>
-            </div>
+        <form className="space-y-4 px-6 py-6">
+          {/* Refund Type */}
+          <div>
+            <label className="block mb-1 text-sm font-semibold text-gray-800">
+              Refund Type
+            </label>
+            <select className="w-full px-4 py-2 rounded-md shadow-md border border-gray-300 text-sm">
+              <option value="">Select Refund Type</option>
+              <option>Mess fee Overpayment</option>
+              <option>Security Deposit</option>
+              <option>Damages fee</option>
+            </select>
+          </div>
 
-            {/* Amount */}
-            <div className="w-full">
-              <label className="block text-black font-semibold mb-1 text-xs sm:text-sm lg:text-base">
-                Amount
-              </label>
-              <input
-                type="number"
-                placeholder="Enter the Amount"
-                className="w-full px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 rounded-md shadow-[0_6px_20px_rgba(0,0,0,0.2)] placeholder:text-gray-400 text-black bg-white focus:outline-none focus:ring-2 focus:ring-[#A4AE97] text-xs sm:text-sm min-h-[36px] sm:min-h-[40px]"
-              />
-            </div>
+          {/* Amount */}
+          <div>
+            <label className="block mb-1 text-sm font-semibold text-gray-800">
+              Amount
+            </label>
+            <input
+              type="number"
+              placeholder="Enter the Amount"
+              className="w-full px-4 py-2 rounded-md shadow-md border border-gray-300 text-sm placeholder:text-gray-400"
+            />
+          </div>
 
-            {/* Reason For Refund */}
-            <div className="w-full flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-2 lg:gap-4">
-              <label
-                htmlFor="reason"
-                className="sm:w-[120px] lg:w-[160px] text-black font-semibold sm:pt-2 text-xs sm:text-sm lg:text-base"
-              >
-                Reason For Refund
-              </label>
-              <textarea
-                id="reason"
-                rows={3}
-                className="w-full sm:flex-1 px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 rounded-md shadow-[0_6px_20px_rgba(0,0,0,0.2)] text-black bg-white focus:outline-none focus:ring-2 focus:ring-[#A4AE97] text-xs sm:text-sm min-h-[60px] sm:min-h-[80px] resize-none"
-              ></textarea>
-            </div>
+          {/* Reason */}
+          <div className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-3">
+            <label className="text-xs sm:text-sm font-semibold sm:pt-2 whitespace-nowrap">
+              Reason For Refund:
+            </label>
+            <textarea 
+              className="w-full px-3 sm:px-4 py-2 rounded-lg shadow-md h-16 sm:h-20 resize-none border border-gray-300 text-xs"
+              placeholder="Enter the reason for refund"
+            />
+          </div>
 
-            {/* Submit Button */}
-            <div className="w-full flex justify-center">
-              <button
-                type="submit"
-                className="bg-[#A4AE97] text-black px-3 sm:px-4 lg:px-6 py-1.5 sm:py-2 rounded-md shadow-[0_6px_20px_rgba(0,0,0,0.25)] font-semibold hover:bg-[#9aa78f] transition w-full sm:w-auto text-xs sm:text-sm min-w-[80px] sm:min-w-[100px] lg:min-w-[120px]"
-              >
-                Submit
-              </button>
-            </div>
-          </form>
-        </div>
+          {/* Submit Button */}
+          <div className="flex justify-center pt-2">
+            <button
+              type="submit"
+              className="bg-[#A4AE97] text-black px-4 sm:px-6 md:px-8 py-1.5 sm:py-2 rounded-md shadow hover:opacity-90 text-xs sm:text-sm font-medium w-full sm:w-auto"
+            >
+              Submit
+            </button>
+          </div>
+        </form>
       </div>
 
       {/* Refund History */}
-      <div className="bg-white rounded-[16px] shadow-[0_6px_20px_rgba(0,0,0,0.25)] w-full">
-        <div className="overflow-x-auto p-2 sm:p-3 lg:p-4 xl:p-6">
-          <h4 className="text-sm sm:text-base lg:text-lg xl:text-xl font-extrabold mb-2 sm:mb-3 lg:mb-4 text-black">
-            Refund History
-          </h4>
-          
-          {/* Mobile Card View */}
-          <div className="block sm:hidden space-y-2">
-            <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-              <div className="flex justify-between items-start mb-2">
-                <h5 className="font-semibold text-black text-xs">Mess fee Overpayment</h5>
-                <span className="bg-[#39FF14] text-black py-0.5 px-1.5 rounded-[4px] font-bold text-[10px]">
-                  Approved
-                </span>
-              </div>
-              <div className="text-[10px] text-gray-600 space-y-1">
-                <div><span className="font-medium">Date:</span> 23-03-2025</div>
-                <div><span className="font-medium">Amount:</span> 50</div>
-                <div><span className="font-medium">Reason:</span> Incorrect Calculation</div>
-              </div>
+      <div className="bg-white min-h-[280px] sm:min-h-[340px] rounded-lg sm:rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.25)] px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8 w-full max-w-6xl lg:mx-0 lg:ml-0">
+        <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-3 sm:mb-4 text-gray-800">
+          Refund History
+        </h3>
+
+        {/* Desktop Table */}
+        <div className="hidden sm:block overflow-x-auto">
+          <table className="w-full text-sm text-gray-800 min-w-full">
+            <thead className="bg-gray-200 text-center">
+              <tr>
+                <th className="p-3 font-semibold">Refund Type</th>
+                <th className="p-3 font-semibold">Requested Date</th>
+                <th className="p-3 font-semibold">Amount</th>
+                <th className="p-3 font-semibold">Reason</th>
+                <th className="p-3 font-semibold">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+             <tr className="bg-white hover:bg-gray-50">
+
+                <td className="p-3 text-center">Mess fee Overpayment</td>
+                <td className="p-3 text-center">23-03-2025</td>
+                <td className="p-3 text-center">₹50</td>
+                <td className="p-3 text-center">Incorrect Calculation</td>
+                <td className="p-3 text-center">
+                  <span className="bg-green-500 text-black px-2 py-1 rounded-md text-xs font-medium">
+                    Approved
+                  </span>
+                </td>
+              </tr>
+           <tr className="bg-white hover:bg-gray-50">
+
+                <td className="p-3 text-center">Security Deposit</td>
+                <td className="p-3 text-center">23-03-2025</td>
+                <td className="p-3 text-center">₹250</td>
+                <td className="p-3 text-center">Upon Successful Check-out</td>
+                <td className="p-3 text-center">
+                  <span className="bg-red-500 text-white px-2 py-1 rounded-md text-xs font-medium">
+                    Rejected
+                  </span>
+                </td>
+              </tr>
+              <tr className="bg-white hover:bg-gray-50">
+
+                <td className="p-3 text-center">Damages fee</td>
+                <td className="p-3 text-center">23-03-2025</td>
+                <td className="p-3 text-center">₹750</td>
+                <td className="p-3 text-center">Dispute over Room inspection</td>
+                <td className="p-3 text-center">
+                  <span className="bg-yellow-400 text-white px-2 py-1 rounded-md text-xs font-medium">
+                    Pending
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Mobile Cards */}
+        <div className="sm:hidden space-y-1">
+          {/* Card 1 */}
+          <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 text-center">
+            <div className="flex justify-center items-center mb-2 space-x-2">
+              <h4 className="font-semibold text-gray-800 text-xs">Mess fee Overpayment</h4>
+              <span className="bg-green-500 text-white px-1.5 py-0.5 rounded text-[10px] font-medium">
+                Approved
+              </span>
             </div>
-            
-            <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-              <div className="flex justify-between items-start mb-2">
-                <h5 className="font-semibold text-black text-xs">Security Deposit</h5>
-                <span className="bg-red-500 text-white py-0.5 px-1.5 rounded-[4px] font-bold text-[10px]">
-                  Rejected
-                </span>
+            <div className="space-y-1.5 text-[10px]">
+              <div className="flex justify-center space-x-1">
+                <span className="text-gray-600">Date:</span>
+                <span className="font-medium text-gray-800">23-03-2025</span>
               </div>
-              <div className="text-[10px] text-gray-600 space-y-1">
-                <div><span className="font-medium">Date:</span> 23-03-2025</div>
-                <div><span className="font-medium">Amount:</span> 250</div>
-                <div><span className="font-medium">Reason:</span> Upon Successful Check-out</div>
+              <div className="flex justify-center space-x-1">
+                <span className="text-gray-600">Amount:</span>
+                <span className="font-medium text-gray-800">₹50</span>
               </div>
-            </div>
-            
-            <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-              <div className="flex justify-between items-start mb-2">
-                <h5 className="font-semibold text-black text-xs">Damages fee</h5>
-                <span className="bg-yellow-400 text-white py-0.5 px-1.5 rounded-[4px] font-bold text-[10px]">
-                  Rejected
-                </span>
-              </div>
-              <div className="text-[10px] text-gray-600 space-y-1">
-                <div><span className="font-medium">Date:</span> 23-03-2025</div>
-                <div><span className="font-medium">Amount:</span> 750</div>
-                <div><span className="font-medium">Reason:</span> Dispute over Room inspection</div>
+              <div className="flex justify-center space-x-1">
+                <span className="text-gray-600">Reason:</span>
+                <span className="font-medium text-gray-800">Incorrect Calculation</span>
               </div>
             </div>
           </div>
 
-          {/* Desktop Table View */}
-          <div className="hidden sm:block">
-            <div className="min-w-[600px]">
-              <table className="w-full text-[10px] sm:text-xs lg:text-sm">
-                <thead>
-                  <tr className="bg-[#e0e0e0] text-black">
-                    <th className="px-1 sm:px-2 lg:px-4 py-1.5 sm:py-2 lg:py-3 text-left">Refund Type</th>
-                    <th className="px-1 py-1.5 sm:py-2 lg:py-3 text-left">Requested Date</th>
-                    <th className="px-1 py-1.5 sm:py-2 lg:py-3 text-left">Amount</th>
-                    <th className="px-1 sm:px-2 lg:px-12 py-1.5 sm:py-2 lg:py-3 text-left">Reason</th>
-                    <th className="px-1 sm:px-2 lg:px-10 py-1.5 sm:py-2 lg:py-3 text-left">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="text-black">
-                    <td className="px-1 sm:px-2 lg:px-4 py-2 sm:py-3 lg:py-4">Mess fee Overpayment</td>
-                    <td className="px-1 sm:px-2 lg:px-4 py-2 sm:py-3 lg:py-4">23-03-2025</td>
-                    <td className="px-1 sm:px-2 lg:px-4 py-2 sm:py-3 lg:py-4">50</td>
-                    <td className="px-1 sm:px-2 lg:px-4 py-2 sm:py-3 lg:py-4">Incorrect Calculation</td>
-                    <td className="px-1 sm:px-2 lg:px-4 py-2 sm:py-3 lg:py-4">
-                      <span className="bg-[#39FF14] text-black py-0.5 sm:py-1 px-1.5 sm:px-2 lg:px-4 rounded-[4px] font-bold text-[10px] sm:text-xs">
-                        Approved
-                      </span>
-                    </td>
-                  </tr>
-                  <tr className="text-black">
-                    <td className="px-1 sm:px-2 lg:px-4 py-2 sm:py-3 lg:py-4">Security Deposit</td>
-                    <td className="px-1 sm:px-2 lg:px-4 py-2 sm:py-3 lg:py-4">23-03-2025</td>
-                    <td className="px-1 sm:px-2 lg:px-4 py-2 sm:py-3 lg:py-4">250</td>
-                    <td className="px-1 sm:px-2 lg:px-4 py-2 sm:py-3 lg:py-4">Upon Successful Check-out</td>
-                    <td className="px-1 sm:px-2 lg:px-4 py-2 sm:py-3 lg:py-4">
-                      <span className="bg-red-500 text-white py-0.5 sm:py-1 px-1.5 sm:px-2 lg:px-4 rounded-[4px] font-bold text-[10px] sm:text-xs">
-                        Rejected
-                      </span>
-                    </td>
-                  </tr>
-                  <tr className="text-black">
-                    <td className="px-1 sm:px-2 lg:px-4 py-2 sm:py-3 lg:py-4">Damages fee</td>
-                    <td className="px-1 sm:px-2 lg:px-4 py-2 sm:py-3 lg:py-4">23-03-2025</td>
-                    <td className="px-1 sm:px-2 lg:px-4 py-2 sm:py-3 lg:py-4">750</td>
-                    <td className="px-1 sm:px-2 lg:px-4 py-2 sm:py-3 lg:py-4">Dispute over Room inspection</td>
-                    <td className="px-1 sm:px-2 lg:px-4 py-2 sm:py-3 lg:py-4">
-                      <span className="bg-yellow-400 text-white py-0.5 sm:py-1 px-1.5 sm:px-2 lg:px-4 rounded-[4px] font-bold text-[10px] sm:text-xs">
-                        Rejected
-                      </span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+          {/* Card 2 */}
+          <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 text-center">
+            <div className="flex justify-center items-center mb-2 space-x-2">
+              <h4 className="font-semibold text-gray-800 text-xs">Security Deposit</h4>
+              <span className="bg-red-500 text-white px-1.5 py-0.5 rounded text-[10px] font-medium">
+                Rejected
+              </span>
+            </div>
+            <div className="space-y-1.5 text-[10px]">
+              <div className="flex justify-center space-x-1">
+                <span className="text-gray-600">Date:</span>
+                <span className="font-medium text-gray-800">23-03-2025</span>
+              </div>
+              <div className="flex justify-center space-x-1">
+                <span className="text-gray-600">Amount:</span>
+                <span className="font-medium text-gray-800">₹250</span>
+              </div>
+              <div className="flex justify-center space-x-1">
+                <span className="text-gray-600">Reason:</span>
+                <span className="font-medium text-gray-800">Upon Successful Check-out</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 3 */}
+          <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 text-center">
+            <div className="flex justify-center items-center mb-2 space-x-2">
+              <h4 className="font-semibold text-gray-800 text-xs">Damages fee</h4>
+              <span className="bg-yellow-400 text-black px-1.5 py-0.5 rounded text-[10px] font-medium">
+                Pending
+              </span>
+            </div>
+            <div className="space-y-1.5 text-[10px]">
+              <div className="flex justify-center space-x-1">
+                <span className="text-gray-600">Date:</span>
+                <span className="font-medium text-gray-800">23-03-2025</span>
+              </div>
+              <div className="flex justify-center space-x-1">
+                <span className="text-gray-600">Amount:</span>
+                <span className="font-medium text-gray-800">₹750</span>
+              </div>
+              <div className="flex justify-center space-x-1">
+                <span className="text-gray-600">Reason:</span>
+                <span className="font-medium text-gray-800">Dispute over Room inspection</span>
+              </div>
             </div>
           </div>
         </div>

@@ -1,5 +1,6 @@
 'use client';
 import React from 'react';
+import Image from 'next/image';
 import { FiEdit } from 'react-icons/fi';
 
 export default function Profile() {
@@ -9,8 +10,10 @@ export default function Profile() {
 
       {/* Page Heading */}
      <div className="flex items-center mb-6">
-  <div className="w-1 h-5 bg-red-600 mr-2 rounded"></div>
-  <h1 className="text-lg font-semibold text-[#2c2c2c]">Profile</h1>
+
+<h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold border-l-4 border-red-600 pl-3 mb-6 sm:mb-8 text-[#2c2c2c]">
+        Fees Status
+      </h1>
 </div>
 
 
@@ -58,12 +61,15 @@ export default function Profile() {
         </div>
       </div>
 
-    {/* Edit Profile Button */}
+   
+{/* Edit Profile Button */}
 <div className="mt-6 text-center md:text-left md:pl-85">
-  <button className="flex items-center justify-center md:justify-start gap-2 bg-[#BEC5AD] text-black px-6 py-2 rounded-xl shadow font-medium w-full md:w-auto">
-    <FiEdit /> Edit Profile
+  <button className="flex items-center justify-center md:justify-start gap-2 bg-[#BEC5AD] text-black px-6 py-2 rounded-xl shadow font-medium font-semibold w-full md:w-auto">
+    <Image src="/icons/edit-icon.png" alt="Edit Icon" width={16} height={16} />
+    Edit Profile
   </button>
 </div>
+
 
     </div>
   );

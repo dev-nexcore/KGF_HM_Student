@@ -41,7 +41,7 @@ export default function Login() {
               type="text"
               id="userId"
               placeholder="Enter Your User ID"
-              className="w-full p-3 rounded-[13px] border border-gray-200 focus:outline-none focus:ring focus:ring-gray-400 shadow-[0_6px_20px_rgba(0,0,0,0.25)] placeholder:text-gray-400"
+              className="w-full p-3 rounded-[13px] border border-gray-200 focus:outline-none focus:ring focus:ring-gray-400 shadow-[0_6px_20px_rgba(0,0,0,0.25)] placeholder:text-gray-400 text-black"
             />
           </div>
           <div>
@@ -55,11 +55,11 @@ export default function Login() {
               type="password"
               id="password"
               placeholder="Enter Your Password"
-              className="w-full p-3 rounded-[13px] border border-gray-200 focus:outline-none focus:ring focus:ring-gray-400 shadow-[0_6px_20px_rgba(0,0,0,0.25)] placeholder:text-gray-400"
+              className="w-full p-3 rounded-[13px] border border-gray-200 focus:outline-none focus:ring focus:ring-gray-400 shadow-[0_6px_20px_rgba(0,0,0,0.25)] placeholder:text-gray-400 text-black"
             />
           </div>
           <div className="flex justify-end">
-            <a href="/forget-password" className="text-sm text-blue-500 hover:underline">
+            <a href="/forget" className="text-sm text-blue-500 hover:underline">
               Forget Password?
             </a>
           </div>

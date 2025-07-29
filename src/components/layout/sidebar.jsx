@@ -91,20 +91,21 @@ export default function Sidebar() {
         </div>
 
         {/* Logout */}
-        <div className="mt-auto mb-6">
-          <hr className="border-t border-black mx-6 my-4" />
-          <div className="flex justify-start px-6">
-            <button className="flex items-center gap-2 text-black text-sm hover:underline">
-              <Image
-                src="/icons/logout.png"
-                alt="Logout"
-                width={18}
-                height={18}
-              />
-              Logout
-            </button>
-          </div>
-        </div>
+<div className="mt-10">
+          <hr className="border-t border-black my-3 mr-4" />
+          <div className="flex justify-start mb-1 px-4 ml-8.5">
+    <button className="flex items-center gap-2 text-black text-sm hover:underline  text-black font-bold">
+      <Image
+        src="/icons/logout.png"
+        alt="Logout"
+        width={18}
+        height={18}
+      />
+      Logout
+    </button>
+  </div>
+</div>
+
       </aside>
 
       {/* Dark Overlay (Mobile only) */}
