@@ -1,6 +1,63 @@
 'use client';
 
+import React, { useState, useEffect } from 'react';
+import api from '@/lib/api';
+
 export default function Refunds() {
+  const [refundType, setRefundType] = useState('');
+  const [amount, setAmount] = useState('');
+  const [reason, setReason] = useState('');
+  const [refunds, setRefunds] = useState([]);
+
+  const [studentId, setStudentId] = useState(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setStudentId(localStorage.getItem('studentId'));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!studentId) return;
+
+    const fetchRefunds = async () => {
+      try {
+        const res = await api.get(`/refunds/${studentId}`);
+        setRefunds(res.data.refunds);
+      } catch (error) {
+        console.error('Error fetching refund history:', error);
+      }
+    };
+
+    fetchRefunds();
+  }, [studentId]);
+
+  // Submit refund form
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!refundType || !amount || !reason) return;
+
+    try {
+      await api.post('/refund', {
+        studentId,
+        refundType,
+        amount,
+        reason,
+      });
+
+      // Re-fetch history after successful submission
+      const res = await api.get(`/refunds/${studentId}`);
+      setRefunds(res.data.refunds);
+
+      // Clear form
+      setRefundType('');
+      setAmount('');
+      setReason('');
+    } catch (err) {
+      console.error('Error submitting refund:', err);
+    }
+  };
+
   return (
     <div className="py-4 sm:py-6 px-2 sm:px-0">
       <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold border-l-4 border-red-500 pl-2 sm:pl-3 mb-3 sm:mb-4 lg:mb-5 text-black">
@@ -16,13 +73,13 @@ export default function Refunds() {
 
         {/* Form Body */}
         <div className="p-2 sm:p-3 lg:p-4 xl:p-6">
-          <form className="w-full flex flex-col gap-3 sm:gap-4 lg:gap-5">
+          <form onSubmit={handleSubmit} className="w-full flex flex-col gap-3 sm:gap-4 lg:gap-5">
             {/* Refund Type */}
             <div className="w-full">
               <label className="block text-black font-semibold mb-1 text-xs sm:text-sm lg:text-base">
                 Refund type
               </label>
-              <select className="w-full px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 rounded-md shadow-[0_6px_20px_rgba(0,0,0,0.2)] bg-white text-black focus:outline-none focus:ring-2 focus:ring-[#A4AE97] text-xs sm:text-sm min-h-[36px] sm:min-h-[40px]">
+              <select value={refundType} onChange={(e) => setRefundType(e.target.value)} className="w-full px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 rounded-md shadow-[0_6px_20px_rgba(0,0,0,0.2)] bg-white text-black focus:outline-none focus:ring-2 focus:ring-[#A4AE97] text-xs sm:text-sm min-h-[36px] sm:min-h-[40px]">
                 <option value="">Choose Refund Type</option>
                 <option>Mess fee Overpayment</option>
                 <option>Security Deposit</option>
@@ -37,6 +94,8 @@ export default function Refunds() {
               </label>
               <input
                 type="number"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
                 placeholder="Enter the Amount"
                 className="w-full px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 rounded-md shadow-[0_6px_20px_rgba(0,0,0,0.2)] placeholder:text-gray-400 text-black bg-white focus:outline-none focus:ring-2 focus:ring-[#A4AE97] text-xs sm:text-sm min-h-[36px] sm:min-h-[40px]"
               />
@@ -51,7 +110,8 @@ export default function Refunds() {
                 Reason For Refund
               </label>
               <textarea
-                id="reason"
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
                 rows={3}
                 className="w-full sm:flex-1 px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 rounded-md shadow-[0_6px_20px_rgba(0,0,0,0.2)] text-black bg-white focus:outline-none focus:ring-2 focus:ring-[#A4AE97] text-xs sm:text-sm min-h-[60px] sm:min-h-[80px] resize-none"
               ></textarea>
@@ -76,7 +136,7 @@ export default function Refunds() {
           <h4 className="text-sm sm:text-base lg:text-lg xl:text-xl font-extrabold mb-2 sm:mb-3 lg:mb-4 text-black">
             Refund History
           </h4>
-          
+
           {/* Mobile Card View */}
           <div className="block sm:hidden space-y-2">
             <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
@@ -92,7 +152,7 @@ export default function Refunds() {
                 <div><span className="font-medium">Reason:</span> Incorrect Calculation</div>
               </div>
             </div>
-            
+
             <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
               <div className="flex justify-between items-start mb-2">
                 <h5 className="font-semibold text-black text-xs">Security Deposit</h5>
@@ -106,7 +166,7 @@ export default function Refunds() {
                 <div><span className="font-medium">Reason:</span> Upon Successful Check-out</div>
               </div>
             </div>
-            
+
             <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
               <div className="flex justify-between items-start mb-2">
                 <h5 className="font-semibold text-black text-xs">Damages fee</h5>
@@ -136,39 +196,24 @@ export default function Refunds() {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="text-black">
-                    <td className="px-1 sm:px-2 lg:px-4 py-2 sm:py-3 lg:py-4">Mess fee Overpayment</td>
-                    <td className="px-1 sm:px-2 lg:px-4 py-2 sm:py-3 lg:py-4">23-03-2025</td>
-                    <td className="px-1 sm:px-2 lg:px-4 py-2 sm:py-3 lg:py-4">50</td>
-                    <td className="px-1 sm:px-2 lg:px-4 py-2 sm:py-3 lg:py-4">Incorrect Calculation</td>
-                    <td className="px-1 sm:px-2 lg:px-4 py-2 sm:py-3 lg:py-4">
-                      <span className="bg-[#39FF14] text-black py-0.5 sm:py-1 px-1.5 sm:px-2 lg:px-4 rounded-[4px] font-bold text-[10px] sm:text-xs">
-                        Approved
-                      </span>
-                    </td>
-                  </tr>
-                  <tr className="text-black">
-                    <td className="px-1 sm:px-2 lg:px-4 py-2 sm:py-3 lg:py-4">Security Deposit</td>
-                    <td className="px-1 sm:px-2 lg:px-4 py-2 sm:py-3 lg:py-4">23-03-2025</td>
-                    <td className="px-1 sm:px-2 lg:px-4 py-2 sm:py-3 lg:py-4">250</td>
-                    <td className="px-1 sm:px-2 lg:px-4 py-2 sm:py-3 lg:py-4">Upon Successful Check-out</td>
-                    <td className="px-1 sm:px-2 lg:px-4 py-2 sm:py-3 lg:py-4">
-                      <span className="bg-red-500 text-white py-0.5 sm:py-1 px-1.5 sm:px-2 lg:px-4 rounded-[4px] font-bold text-[10px] sm:text-xs">
-                        Rejected
-                      </span>
-                    </td>
-                  </tr>
-                  <tr className="text-black">
-                    <td className="px-1 sm:px-2 lg:px-4 py-2 sm:py-3 lg:py-4">Damages fee</td>
-                    <td className="px-1 sm:px-2 lg:px-4 py-2 sm:py-3 lg:py-4">23-03-2025</td>
-                    <td className="px-1 sm:px-2 lg:px-4 py-2 sm:py-3 lg:py-4">750</td>
-                    <td className="px-1 sm:px-2 lg:px-4 py-2 sm:py-3 lg:py-4">Dispute over Room inspection</td>
-                    <td className="px-1 sm:px-2 lg:px-4 py-2 sm:py-3 lg:py-4">
-                      <span className="bg-yellow-400 text-white py-0.5 sm:py-1 px-1.5 sm:px-2 lg:px-4 rounded-[4px] font-bold text-[10px] sm:text-xs">
-                        Rejected
-                      </span>
-                    </td>
-                  </tr>
+                  {refunds.map((refund, index) => (
+                    <tr key={index}>
+                      <td>{refund.refundType}</td>
+                      <td>{new Date(refund.requestedAt).toLocaleDateString()}</td>
+                      <td>{refund.amount}</td>
+                      <td>{refund.reason}</td>
+                      <td>
+                        <span className={`rounded-[4px] py-0.5 px-2 font-bold text-xs ${refund.status === 'Approved'
+                          ? 'bg-[#39FF14] text-black'
+                          : refund.status === 'Rejected'
+                            ? 'bg-red-500 text-white'
+                            : 'bg-yellow-400 text-white'
+                          }`}>
+                          {refund.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
