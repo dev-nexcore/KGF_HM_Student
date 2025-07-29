@@ -1,16 +1,43 @@
 'use client';
 import React, { useState, useEffect } from 'react';
+import api from '@/lib/api';
 import PaymentModal from './PaymentModal';
 
 export default function FeesStatus() {
   const [showModal, setShowModal] = useState(false);
-  const [isClient, setIsClient] = useState(false); // To ensure client-side rendering
+  const [currentFees, setCurrentFees] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [studentId, setStudentId] = useState(null);
+  const [ready, setReady] = useState(false); // Replaces isClient
+  const [selectedFeeAmount, setSelectedFeeAmount] = useState(null);
 
   useEffect(() => {
-    setIsClient(true);
+    // Run only on client
+    const id = localStorage.getItem('studentId');
+    if (id) setStudentId(id);
+    setReady(true); // Now it's safe to run other logic
   }, []);
 
-  if (!isClient) return null; // Prevent hydration error
+  useEffect(() => {
+    const fetchFees = async () => {
+      try {
+        const res = await api.get(`/feeStatus/${studentId}`);
+        setCurrentFees(res.data.fees || []);
+      } catch (err) {
+        console.error("Error fetching current fee status:", err);
+        setError('Failed to fetch fee status');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (ready && studentId) {
+      fetchFees();
+    }
+  }, [ready, studentId]);
+
+  if (!ready) return null; // Prevent premature render
 
   const paymentHistory = [
     { date: '23-03-2025', amount: '6,000', email: 'xyz@gmail.com', status: 'Paid' },
@@ -33,38 +60,58 @@ export default function FeesStatus() {
           <h3 className="text-base sm:text-lg font-bold text-black">Current Fees Status</h3>
         </div>
 
-        <div className="px-4 sm:px-6 md:px-8 py-4 sm:py-6">
-          <div className="flex justify-between mb-3 sm:mb-4">
-            <span className="font-semibold text-black text-sm sm:text-base">Hostel Fees:</span>
-            <span className="font-bold text-black text-sm sm:text-base">₹ 3000</span>
-          </div>
-          <div className="flex justify-between mb-3 sm:mb-4">
-            <span className="font-semibold text-black text-sm sm:text-base">Due Date:</span>
-            <span className="font-bold text-black text-sm sm:text-base">18th July 2025</span>
-          </div>
-          <div className="flex justify-between mb-3 sm:mb-4">
-            <span className="font-semibold text-black text-sm sm:text-base">Amount:</span>
-            <span className="font-bold text-black text-sm sm:text-base">₹ 3000</span>
-          </div>
-          <div className="flex justify-between mb-4 sm:mb-6">
-            <span className="font-semibold text-black text-sm sm:text-base">Status:</span>
-            <span className="font-bold text-red-600 text-sm sm:text-base">Overdue</span>
-          </div>
-          <div className="flex justify-center">
-            <button
-              onClick={() => setShowModal(true)}
-              className="bg-[#BEC5AD] px-4 sm:px-6 py-2 rounded-md text-black font-semibold shadow-md text-sm sm:text-base hover:bg-[#a8b096] transition-colors"
-            >
-              Pay Now
-            </button>
-          </div>
-        </div>
+        {loading ? (
+          <div className="text-center my-4 text-gray-600">Loading current fee status...</div>
+        ) : error ? (
+          <div className="text-center my-4 text-red-600">{error}</div>
+        ) : currentFees.length === 0 ? (
+          <div className="text-center my-4 text-gray-500">No current fees found.</div>
+        ) : (
+          currentFees.map((fee, idx) => (
+            <div key={idx} className="px-4 py-4">
+              <div className="flex justify-between mb-3">
+                <span className="font-semibold text-black text-sm">Fee Type:</span>
+                <span className="font-bold text-black text-sm">{fee.feeType}</span>
+              </div>
+              <div className="flex justify-between mb-3">
+                <span className="font-semibold text-black text-sm">Due Date:</span>
+                <span className="font-bold text-black text-sm">
+                  {new Date(fee.dueDate).toLocaleDateString('en-IN')}
+                </span>
+              </div>
+              <div className="flex justify-between mb-3">
+                <span className="font-semibold text-black text-sm">Amount:</span>
+                <span className="font-bold text-black text-sm">₹ {fee.amount}</span>
+              </div>
+              <div className="flex justify-between mb-4">
+                <span className="font-semibold text-black text-sm">Status:</span>
+                <span className={`font-bold text-sm ${fee.status === 'overdue' ? 'text-red-600' :
+                  fee.status === 'unpaid' ? 'text-yellow-600' :
+                    'text-green-600'
+                  }`}>
+                  {fee.status}
+                </span>
+              </div>
+              <div className="flex justify-center">
+                <button
+                  onClick={() => {
+                    setSelectedFeeAmount(fee.amount);
+                    setShowModal(true);
+                  }}
+                  className="bg-[#BEC5AD] px-6 py-2 rounded-md text-black font-semibold shadow-md text-sm hover:bg-[#a8b096] transition-colors"
+                >
+                  Pay Now
+                </button>
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
       {/* Payment History Table */}
       <div className="bg-white rounded-xl shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none p-3 sm:p-4 md:p-6 w-full max-w-4xl">
         <h3 className="text-sm sm:text-md font-semibold mb-3 sm:mb-4 text-[#2c2c2c]">Payment History</h3>
-        
+
         {/* Mobile view - Cards */}
         <div className="block sm:hidden">
           {paymentHistory.map((item, idx) => (
@@ -115,7 +162,14 @@ export default function FeesStatus() {
       </div>
 
       {/* Payment Modal */}
-      <PaymentModal isOpen={showModal} onClose={() => setShowModal(false)} />
+      <PaymentModal
+        isOpen={showModal}
+        onClose={() => {
+          setShowModal(false);
+          setSelectedFeeAmount(null);
+        }}
+        amount={selectedFeeAmount}
+      />
     </div>
   );
 }

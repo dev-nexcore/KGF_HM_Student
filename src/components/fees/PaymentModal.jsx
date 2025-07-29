@@ -1,7 +1,7 @@
 'use client';
 import React, { useRef, useEffect } from 'react';
 
-export default function PaymentModal({ isOpen, onClose }) {
+export default function PaymentModal({ isOpen, onClose, amount }) {
   const modalRef = useRef();
 
   // Close when clicked outside the modal box
@@ -32,7 +32,9 @@ export default function PaymentModal({ isOpen, onClose }) {
         <p className="text-sm sm:text-base font-bold text-black mb-2">Payment Details</p>
         <div className="flex justify-between items-center mb-4 sm:mb-6">
           <p className="text-xs sm:text-sm text-[#828282] font-semibold">Amount Due:</p>
-          <p className="text-xs sm:text-sm text-[#828282] font-semibold">INR 7,000</p>
+          <p className="text-xs sm:text-sm text-[#828282] font-semibold">
+            INR {amount?.toLocaleString('en-IN')}
+          </p>
         </div>
 
         {/* Select Payment Method */}
@@ -43,21 +45,21 @@ export default function PaymentModal({ isOpen, onClose }) {
         <div className="flex flex-col gap-3 sm:gap-5 mb-4 sm:mb-6 text-sm sm:text-base text-black font-normal">
           {/* UPI */}
           <label className="flex items-center gap-3 sm:gap-4 cursor-pointer">
-            <input 
-              type="radio" 
-              name="payment" 
-              className="accent-blue-600 w-4 h-4 sm:w-5 sm:h-5" 
-              defaultChecked 
+            <input
+              type="radio"
+              name="payment"
+              className="accent-blue-600 w-4 h-4 sm:w-5 sm:h-5"
+              defaultChecked
             />
             <span>UPI</span>
           </label>
 
           {/* Net Banking */}
           <label className="flex items-center gap-3 sm:gap-4 cursor-pointer">
-            <input 
-              type="radio" 
-              name="payment" 
-              className="accent-blue-600 w-4 h-4 sm:w-5 sm:h-5" 
+            <input
+              type="radio"
+              name="payment"
+              className="accent-blue-600 w-4 h-4 sm:w-5 sm:h-5"
             />
             <span>Net Banking</span>
           </label>
@@ -65,10 +67,10 @@ export default function PaymentModal({ isOpen, onClose }) {
           {/* Credit or Debit Card with Logos */}
           <label className="flex items-center justify-between gap-2 sm:gap-3 cursor-pointer">
             <div className="flex items-center gap-3 sm:gap-4">
-              <input 
-                type="radio" 
-                name="payment" 
-                className="accent-blue-600 w-4 h-4 sm:w-5 sm:h-5" 
+              <input
+                type="radio"
+                name="payment"
+                className="accent-blue-600 w-4 h-4 sm:w-5 sm:h-5"
               />
               <span>Credit or Debit Card</span>
             </div>
