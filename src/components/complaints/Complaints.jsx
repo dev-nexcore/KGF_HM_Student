@@ -1,8 +1,69 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import api from '@/lib/api';
+import toast from 'react-hot-toast'; // optional for feedback
 
 export default function Complaints() {
+  const [complaintType, setComplaintType] = useState('');
+  const [subject, setSubject] = useState('');
+  const [description, setDescription] = useState('');
+  const [complaints, setComplaints] = useState([]);
+  const [studentId, setStudentId] = useState(null);
+
+  // Get student ID from localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const id = localStorage.getItem('studentId');
+      setStudentId(id);
+    }
+  }, []);
+
+  // Fetch complaint history
+  useEffect(() => {
+    if (!studentId) return;
+
+    const fetchComplaints = async () => {
+      try {
+        const res = await api.get(`/complaints/${studentId}`);
+        setComplaints(res.data.complaints);
+      } catch (err) {
+        console.error("Error fetching complaint history:", err);
+      }
+    };
+
+    fetchComplaints();
+  }, [studentId]);
+
+  // Submit form
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!complaintType || !subject || !description) return;
+
+    try {
+      await api.post('/complaint', {
+        studentId,
+        complaintType,
+        subject,
+        description
+      });
+
+      toast.success("Complaint filed successfully");
+
+      // Reset form
+      setComplaintType('');
+      setSubject('');
+      setDescription('');
+
+      // Re-fetch history
+      const res = await api.get(`/complaints/${studentId}`);
+      setComplaints(res.data.complaints);
+    } catch (err) {
+      console.error("Error filing complaint:", err);
+      toast.error("Something went wrong!");
+    }
+  };
+
   return (
     <div className="py-4 sm:py-6 px-2 sm:px-0">
       {/* Page Heading */}
@@ -19,7 +80,7 @@ export default function Complaints() {
 
         {/* Form Body */}
         <div className="p-3 sm:p-4 lg:p-6">
-          <form className="w-full flex flex-col gap-4 sm:gap-5">
+          <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4 sm:gap-5">
             {/* Complaint Type */}
             <div className="w-full">
               <label htmlFor="complaintType" className="block text-black font-semibold mb-1 text-xs sm:text-sm lg:text-base">
@@ -29,6 +90,8 @@ export default function Complaints() {
                 id="complaintType"
                 name="type"
                 required
+                value={complaintType}
+                onChange={(e) => setComplaintType(e.target.value)}
                 className="w-full px-3 sm:px-4 py-2 rounded-md shadow-[0_6px_20px_rgba(0,0,0,0.2)] bg-white text-black focus:outline-none focus:ring-2 focus:ring-[#A4AE97] text-xs sm:text-sm"
               >
                 <option value="">Select Complaint Type</option>
@@ -49,6 +112,8 @@ export default function Complaints() {
                 name="subject"
                 required
                 placeholder="Enter The Subject"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
                 className="w-full px-3 sm:px-4 py-2 rounded-md shadow-[0_6px_20px_rgba(0,0,0,0.2)] placeholder:text-gray-400 text-black bg-white focus:outline-none focus:ring-2 focus:ring-[#A4AE97] text-xs sm:text-sm"
               />
             </div>
@@ -66,6 +131,8 @@ export default function Complaints() {
                 name="description"
                 rows={4}
                 required
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
                 className="w-full lg:flex-1 px-3 sm:px-4 py-2 rounded-md shadow-[0_6px_20px_rgba(0,0,0,0.2)] text-black bg-white focus:outline-none focus:ring-2 focus:ring-[#A4AE97] text-xs sm:text-sm"
               ></textarea>
             </div>
@@ -86,48 +153,6 @@ export default function Complaints() {
       {/* Complaint History */}
       <div className="bg-white rounded-[16px] shadow-[0_6px_20px_rgba(0,0,0,0.25)] w-full overflow-x-auto p-3 sm:p-4 lg:p-6">
         <h4 className="text-base sm:text-lg lg:text-xl font-extrabold mb-3 sm:mb-4 text-black">Complaint History</h4>
-        
-        {/* Mobile Card View */}
-        <div className="block lg:hidden space-y-3">
-          <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-            <div className="flex justify-between items-start mb-2">
-              <h5 className="font-semibold text-gray-800 text-sm">Noise Disturbance</h5>
-              <span className="bg-[#39FF14] text-black py-1 px-2 rounded-[4px] font-bold text-xs">
-                Approved
-              </span>
-            </div>
-            <div className="text-xs text-gray-600 space-y-1">
-              <div><span className="font-medium">Subject:</span> Noisy Neighbour in Room 305</div>
-              <div><span className="font-medium">Filed Date:</span> 23-03-2025</div>
-            </div>
-          </div>
-          
-          <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-            <div className="flex justify-between items-start mb-2">
-              <h5 className="font-semibold text-gray-800 text-sm">Maintenance issue</h5>
-              <span className="bg-red-500 text-white py-1 px-2 rounded-[4px] font-bold text-xs">
-                Rejected
-              </span>
-            </div>
-            <div className="text-xs text-gray-600 space-y-1">
-              <div><span className="font-medium">Subject:</span> Broken Shower Head - 2nd floor</div>
-              <div><span className="font-medium">Filed Date:</span> 23-03-2025</div>
-            </div>
-          </div>
-          
-          <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-            <div className="flex justify-between items-start mb-2">
-              <h5 className="font-semibold text-gray-800 text-sm">Damages fee</h5>
-              <span className="bg-yellow-400 text-white py-1 px-2 rounded-[4px] font-bold text-xs">
-                Rejected
-              </span>
-            </div>
-            <div className="text-xs text-gray-600 space-y-1">
-              <div><span className="font-medium">Subject:</span> Internet Connectivity issues</div>
-              <div><span className="font-medium">Filed Date:</span> 23-03-2025</div>
-            </div>
-          </div>
-        </div>
 
         {/* Desktop Table View - UNCHANGED */}
         <div className="hidden lg:block">
@@ -142,36 +167,21 @@ export default function Complaints() {
                 </tr>
               </thead>
               <tbody>
-                <tr className="text-black bg-white">
-                  <td className="px-4 py-4">Noise Disturbance</td>
-                  <td className="px-4 py-4">Noisy Neighbour in Room 305</td>
-                  <td className="px-4 py-4">23-03-2025</td>
-                  <td className="px-4 py-4">
-                    <span className="bg-[#39FF14] text-black py-1 px-4 rounded-[4px] font-bold block w-max">
-                      Approved
-                    </span>
-                  </td>
-                </tr>
-                <tr className="text-black bg-white">
-                  <td className="px-4 py-4">Maintenance issue</td>
-                  <td className="px-4 py-4">Broken Shower Head - 2nd floor</td>
-                  <td className="px-4 py-4">23-03-2025</td>
-                  <td className="px-4 py-4">
-                    <span className="bg-red-500 text-white py-1 px-4 rounded-[4px] font-bold block w-max">
-                      Rejected
-                    </span>
-                  </td>
-                </tr>
-                <tr className="text-black bg-white">
-                  <td className="px-4 py-4">Damages fee</td>
-                  <td className="px-4 py-4">Internet Connectivity issues</td>
-                  <td className="px-4 py-4">23-03-2025</td>
-                  <td className="px-4 py-4">
-                    <span className="bg-yellow-400 text-white py-1 px-4 rounded-[4px] font-bold block w-max">
-                      Rejected
-                    </span>
-                  </td>
-                </tr>
+                {complaints.map((c, idx) => (
+                  <tr key={idx} className="text-black bg-white">
+                    <td className="px-4 py-4">{c.complaintType}</td>
+                    <td className="px-4 py-4">{c.subject}</td>
+                    <td className="px-4 py-4">{new Date(c.createdAt).toLocaleDateString()}</td>
+                    <td className="px-4 py-4">
+                      <span className={`py-1 px-4 rounded-[4px] font-bold block w-max ${c.status === 'Approved' ? 'bg-[#39FF14] text-black' :
+                          c.status === 'Rejected' ? 'bg-red-500 text-white' :
+                            'bg-yellow-400 text-white'
+                        }`}>
+                        {c.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>

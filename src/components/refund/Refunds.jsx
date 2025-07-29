@@ -139,47 +139,24 @@ export default function Refunds() {
 
           {/* Mobile Card View */}
           <div className="block sm:hidden space-y-2">
-            <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-              <div className="flex justify-between items-start mb-2">
-                <h5 className="font-semibold text-black text-xs">Mess fee Overpayment</h5>
-                <span className="bg-[#39FF14] text-black py-0.5 px-1.5 rounded-[4px] font-bold text-[10px]">
-                  Approved
-                </span>
+            {refunds.map((refund, index) => (
+              <div key={index} className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                <div className="flex justify-between items-start mb-2">
+                  <h5 className="font-semibold text-black text-xs">{refund.refundType}</h5>
+                  <span className={`py-0.5 px-1.5 rounded-[4px] font-bold text-[10px] ${refund.status === 'Approved' ? 'bg-[#39FF14] text-black' :
+                      refund.status === 'Rejected' ? 'bg-red-500 text-white' :
+                        'bg-yellow-400 text-white'
+                    }`}>
+                    {refund.status}
+                  </span>
+                </div>
+                <div className="text-[10px] text-gray-600 space-y-1">
+                  <div><span className="font-medium">Date:</span> {new Date(refund.requestedAt).toLocaleDateString()}</div>
+                  <div><span className="font-medium">Amount:</span> {refund.amount}</div>
+                  <div><span className="font-medium">Reason:</span> {refund.reason}</div>
+                </div>
               </div>
-              <div className="text-[10px] text-gray-600 space-y-1">
-                <div><span className="font-medium">Date:</span> 23-03-2025</div>
-                <div><span className="font-medium">Amount:</span> 50</div>
-                <div><span className="font-medium">Reason:</span> Incorrect Calculation</div>
-              </div>
-            </div>
-
-            <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-              <div className="flex justify-between items-start mb-2">
-                <h5 className="font-semibold text-black text-xs">Security Deposit</h5>
-                <span className="bg-red-500 text-white py-0.5 px-1.5 rounded-[4px] font-bold text-[10px]">
-                  Rejected
-                </span>
-              </div>
-              <div className="text-[10px] text-gray-600 space-y-1">
-                <div><span className="font-medium">Date:</span> 23-03-2025</div>
-                <div><span className="font-medium">Amount:</span> 250</div>
-                <div><span className="font-medium">Reason:</span> Upon Successful Check-out</div>
-              </div>
-            </div>
-
-            <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-              <div className="flex justify-between items-start mb-2">
-                <h5 className="font-semibold text-black text-xs">Damages fee</h5>
-                <span className="bg-yellow-400 text-white py-0.5 px-1.5 rounded-[4px] font-bold text-[10px]">
-                  Rejected
-                </span>
-              </div>
-              <div className="text-[10px] text-gray-600 space-y-1">
-                <div><span className="font-medium">Date:</span> 23-03-2025</div>
-                <div><span className="font-medium">Amount:</span> 750</div>
-                <div><span className="font-medium">Reason:</span> Dispute over Room inspection</div>
-              </div>
-            </div>
+            ))}
           </div>
 
           {/* Desktop Table View */}
