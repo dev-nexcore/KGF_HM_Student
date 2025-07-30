@@ -5,7 +5,12 @@ import api from '@/lib/api';
 
 const NoticePage = () => {
   const [notices, setNotices] = useState([]);
-  const studentId = localStorage.getItem('studentId');
+  const [studentId, setStudentId] = useState(null);
+
+  useEffect(() => {
+    const id = localStorage.getItem('studentId');
+    setStudentId(id);
+  }, []);
 
   useEffect(() => {
     if (!studentId) return;
