@@ -1,7 +1,78 @@
 'use client';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import api from '@/lib/api';
+import { useRouter } from 'next/navigation';
 
 export default function ResetPassword() {
+  const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [otp, setOtp] = useState('');
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [loadingOtp, setLoadingOtp] = useState(false);
+  const [loadingReset, setLoadingReset] = useState(false);
+  const [otpError, setOtpError] = useState('');
+  const [resetError, setResetError] = useState('');
+  const [otpSuccess, setOtpSuccess] = useState('');
+  const [resetSuccess, setResetSuccess] = useState('');
+
+  useEffect(() => {
+    const storedEmail = localStorage.getItem('forgotPasswordEmail');
+    if (storedEmail) setEmail(storedEmail);
+  }, []);
+
+  const handleVerifyOtp = async () => {
+    if (!otp) {
+      setOtpError('Please enter OTP');
+      return;
+    }
+    setLoadingOtp(true);
+    setOtpError('');
+    setOtpSuccess('');
+    try {
+      const res = await api.post('/verify-otp', { email, otp });
+      setOtpSuccess(res.data.message);
+      setOtpVerified(true);
+    } catch (err) {
+      setOtpError(err.response?.data?.message || 'OTP verification failed');
+      setOtpVerified(false);
+    } finally {
+      setLoadingOtp(false);
+    }
+  };
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    setResetError('');
+    setResetSuccess('');
+
+    if (!otpVerified) {
+      setResetError('Please verify OTP first');
+      return;
+    }
+    if (!newPassword || !confirmPassword) {
+      setResetError('Please fill in both password fields');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setResetError('Passwords do not match');
+      return;
+    }
+
+    setLoadingReset(true);
+    try {
+      const res = await api.post('/reset-password', { email, otp, newPassword });
+      setResetSuccess(res.data.message);
+      localStorage.removeItem('forgotPasswordEmail'); // clean up
+      setTimeout(() => router.push('/'), 1000);
+    } catch (err) {
+      setResetError(err.response?.data?.message || 'Password reset failed');
+    } finally {
+      setLoadingReset(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#A4B494] flex items-center justify-center px-4">
       {/* Wide white card */}
@@ -14,38 +85,74 @@ export default function ResetPassword() {
 
           <div className="mb-6">
             <label className="block text-sm font-semibold mb-2 text-[#000000]">OTP</label>
-            <input
-              type="text"
-              placeholder="Enter OTP"
-              className="w-full px-4 py-3 rounded-xl shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none text-sm text-[#000000]"
-            />
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Enter OTP"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                disabled={otpVerified}
+                className="w-full px-4 py-3 rounded-xl shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none text-sm text-[#000000]"
+              />
+              <button
+                type="button"
+                onClick={handleVerifyOtp}
+                disabled={loadingOtp || otpVerified}
+                className="bg-[#BEC5AD] text-black font-semibold py-2 px-4 rounded-xl shadow-md hover:brightness-95 transition duration-200"
+              >
+                {loadingOtp ? 'Verifying...' : otpVerified ? 'Verified' : 'Verify'}
+              </button>
+            </div>
+            {otpError && <p className="text-red-600 text-sm mt-1">{otpError}</p>}
+            {otpSuccess && <p className="text-green-600 text-sm mt-1">{otpSuccess}</p>}
           </div>
 
-          <div className="mb-6">
-            <label className="block text-sm font-semibold mb-2 text-[#000000]">New Password</label>
-            <input
-              type="password"
-              placeholder="Enter New Password"
-              className="w-full px-4 py-3 rounded-xl shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none text-sm text-[#000000]"
-            />
-          </div>
+          <form onSubmit={handleResetPassword}>
+            <div className="mb-6">
+              <label className="block text-sm font-semibold mb-2 text-[#000000]">New Password</label>
+              <input
+                type="password"
+                placeholder="Enter New Password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                disabled={!otpVerified}
+                className="w-full px-4 py-3 rounded-xl shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none text-sm text-[#000000]"
+              />
+            </div>
 
-          <div className="mb-8">
-            <label className="block text-sm font-semibold mb-2 text-[#000000]">Confirm New Password</label>
-            <input
-              type="password"
-              placeholder="Confirm New Password"
-              className="w-full px-4 py-3 rounded-xl shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none text-sm text-[#000000]"
-            />
-          </div>
+            <div className="mb-8">
+              <label className="block text-sm font-semibold mb-2 text-[#000000]">Confirm New Password</label>
+              <input
+                type="password"
+                placeholder="Confirm New Password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                disabled={!otpVerified}
+                className="w-full px-4 py-3 rounded-xl shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none text-sm text-[#000000]"
+              />
+            </div>
 
-          <div className="flex justify-center mb-6">
-            <button className="bg-[#BEC5AD] text-black font-semibold py-2 px-6 rounded-xl shadow-md hover:brightness-95 transition duration-200">
-              Reset Password
-            </button>
-          </div>
+            {(resetError || resetSuccess) && (
+              <p className={`text-sm text-center mb-3 ${resetError ? 'text-red-600' : 'text-green-600'}`}>
+                {resetError || resetSuccess}
+              </p>
+            )}
 
-          <p className="text-center text-sm text-[#545454] hover:underline cursor-pointer">
+            <div className="flex justify-center mb-6">
+              <button
+                type="submit"
+                disabled={loadingReset || !otpVerified}
+                className="bg-[#BEC5AD] text-black font-semibold py-2 px-6 rounded-xl shadow-md hover:brightness-95 transition duration-200"
+              >
+                {loadingReset ? 'Resetting...' : 'Reset Password'}
+              </button>
+            </div>
+          </form>
+
+          <p 
+            className="text-center text-sm text-[#545454] hover:underline cursor-pointer" 
+            onClick={() => router.push('/')}
+          >
             Back To Login
           </p>
         </div>

@@ -8,24 +8,25 @@ import { toast, Toaster } from "react-hot-toast";
 export default function Login() {
   const [studentId, setStudentId] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const res = await api.post("/login", {
-        studentId,
-        password,
-      });
-
+      const res = await api.post("/login", { studentId, password });
       toast.success("Login successful!");
-      console.log("Login successful:", res.data);
       localStorage.setItem("studentId", res.data.studentId);
       router.push("/dashboard");
     } catch (err) {
-      console.error("Login failed:", err?.response?.data || err.message);
-      toast.error(err?.response?.data?.message || "Login failed.");
+      const status = err?.response?.status;
+      const data = err?.response?.data;
+      const msg = data?.message || err.message || "Login failed.";
+
+      console.error("Login failed:", { status, data, msg });
+
+      toast.error(msg);
     }
   };
 
@@ -91,15 +92,15 @@ export default function Login() {
             />
           </div>
           <div className="flex justify-end">
-            <a href="/forget" className="text-sm text-blue-500 hover:underline">
+            <p onClick={() => router.push('/forget')} className="text-sm text-blue-500 hover:underline">
               Forget Password?
-            </a>
+            </p>
           </div>
           <button
             type="submit"
             className="w-full py-3 rounded-[13px] bg-[#A4AE97] text-black font-semibold text-[20px] shadow hover:shadow-md transition"
           >
-            Login
+            {loading ? "Signing in..." : "Login"}
           </button>
         </form>
       </div>
