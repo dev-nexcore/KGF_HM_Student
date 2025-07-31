@@ -5,26 +5,42 @@ import { useRouter } from 'next/navigation';
 
 export default function ResetPassword() {
   const router = useRouter();
+
+  // --- state (same UI fields) ---
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
   const [otpVerified, setOtpVerified] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+
   const [loadingOtp, setLoadingOtp] = useState(false);
   const [loadingReset, setLoadingReset] = useState(false);
+
   const [otpError, setOtpError] = useState('');
   const [resetError, setResetError] = useState('');
   const [otpSuccess, setOtpSuccess] = useState('');
   const [resetSuccess, setResetSuccess] = useState('');
+
+  // NEW: store short-lived reset token from /verify-otp
+  const [resetToken, setResetToken] = useState('');
+
+  // password rule: min 8, at least 1 number and 1 special char
+  const PASSWORD_REGEX = /^(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
 
   useEffect(() => {
     const storedEmail = localStorage.getItem('forgotPasswordEmail');
     if (storedEmail) setEmail(storedEmail);
   }, []);
 
+  // Sanitize OTP input: digits only, max 6
+  const handleOtpChange = (e) => {
+    const digitsOnly = e.target.value.replace(/\D/g, '').slice(0, 6);
+    setOtp(digitsOnly);
+  };
+
   const handleVerifyOtp = async () => {
-    if (!otp) {
-      setOtpError('Please enter OTP');
+    if (!otp || otp.length !== 6) {
+      setOtpError('Please enter a 6-digit OTP');
       return;
     }
     setLoadingOtp(true);
@@ -60,8 +76,11 @@ export default function ResetPassword() {
       return;
     }
 
+    // You can add client-side password validation here too
+
     setLoadingReset(true);
     try {
+      // Send email, otp, and newPassword (no reset token)
       const res = await api.post('/reset-password', { email, otp, newPassword });
       setResetSuccess(res.data.message);
       localStorage.removeItem('forgotPasswordEmail'); // clean up
@@ -90,8 +109,11 @@ export default function ResetPassword() {
                 type="text"
                 placeholder="Enter OTP"
                 value={otp}
-                onChange={(e) => setOtp(e.target.value)}
+                onChange={handleOtpChange}
                 disabled={otpVerified}
+                inputMode="numeric"
+                pattern="\d*"
+                maxLength={6}
                 className="w-full px-4 py-3 rounded-xl shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none text-sm text-[#000000]"
               />
               <button
@@ -149,8 +171,8 @@ export default function ResetPassword() {
             </div>
           </form>
 
-          <p 
-            className="text-center text-sm text-[#545454] hover:underline cursor-pointer" 
+          <p
+            className="text-center text-sm text-[#545454] hover:underline cursor-pointer"
             onClick={() => router.push('/')}
           >
             Back To Login

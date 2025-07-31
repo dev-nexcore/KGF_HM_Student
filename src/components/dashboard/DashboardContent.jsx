@@ -62,9 +62,9 @@ export default function DashboardContent() {
 
   useEffect(() => {
     const fetchProfile = async () => {
+      setLoading(true);
       try {
-        const res = await api.get(`/profile/${studentId}`);
-
+        const res = await api.get('/profile'); // No studentId in path now
         if (res.status === 200) {
           const data = res.data;
           setCheckStatus(data.checkStatus || "Pending Check-in");
@@ -72,16 +72,17 @@ export default function DashboardContent() {
           setRoomNo(data.roomNo);
           setRoommateName(data.roommateName);
           setBedAllotment(data.bedAllotment);
+          setStudentId(data.studentId); // Optional if you still use it
         }
       } catch (err) {
         console.error("Failed to fetch student profile:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
-    if (studentId) {
-      fetchProfile();
-    }
-  }, [studentId]);
+    fetchProfile();
+  }, []);
 
   useEffect(() => {
     const fetchFeesStatus = async () => {
@@ -121,7 +122,7 @@ export default function DashboardContent() {
   useEffect(() => {
     const fetchInspectionSchedule = async () => {
       try {
-        const res = await api.get(`/inspectionSchedule/${studentId}`);
+        const res = await api.get('/inspectionSchedule'); // No studentId in path
         setInspection(res.data);
       } catch (err) {
         if (err.response?.status === 404) {
@@ -133,11 +134,8 @@ export default function DashboardContent() {
       }
     };
 
-    if (studentId) {
-      fetchInspectionSchedule();
-    }
-  }, [studentId]);
-
+    fetchInspectionSchedule();
+  }, []);
 
   async function handleCheckIn() {
     setLoading(true);
@@ -329,8 +327,16 @@ export default function DashboardContent() {
                 <div key={index} className="flex flex-col gap-2">
                   <div className="flex justify-between">
                     <span>{fee.feeType} Fee:</span>
-                    <span className={`${fee.status === 'paid' ? 'text-green-600' : 'text-red-600'}`}>
-                      {fee.status === 'paid' ? 'Paid' : 'Overdue'}
+                    <span
+                      className={
+                        fee.status === 'paid'
+                          ? 'text-green-600'
+                          : fee.status === 'unpaid'
+                            ? 'text-yellow-600'
+                            : 'text-red-600'
+                      }
+                    >
+                      {fee.status.charAt(0).toUpperCase() + fee.status.slice(1)}
                     </span>
                   </div>
                   <div className="flex justify-between">

@@ -8,22 +8,18 @@ export default function Navbar() {
   const [studentName, setStudentName] = useState("...");
 
   useEffect(() => {
-    const fetchStudentName = async () => {
-      try {
-        const studentId = localStorage.getItem("studentId");
+  const fetchStudentName = async () => {
+    try {
+      const res = await api.get('/profile'); // Uses token automatically
+      setStudentName(res.data.firstName || "Student");
+    } catch (err) {
+      console.error("Failed to fetch student name:", err);
+      setStudentName("Student");
+    }
+  };
 
-        if (!studentId) return;
-
-        const res = await api.get(`/profile/${studentId}`);
-        setStudentName(res.data.studentName || "Student");
-      } catch (err) {
-        console.error("Failed to fetch student name:", err);
-        setStudentName("Student");
-      }
-    };
-
-    fetchStudentName();
-  }, []);
+  fetchStudentName();
+}, []);
 
   return (
     <nav className="flex items-center justify-between px-4 sm:px-6 py-4 bg-[#BEC5AD] h-20 min-h-[80px]">

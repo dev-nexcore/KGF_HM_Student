@@ -13,6 +13,13 @@ export default function Sidebar() {
     setSidebarOpen(false); // Close on route change
   }, [pathname]);
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('studentId');
+    router.push('/');
+  };
+
+
   const navItems = [
     { name: "Dashboard", icon: "dashboard.png", href: "/dashboard" },
     { name: "Fees Status", icon: "account_balance_wallet.png", href: "/fees-status" },
@@ -24,11 +31,10 @@ export default function Sidebar() {
 
   const getLinkClass = (href) =>
     `flex items-center gap-3 px-6 py-3 transition-all duration-200 rounded-l-full text-sm
-     ${
-       pathname === href
-         ? "bg-white text-black font-bold shadow ml-2"
-         : "hover:underline text-black"
-     }`;
+     ${pathname === href
+      ? "bg-white text-black font-bold shadow ml-2"
+      : "hover:underline text-black"
+    }`;
 
   return (
     <div className="bg-[#BEC5AD]">
@@ -57,16 +63,16 @@ export default function Sidebar() {
         </button>
 
         <div>
-  {/* Logo */}
-<div className="flex justify-start mb-6 px-4 ml-8.5">
-  <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-white shadow">
-    <img
-      src="/logo.png"
-      alt="Logo"
-      className="w-full h-full object-cover"
-    />
-  </div>
-</div>
+          {/* Logo */}
+          <div className="flex justify-start mb-6 px-4 ml-8.5">
+            <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-white shadow">
+              <img
+                src="/logo.png"
+                alt="Logo"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </div>
 
 
 
@@ -91,20 +97,20 @@ export default function Sidebar() {
         </div>
 
         {/* Logout */}
-<div className="mt-10">
+        <div className="mt-10">
           <hr className="border-t border-black my-3 mr-4" />
           <div className="flex justify-start mb-1 px-4 ml-8.5">
-    <button className="flex items-center gap-2 text-black text-sm hover:underline  text-black font-bold">
-      <Image
-        src="/icons/logout.png"
-        alt="Logout"
-        width={18}
-        height={18}
-      />
-      Logout
-    </button>
-  </div>
-</div>
+            <button className="flex items-center gap-2 text-black text-sm hover:underline  text-black font-bold">
+              <Image
+                src="/icons/logout.png"
+                alt="Logout"
+                width={18}
+                height={18}
+              />
+              Logout
+            </button>
+          </div>
+        </div>
 
       </aside>
 

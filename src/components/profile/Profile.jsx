@@ -18,8 +18,16 @@ export default function Profile() {
       try {
         const studentId = localStorage.getItem("studentId");
         if (!studentId) return;
-        const res = await api.get(`/profile/${studentId}`);
-        setProfile(res.data);
+
+        const res = await api.get(`/profile`);
+        const data = res.data;
+
+        setProfile(data);
+        setFormData({
+          studentName: `${data.firstName} ${data.lastName}`,
+          email: data.email,
+          contactNumber: data.contactNumber,
+        });
       } catch (err) {
         console.error('Failed to fetch profile:', err);
       }
@@ -39,8 +47,25 @@ export default function Profile() {
         console.error("Student ID not found in localStorage");
         return;
       }
-      await api.put(`/profile/${studentId}`, formData);
-      setProfile({ ...profile, ...formData });
+
+      const [firstName, ...rest] = formData.studentName.split(" ");
+      const lastName = rest.join(" ") || ""; // Handle single names
+
+      await api.put(`/profile/${studentId}`, {
+        firstName,
+        lastName,
+        email: formData.email,
+        contactNumber: formData.contactNumber,
+      });
+
+      setProfile(prev => ({
+        ...prev,
+        firstName,
+        lastName,
+        email: formData.email,
+        contactNumber: formData.contactNumber,
+      }));
+
       setShowModal(false);
       toast.success("Profile updated successfully!");
     } catch (err) {
@@ -64,7 +89,7 @@ export default function Profile() {
         {/* Profile Card */}
         <div className="bg-[#BEC5AD] rounded-lg p-6 w-full lg:w-[35%] flex flex-col items-center justify-center shadow min-h-[330px] lg:min-h-[480px]">
           <div className="w-32 h-32 rounded-full bg-white mb-4" />
-          <h2 className="text-lg font-bold text-black mb-1">{profile.studentName}</h2>
+          <h2 className="text-lg font-bold text-black mb-1">{profile.firstName} {profile.lastName}</h2>
           <p className="text-sm font-semibold text-black">Student ID: {profile.studentId}</p>
         </div>
 
@@ -86,7 +111,7 @@ export default function Profile() {
         <button
           onClick={() => {
             setFormData({
-              studentName: profile.studentName || '',
+              studentName: `${profile.firstName} ${profile.lastName}`.trim(),
               email: profile.email || '',
               contactNumber: profile.contactNumber || '',
             });

@@ -16,16 +16,38 @@ export default function Login() {
 
     try {
       const res = await api.post("/login", { studentId, password });
-      toast.success("Login successful!");
-      localStorage.setItem("studentId", res.data.studentId);
+
+      const { token, student, message } = res.data || {};
+
+      if (!token) {
+        // Safety: your interceptor needs this
+        throw new Error("No token returned by the server. Please try again.");
+      }
+
+      if (typeof window !== "undefined") {
+        localStorage.setItem("token", token); // <-- enables Authorization header via interceptor
+        if (student?.studentId) {
+          localStorage.setItem("studentId", student.studentId);
+        } else if (res.data?.studentId) {
+          // backward-compat if your API returns studentId at root
+          localStorage.setItem("studentId", res.data.studentId);
+        }
+      }
+
+      toast.success(message || "Login successful!");
       router.push("/dashboard");
     } catch (err) {
       const status = err?.response?.status;
       const data = err?.response?.data;
-      const msg = data?.message || err.message || "Login failed.";
+      const msg =
+        data?.message ||
+        (status === 401
+          ? "Invalid credentials."
+          : status === 403
+            ? "Access forbidden."
+            : err.message || "Login failed.");
 
       console.error("Login failed:", { status, data, msg });
-
       toast.error(msg);
     }
   };
