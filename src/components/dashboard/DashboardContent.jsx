@@ -8,6 +8,10 @@ import {
   Legend,
 } from 'chart.js';
 import api from '@/lib/api';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -140,24 +144,25 @@ export default function DashboardContent() {
 
 
   async function handleCheckIn() {
-    setLoading(true);
-    try {
-      const res = await api.post('/check-in', { studentId });
+  setLoading(true);
+  try {
+    const res = await api.post('/check-in', { studentId });
 
-      if (res.status === 200) {
-        const data = res.data;
-        setCheckStatus('Checked In');
-        setCheckTime(data.checkInDate || new Date().toLocaleTimeString());
-        alert(data.message || 'Checked in successfully');
-      } else {
-        alert(res.data.message || 'Failed to check in');
-      }
-    } catch (err) {
-      alert('Error checking in');
-      console.error(err);
+    if (res.status === 200) {
+      const data = res.data;
+      setCheckStatus('Checked In');
+      setCheckTime(data.checkInDate || new Date().toLocaleTimeString());
+      toast.success(data.message || 'Checked in successfully');
+    } else {
+      toast.error(res.data.message || 'Failed to check in');
     }
-    setLoading(false);
+  } catch (err) {
+    toast.error('Error checking in');
+    console.error(err);
   }
+  setLoading(false);
+}
+
 
   async function handleCheckOut() {
     setLoading(true);
@@ -182,14 +187,15 @@ export default function DashboardContent() {
   return (
     <main className="bg-[#ffffff] px-4 sm:px-6 lg:px-8 py-2 min-h-screen font-sans">
       <div className="flex items-center mb-4">
-        <div className="w-1 h-5 bg-red-600 mr-2 rounded" />
-        <h2 className="text-lg font-semibold text-[#2c2c2c]">Overview</h2>
-      </div>
+<h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-black border-l-4 border-[#4F8CCF] pl-2 mb-4 sm:mb-6">
+        Overview
+      </h2>     
+       </div>
 
       <div className="mt-4 flex flex-wrap justify-start gap-4 sm:gap-6">
 
         {/* Check-in / Out Card */}
-        <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[450px]">
+        <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[550px]">
           <div className="bg-[#AAB491] px-4 py-2 rounded-t-lg">
             <h2 className="text-base font-semibold text-black text-center">Check-in /Out Status</h2>
           </div>
@@ -232,7 +238,7 @@ export default function DashboardContent() {
         </div>
 
         {/* Attendance Summary */}
-        <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[450px]">
+        <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[550px]">
           <div className="bg-[#AAB491] px-4 py-2 rounded-t-lg flex items-center justify-between">
             <h2 className="text-base font-semibold text-black">Attendance Summary</h2>
             <select
@@ -250,11 +256,11 @@ export default function DashboardContent() {
             {/* Legend */}
             <div className="space-y-3 text-sm mt-2">
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-[#36FF09]"></span>
+                <span className="w-3 h-3 rounded-full bg-[#4F8DCF]"></span>
                 <span className="text-black font-medium">Present</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-[#FF0000]"></span>
+                <span className="w-3 h-3 rounded-full bg-[#E30007]"></span>
                 <span className="text-black font-medium">Absent</span>
               </div>
             </div>
@@ -281,7 +287,7 @@ export default function DashboardContent() {
         </div>
 
         {/* Room Inspection Schedule */}
-        <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[450px] h-[200px]">
+        <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[550px] h-[200px]">
           <div className="bg-[#AAB491] px-4 py-2 rounded-t-lg">
             <h2 className="text-base font-semibold text-black">Room Inspection Schedule</h2>
           </div>
@@ -308,7 +314,7 @@ export default function DashboardContent() {
         </div>
 
         {/* Bed Allotment */}
-        <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[450px] h-[200px]">
+        <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[550px] h-[200px]">
           <div className="bg-[#AAB491] px-4 py-2 rounded-t-lg">
             <h2 className="text-base font-semibold text-black">Bed Allotment</h2>
           </div>
@@ -319,7 +325,7 @@ export default function DashboardContent() {
         </div>
 
         {/* Fee Alerts */}
-        <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[450px] h-[200px]">
+        <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[550px] h-[200px]">
           <div className="bg-[#AAB491] px-4 py-1 rounded-t-lg">
             <h2 className="text-base font-semibold text-black">Fee Alerts</h2>
           </div>
@@ -351,7 +357,7 @@ export default function DashboardContent() {
         </div>
 
         {/* Leave Approval Status */}
-        <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[450px] h-[200px]">
+        <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[550px] h-[200px]">
           <div className="bg-[#AAB491] px-4 py-1 rounded-t-lg">
             <h2 className="text-base font-semibold text-black">Leave Approval Status</h2>
           </div>
@@ -381,5 +387,6 @@ export default function DashboardContent() {
         </div>
       </div>
     </main>
+    
   );
 }

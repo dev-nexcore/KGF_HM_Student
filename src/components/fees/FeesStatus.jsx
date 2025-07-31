@@ -49,15 +49,17 @@ export default function FeesStatus() {
   return (
     <div className="w-full min-h-screen bg-white pt-1 pb-6 sm:pb-10 px-3 sm:px-4 dark:bg-white overflow-hidden">
       {/* Fees Section Title */}
-      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold border-l-4 border-red-600 pl-3 mb-6 sm:mb-8 -ml-2 mt-1 text-[#2c2c2c]">
+     
+      <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-black border-l-4 border-[#4F8CCF] pl-2 mb-4 sm:mb-6">
         Fees Status
-      </h1>
+      </h2>    
 
       {/* Current Fees Status Card */}
-      <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none overflow-hidden w-full max-w-md mb-6 sm:mb-8">
-        <div className="bg-[#A4B494] px-6 sm:px-8 py-4 sm:py-5">
-          <h3 className="text-lg sm:text-xl font-bold text-black">Current Fees Status</h3>
-        </div>
+      <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none overflow-hidden w-full max-w-7xl min-h-[400px] mb-6 sm:mb-8">
+  <div className="bg-[#A4B494] px-6 sm:px-8 py-4 sm:py-5">
+    <h3 className="text-lg sm:text-xl font-bold text-black">Current Fees Status</h3>
+  </div>
+
 
         {loading ? (
           <div className="text-center my-4 text-gray-600">Loading current fee status...</div>
@@ -109,7 +111,7 @@ export default function FeesStatus() {
 
 
       {/* Payment History Table */}
-      <div className="bg-white rounded-lg shadow-md w-full max-w-5xl">
+      <div className="bg-white rounded-lg shadow-md w-full max-w-7xl">
         <div className="p-5 sm:p-6">
           <h3 className="text-lg sm:text-xl font-bold mb-6 text-black">
             Payment History

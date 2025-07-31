@@ -27,7 +27,7 @@ export default function Complaints() {
     const fetchComplaints = async () => {
       try {
         setLoading(true);
-        const res = await api.get(`/complaints/${studentId}`);
+        const res = await api.get(/complaints/${studentId});
         setComplaints(res.data?.complaints || []);
       } catch (err) {
         console.error('Error fetching complaint history:', err);
@@ -60,7 +60,7 @@ export default function Complaints() {
       setDescription('');
 
       // Re-fetch history
-      const res = await api.get(`/complaints/${studentId}`);
+      const res = await api.get(/complaints/${studentId});
       setComplaints(res.data?.complaints || []);
     } catch (err) {
       console.error('Error filing complaint:', err);
@@ -71,7 +71,7 @@ export default function Complaints() {
   const getStatusClasses = (status) => {
     if (status === 'Approved' || status === 'Resolved') return 'bg-green-500 text-black';
     if (status === 'Rejected') return 'bg-red-500 text-white';
-    return 'bg-yellow-400 text-white'; // Pending / others
+    if (status === 'Pending') return 'bg-[#4F8DCF] text-white';
   };
 
   const formatDate = (dateStr) => {
@@ -83,18 +83,18 @@ export default function Complaints() {
 
   return (
     <div className="bg-white text-black p-4 sm:p-6 md:p-8 overflow-hidden min-h-screen">
-      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold border-l-4 border-red-600 pl-3 mb-6 sm:mb-8 mt-[-7px] -ml-2 text-[#2c2c2c]">
+      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold border-l-4 border-[#4F8DCF] pl-3 mb-6 sm:mb-8 mt-[-7px] -ml-2 text-[#2c2c2c]">
         Complaints
       </h1>
 
       {/* Complaint Application Form - same layout as your original */}
-      <div className="bg-white rounded-lg sm:rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.25)] mb-6 sm:mb-10 w-full max-w-3xl">
+      <div className="bg-white rounded-lg sm:rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.25)] mb-6 sm:mb-10 w-full max-w-full min-h-[500px]">
         {/* Header */}
         <div className="bg-[#A4B494] rounded-t-lg sm:rounded-t-xl px-6 py-3 font-bold text-base md:text-lg">
           Complaint Application Form
         </div>
 
-        <form className="space-y-4 px-6 py-6" onSubmit={handleSubmit}>
+        <form className="space-y-4 px-6 py-8" onSubmit={handleSubmit}>
           {/* Complaint Type */}
           <div>
             <label className="block mb-1 text-sm font-semibold text-gray-800">
@@ -130,15 +130,15 @@ export default function Complaints() {
 
           {/* Description */}
           <div className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-3">
-            <label className="text-xs sm:text-sm font-semibold sm:pt-2 whitespace-nowrap">
+            <label className="text-xs sm:text-sm font-semibold sm:pt-0 whitespace-nowrap">
               Description:
             </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              rows={3}
+              rows={10}
               required
-              className="w-full px-3 sm:px-4 py-2 rounded-lg shadow-md h-16 sm:h-20 resize-none border border-gray-300 text-xs"
+              className="w-full px-3 sm:px-4 py-2 rounded-lg shadow-md h-full sm:h-full resize-none border border-gray-300 text-xs"
               placeholder="Enter complaint description"
             />
           </div>
@@ -147,9 +147,9 @@ export default function Complaints() {
           <div className="flex justify-center pt-2">
             <button
               type="submit"
+              className="bg-[#A4AE97] text-black px-4 sm:px-6 md:px-8 py-1.5 sm:py-2 rounded-md shadow hover:opacity-90 text-xs sm:text-sm font-medium w-full sm:w-auto"
               disabled={!studentId}
               title={!studentId ? 'Student not identified' : 'Submit'}
-              className="bg-[#A4AE97] text-black px-4 sm:px-6 md:px-8 py-1.5 sm:py-2 rounded-md shadow hover:opacity-90 text-xs sm:text-sm font-medium w-full sm:w-auto disabled:opacity-60"
             >
               Submit
             </button>
@@ -190,7 +190,7 @@ export default function Complaints() {
                     <td className="p-3 text-center">{c.subject}</td>
                     <td className="p-3 text-center">{formatDate(c.createdAt)}</td>
                     <td className="p-3 text-center">
-                      <span className={`px-2 py-1 rounded-md text-xs font-medium ${getStatusClasses(c.status)}`}>
+                      <span className={px-2 py-1 rounded-md text-xs font-medium ${getStatusClasses(c.status)}}>
                         {c.status || 'Pending'}
                       </span>
                     </td>
@@ -212,7 +212,7 @@ export default function Complaints() {
               <div key={idx} className="bg-gray-50 rounded-lg p-3 border border-gray-200 text-center">
                 <div className="flex justify-center items-center mb-2 space-x-2">
                   <h4 className="font-semibold text-gray-800 text-xs">{c.complaintType}</h4>
-                  <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${getStatusClasses(c.status)}`}>
+                  <span className={px-1.5 py-0.5 rounded text-[10px] font-medium ${getStatusClasses(c.status)}}>
                     {c.status || 'Pending'}
                   </span>
                 </div>

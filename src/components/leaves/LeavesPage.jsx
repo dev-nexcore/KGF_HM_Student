@@ -56,7 +56,7 @@ export default function LeavesPage() {
 
   return (
     <div className="w-full bg-white pt-1 pb-6 sm:pb-10 px-3 sm:px-4 text-black">
-      <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-black border-l-4 border-red-600 pl-2 mb-4 sm:mb-6">
+      <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-black border-l-4 border-[#4F8CCF] pl-2 mb-4 sm:mb-6">
         Leaves
       </h2>
 

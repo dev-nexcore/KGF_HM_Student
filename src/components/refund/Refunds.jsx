@@ -65,7 +65,7 @@ export default function Refunds() {
   const getStatusClasses = (status) => {
     if (status === 'Approved') return 'bg-green-500 text-black';
     if (status === 'Rejected') return 'bg-red-500 text-white';
-    return 'bg-yellow-400 text-white';
+    if (status === 'Pending') return 'bg-blue-500 text-white';
   };
 
   const formatDate = (dateStr) => {
@@ -78,9 +78,10 @@ export default function Refunds() {
   return (
     <div className="bg-white text-black p-4 sm:p-6 md:p-8 overflow-hidden min-h-screen">
 
-      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold border-l-4 border-red-600 pl-3 mb-6 sm:mb-8 mt-[-7px] -ml-2 text-[#2c2c2c]">
-        Refunds
-      </h1>
+      
+      <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-black border-l-4 border-[#4F8CCF] pl-2 mb-4 sm:mb-6">
+         Refunds
+      </h2> 
 
       {/* Refund Application Form */}
       <div className="bg-white rounded-lg sm:rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.25)] mb-6 sm:mb-10 w-full max-w-3xl">
