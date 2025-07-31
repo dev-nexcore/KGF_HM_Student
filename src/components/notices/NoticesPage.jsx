@@ -30,9 +30,10 @@ const NoticePage = () => {
 
   return (
     <div className="bg-white text-black p-4 sm:p-6 md:p-8 overflow-hidden min-h-screen">
-      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold border-l-4 border-red-600 pl-3 mb-6 sm:mb-8">
-        Notices
-      </h1>
+      
+      <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-black border-l-4 border-[#4F8CCF] pl-2 mb-4 sm:mb-6">
+         Notices
+      </h2> 
 
       {notices.length === 0 ? (
         <p className="text-gray-600">No current notices</p>

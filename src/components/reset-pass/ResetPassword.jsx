@@ -2,30 +2,30 @@
 import React, { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import { useRouter } from 'next/navigation';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
+
+
+
 
 export default function ResetPassword() {
-  const router = useRouter();
+const router = useRouter();
+const [email, setEmail] = useState('');
+const [otp, setOtp] = useState('');
+const [otpVerified, setOtpVerified] = useState(false);
 
-  // --- state (same UI fields) ---
-  const [email, setEmail] = useState('');
-  const [otp, setOtp] = useState('');
-  const [otpVerified, setOtpVerified] = useState(false);
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+// ✅ Missing password states — add these:
+const [newPassword, setNewPassword] = useState('');
+const [confirmPassword, setConfirmPassword] = useState('');
 
-  const [loadingOtp, setLoadingOtp] = useState(false);
-  const [loadingReset, setLoadingReset] = useState(false);
+const [showNewPassword, setShowNewPassword] = useState(false);
+const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const [otpError, setOtpError] = useState('');
-  const [resetError, setResetError] = useState('');
-  const [otpSuccess, setOtpSuccess] = useState('');
-  const [resetSuccess, setResetSuccess] = useState('');
-
-  // NEW: store short-lived reset token from /verify-otp
-  const [resetToken, setResetToken] = useState('');
-
-  // password rule: min 8, at least 1 number and 1 special char
-  const PASSWORD_REGEX = /^(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+const [loadingOtp, setLoadingOtp] = useState(false);
+const [loadingReset, setLoadingReset] = useState(false);
+const [otpError, setOtpError] = useState('');
+const [resetError, setResetError] = useState('');
+const [otpSuccess, setOtpSuccess] = useState('');
+const [resetSuccess, setResetSuccess] = useState('');
 
   useEffect(() => {
     const storedEmail = localStorage.getItem('forgotPasswordEmail');
@@ -130,29 +130,57 @@ export default function ResetPassword() {
           </div>
 
           <form onSubmit={handleResetPassword}>
-            <div className="mb-6">
-              <label className="block text-sm font-semibold mb-2 text-[#000000]">New Password</label>
-              <input
-                type="password"
-                placeholder="Enter New Password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                disabled={!otpVerified}
-                className="w-full px-4 py-3 rounded-xl shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none text-sm text-[#000000]"
-              />
-            </div>
+           {/* New Password Field */}
+<div className="mb-6 relative">
+  <label className="block text-sm font-semibold mb-2 text-[#000000]">
+    New Password
+  </label>
+  <input
+    type={showNewPassword ? 'text' : 'password'}
+    placeholder="Enter New Password"
+    value={newPassword}
+    onChange={(e) => setNewPassword(e.target.value)}
+    disabled={!otpVerified}
+    className="w-full px-4 py-3 pr-12 rounded-xl shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none text-sm text-[#000000]"
+  />
+  <button
+    type="button"
+    onClick={() => setShowNewPassword(!showNewPassword)}
+    className="absolute right-4 top-12.5 transform -translate-y-1/2"
+  >
+    {showNewPassword ? (
+      <FiEye className="text-gray-700 w-5 h-5" />
+    ) : (
+      <FiEyeOff className="text-gray-700 w-5 h-5" />
+    )}
+  </button>
+</div>
 
-            <div className="mb-8">
-              <label className="block text-sm font-semibold mb-2 text-[#000000]">Confirm New Password</label>
-              <input
-                type="password"
-                placeholder="Confirm New Password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                disabled={!otpVerified}
-                className="w-full px-4 py-3 rounded-xl shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none text-sm text-[#000000]"
-              />
-            </div>
+{/* Confirm New Password Field */}
+<div className="mb-8 relative">
+  <label className="block text-sm font-semibold mb-2 text-[#000000]">
+    Confirm New Password
+  </label>
+  <input
+    type={showConfirmPassword ? 'text' : 'password'}
+    placeholder="Confirm New Password"
+    value={confirmPassword}
+    onChange={(e) => setConfirmPassword(e.target.value)}
+    disabled={!otpVerified}
+    className="w-full px-4 py-3 pr-12 rounded-xl shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none text-sm text-[#000000]"
+  />
+  <button
+    type="button"
+    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+    className="absolute right-4 top-12.5 transform -translate-y-1/2"
+  >
+    {showConfirmPassword ? (
+      <FiEye className="text-gray-700 w-5 h-5" />
+    ) : (
+      <FiEyeOff className="text-gray-700 w-5 h-5" />
+    )}
+  </button>
+</div>
 
             {(resetError || resetSuccess) && (
               <p className={`text-sm text-center mb-3 ${resetError ? 'text-red-600' : 'text-green-600'}`}>
