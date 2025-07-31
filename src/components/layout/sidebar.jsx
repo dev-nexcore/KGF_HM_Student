@@ -4,8 +4,11 @@ import Link from "next/link";
 import { Menu, X } from "lucide-react"; // keeping only hamburger & close icons
 import { usePathname } from "next/navigation";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
 
 export default function Sidebar() {
+  const router = useRouter();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -16,6 +19,8 @@ export default function Sidebar() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('studentId');
+    localStorage.removeItem('forgotPasswordEmail');
+    toast.success("Logged out successfully");
     router.push('/');
   };
 
@@ -97,10 +102,13 @@ export default function Sidebar() {
         </div>
 
         {/* Logout */}
-        <div className="mt-10">
+        <div className="mt-0">
           <hr className="border-t border-black my-3 mr-4" />
           <div className="flex justify-start mb-1 px-4 ml-8.5">
-            <button className="flex items-center gap-2 text-black text-sm hover:underline font-bold">
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 text-black text-sm hover:underline font-bold"
+            >
               <Image
                 src="/icons/logout.png"
                 alt="Logout"
@@ -111,7 +119,6 @@ export default function Sidebar() {
             </button>
           </div>
         </div>
-
       </aside>
 
       {/* Dark Overlay (Mobile only) */}

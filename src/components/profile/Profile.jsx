@@ -79,13 +79,14 @@ export default function Profile() {
   return (
     <div className="pt-2 px-2 md:pt-1 md:px-2">
       {/* Page Heading */}
-      <div className="flex items-center mb-6">
-        <div className="w-1 h-5 bg-red-600 mr-2 rounded"></div>
-        <h1 className="text-lg font-semibold text-[#2c2c2c]">Profile</h1>
+      <div className="flex items-center mb-4">
+        <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-black border-l-4 border-[#4F8CCF] pl-2 mb-4 sm:mb-6">
+          Profile
+        </h2>
       </div>
 
-      {/* Cards Section */}
-      <div className="flex flex-col lg:flex-row gap-6">
+      {/* Cards Section - Centered on larger screens */}
+      <div className="flex flex-col lg:flex-row lg:justify-center gap-6">
         {/* Profile Card */}
         <div className="bg-[#BEC5AD] rounded-lg p-6 w-full lg:w-[35%] flex flex-col items-center justify-center shadow min-h-[330px] lg:min-h-[480px]">
           <div className="w-32 h-32 rounded-full bg-white mb-4" />
@@ -106,8 +107,8 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Edit Profile Button */}
-      <div className="mt-6 text-center md:text-left md:pl-85">
+      {/* Edit Profile Button - Centered below cards */}
+      <div className="mt-6 flex justify-center">
         <button
           onClick={() => {
             setFormData({
@@ -117,7 +118,7 @@ export default function Profile() {
             });
             setShowModal(true);
           }}
-          className="flex items-center justify-center md:justify-start gap-2 bg-[#BEC5AD] text-black px-6 py-2 rounded-xl shadow font-medium w-full md:w-auto hover:cursor-pointer"
+          className="flex items-center justify-center gap-2 bg-[#BEC5AD] text-black px-6 py-2 rounded-xl shadow font-medium hover:cursor-pointer"
         >
           <FiEdit /> Edit Profile
         </button>

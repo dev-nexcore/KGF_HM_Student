@@ -49,16 +49,16 @@ export default function FeesStatus() {
   return (
     <div className="w-full min-h-screen bg-white pt-1 pb-6 sm:pb-10 px-3 sm:px-4 dark:bg-white overflow-hidden">
       {/* Fees Section Title */}
-     
+
       <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-black border-l-4 border-[#4F8CCF] pl-2 mb-4 sm:mb-6">
         Fees Status
-      </h2>    
+      </h2>
 
       {/* Current Fees Status Card */}
-      <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none overflow-hidden w-full max-w-7xl min-h-[400px] mb-6 sm:mb-8">
-  <div className="bg-[#A4B494] px-6 sm:px-8 py-4 sm:py-5">
-    <h3 className="text-lg sm:text-xl font-bold text-black">Current Fees Status</h3>
-  </div>
+      <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none overflow-hidden w-full max-w-2xl min-h-[300px] mb-6 sm:mb-8">
+        <div className="bg-[#A4B494] px-6 sm:px-8 py-4 sm:py-5">
+          <h3 className="text-lg sm:text-xl font-bold text-black">Current Fees Status</h3>
+        </div>
 
 
         {loading ? (
@@ -69,24 +69,24 @@ export default function FeesStatus() {
           <div className="text-center my-4 text-gray-500">No current fees found.</div>
         ) : (
           currentFees.map((fee, idx) => (
-            <div key={idx} className="px-4 py-4">
+            <div key={idx} className="px-6 sm:px-8 py-4 sm:py-5 text-lg">
               <div className="flex justify-between mb-3">
-                <span className="font-semibold text-black text-sm">Fee Type:</span>
-                <span className="font-bold text-black text-sm">{fee.feeType}</span>
+                <span className="font-semibold text-black ">Fee Type:</span>
+                <span className="font-bold text-black ">{fee.feeType}</span>
               </div>
               <div className="flex justify-between mb-3">
-                <span className="font-semibold text-black text-sm">Due Date:</span>
-                <span className="font-bold text-black text-sm">
+                <span className="font-semibold text-black ">Due Date:</span>
+                <span className="font-bold text-black ">
                   {new Date(fee.dueDate).toLocaleDateString('en-IN')}
                 </span>
               </div>
               <div className="flex justify-between mb-3">
-                <span className="font-semibold text-black text-sm">Amount:</span>
-                <span className="font-bold text-black text-sm">₹ {fee.amount}</span>
+                <span className="font-semibold text-black ">Amount:</span>
+                <span className="font-bold text-black ">₹ {fee.amount}</span>
               </div>
               <div className="flex justify-between mb-4">
-                <span className="font-semibold text-black text-sm">Status:</span>
-                <span className={`font-bold text-sm ${fee.status === 'overdue' ? 'text-red-600' :
+                <span className="font-semibold text-black ">Status:</span>
+                <span className={`font-bold  ${fee.status === 'overdue' ? 'text-red-600' :
                   fee.status === 'unpaid' ? 'text-yellow-600' :
                     'text-green-600'
                   }`}>

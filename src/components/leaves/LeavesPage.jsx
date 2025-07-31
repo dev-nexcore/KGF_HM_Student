@@ -170,7 +170,7 @@ export default function LeavesPage() {
                             ? 'bg-green-500 text-white'
                             : leave.status === 'rejected'
                             ? 'bg-red-500 text-white' 
-                            : 'bg-[#4F8DCF] text-black'
+                            : 'bg-[#4F8DCF] text-white'
                         }`}
                       > 
                         {leave.status.charAt(0).toUpperCase() + leave.status.slice(1)}
