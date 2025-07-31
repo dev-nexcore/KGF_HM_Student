@@ -50,7 +50,7 @@ export default function Login() {
         <div className="flex items-center justify-center mb-6">
           <div className="flex items-center justify-center w-60 h-60 md:w-72 md:h-72">
             <img
-              src="kokan-logo.jpg"
+              src="logo.png"
               alt="Kokan Global Foundation"
               className="w-60 h-60 md:w-68 md:h-68 object-cover rounded-[20px] shadow-lg"
             />

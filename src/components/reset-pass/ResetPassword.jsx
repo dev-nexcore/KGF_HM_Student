@@ -149,9 +149,9 @@ const [resetSuccess, setResetSuccess] = useState('');
     className="absolute right-4 top-12.5 transform -translate-y-1/2"
   >
     {showNewPassword ? (
-      <FiEye className="text-gray-700 w-5 h-5" />
-    ) : (
       <FiEyeOff className="text-gray-700 w-5 h-5" />
+    ) : (
+      <FiEye className="text-gray-700 w-5 h-5" />
     )}
   </button>
 </div>
@@ -175,9 +175,9 @@ const [resetSuccess, setResetSuccess] = useState('');
     className="absolute right-4 top-12.5 transform -translate-y-1/2"
   >
     {showConfirmPassword ? (
-      <FiEye className="text-gray-700 w-5 h-5" />
-    ) : (
       <FiEyeOff className="text-gray-700 w-5 h-5" />
+    ) : (
+      <FiEye className="text-gray-700 w-5 h-5" />
     )}
   </button>
 </div>

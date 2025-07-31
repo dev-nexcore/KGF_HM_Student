@@ -57,7 +57,7 @@ export default function DashboardContent() {
     datasets: [
       {
         data: [attendanceData.present ?? 0, attendanceData.absent ?? 0],
-        backgroundColor: ['#36FF09', '#FF0000'],
+        backgroundColor: ['#4F8DCF', '#FF0000'],
         borderWidth: 0,
       },
     ],
@@ -267,14 +267,14 @@ export default function DashboardContent() {
                 <Pie
                   data={chartData}
                   options={{
-                    cutout: '40%',
+                    cutout: '50%',
                     plugins: { legend: { display: false } },
                   }}
                 />
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center">
                     <p className="text-sm text-gray-500">Total</p>
-                    <p className="text-lg font-bold text-black">30</p>
+                    <p className="text-lg font-bold text-black">31</p>
                   </div>
                 </div>
               </div>
@@ -300,7 +300,7 @@ export default function DashboardContent() {
                 </div>
                 <div className="flex justify-between">
                   <span>Status:</span>
-                  <span className="text-[#06FF0E] font-semibold">{inspection.status}</span>
+                  <span className="text-[#4F8DCF] font-semibold">{inspection.status}</span>
                 </div>
               </>
             ) : (
@@ -375,8 +375,8 @@ export default function DashboardContent() {
                 <div className="flex justify-between">
                   <span>Status:</span>
                   <span
-                    className={`${latestLeave.status === 'Approved' ? 'text-[#36FF09]' :
-                      latestLeave.status === 'Rejected' ? 'text-red-600' :
+                    className={`${latestLeave.status === 'approved' ? 'text-[#36FF09]' :
+                      latestLeave.status === 'rejected' ? 'text-red-600' :
                         'text-yellow-500'
                       } font-semibold`}
                   >
