@@ -15,11 +15,17 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
       const res = await api.post("/login", { studentId, password });
+
       toast.success("Login successful!");
-      localStorage.setItem("studentId", res.data.studentId);
+
+      // ✅ Store both token and studentId correctly
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("studentId", res.data.student.studentId);
+
       router.push("/dashboard");
     } catch (err) {
       const status = err?.response?.status;
@@ -27,8 +33,9 @@ export default function Login() {
       const msg = data?.message || err.message || "Login failed.";
 
       console.error("Login failed:", { status, data, msg });
-
       toast.error(msg);
+    } finally {
+      setLoading(false);
     }
   };
 

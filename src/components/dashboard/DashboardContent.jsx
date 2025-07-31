@@ -8,8 +8,7 @@ import {
   Legend,
 } from 'chart.js';
 import api from '@/lib/api';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast, Toaster } from "react-hot-toast";
 
 
 
@@ -126,7 +125,7 @@ export default function DashboardContent() {
   useEffect(() => {
     const fetchInspectionSchedule = async () => {
       try {
-        const res = await api.get('/inspectionSchedule'); // No studentId in path
+        const res = await api.get(`/inspectionSchedule/${studentId}`); 
         setInspection(res.data);
       } catch (err) {
         if (err.response?.status === 404) {
@@ -142,25 +141,24 @@ export default function DashboardContent() {
   }, []);
 
   async function handleCheckIn() {
-  setLoading(true);
-  try {
-    const res = await api.post('/check-in', { studentId });
+    setLoading(true);
+    try {
+      const res = await api.post('/check-in', { studentId });
 
-    if (res.status === 200) {
-      const data = res.data;
-      setCheckStatus('Checked In');
-      setCheckTime(data.checkInDate || new Date().toLocaleTimeString());
-      toast.success(data.message || 'Checked in successfully');
-    } else {
-      toast.error(res.data.message || 'Failed to check in');
+      if (res.status === 200) {
+        const data = res.data;
+        setCheckStatus('Checked In');
+        setCheckTime(data.checkInDate || new Date().toLocaleTimeString());
+        alert(data.message || 'Checked in successfully');
+      } else {
+        alert(res.data.message || 'Failed to check in');
+      }
+    } catch (err) {
+      alert('Error checking in');
+      console.error(err);
     }
-  } catch (err) {
-    toast.error('Error checking in');
-    console.error(err);
+    setLoading(false);
   }
-  setLoading(false);
-}
-
 
   async function handleCheckOut() {
     setLoading(true);
@@ -185,10 +183,10 @@ export default function DashboardContent() {
   return (
     <main className="bg-[#ffffff] px-4 sm:px-6 lg:px-8 py-2 min-h-screen font-sans">
       <div className="flex items-center mb-4">
-<h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-black border-l-4 border-[#4F8CCF] pl-2 mb-4 sm:mb-6">
-        Overview
-      </h2>     
-       </div>
+        <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-black border-l-4 border-[#4F8CCF] pl-2 mb-4 sm:mb-6">
+          Overview
+        </h2>
+      </div>
 
       <div className="mt-4 flex flex-wrap justify-start gap-4 sm:gap-6">
 
@@ -393,6 +391,6 @@ export default function DashboardContent() {
         </div>
       </div>
     </main>
-    
+
   );
 }

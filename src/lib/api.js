@@ -27,7 +27,7 @@ api.interceptors.response.use(
     if (status === 401 || status === 403) {
       if (typeof window !== "undefined") {
         localStorage.removeItem("token");
-        // localStorage.removeItem("studentId");
+        localStorage.removeItem("studentId");
         const path = window.location.pathname;
         const onLogin = path === "/" || path.startsWith("/login");
         if (!onLogin) window.location.href = "/";

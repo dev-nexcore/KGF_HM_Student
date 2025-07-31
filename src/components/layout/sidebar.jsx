@@ -100,7 +100,7 @@ export default function Sidebar() {
         <div className="mt-10">
           <hr className="border-t border-black my-3 mr-4" />
           <div className="flex justify-start mb-1 px-4 ml-8.5">
-            <button className="flex items-center gap-2 text-black text-sm hover:underline  text-black font-bold">
+            <button className="flex items-center gap-2 text-black text-sm hover:underline font-bold">
               <Image
                 src="/icons/logout.png"
                 alt="Logout"
