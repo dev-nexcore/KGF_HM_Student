@@ -65,7 +65,7 @@ export default function Refunds() {
   const getStatusClasses = (status) => {
     if (status === 'Approved') return 'bg-green-500 text-black';
     if (status === 'Rejected') return 'bg-red-500 text-white';
-    if (status === 'Pending') return 'bg-blue-500 text-white';
+    if (status === 'Pending') return 'bg-[#4F8DCF] text-white';
   };
 
   const formatDate = (dateStr) => {
@@ -78,20 +78,18 @@ export default function Refunds() {
   return (
     <div className="bg-white text-black p-4 sm:p-6 md:p-8 overflow-hidden min-h-screen">
 
-      
-      <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-black border-l-4 border-[#4F8CCF] pl-2 mb-4 sm:mb-6">
-         Refunds
-      </h2> 
+      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold border-l-4 border-[#4F8DCF] pl-3 mb-6 sm:mb-8 mt-[-7px] -ml-2 text-[#2c2c2c]">
+        Refunds
+      </h1>
 
       {/* Refund Application Form */}
-      <div className="bg-white rounded-lg sm:rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.25)] mb-6 sm:mb-10 w-full max-w-3xl">
-
+      <div className="bg-white rounded-lg sm:rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.25)] mb-6 sm:mb-10 w-full max-w-full min-h-[500px]">
         {/* Header */}
         <div className="bg-[#A4B494] rounded-t-lg sm:rounded-t-xl px-6 py-3 font-bold text-base md:text-lg">
           Refund Application Form
         </div>
 
-        <form className="space-y-4 px-6 py-6" onSubmit={handleSubmit}>
+        <form className="space-y-4 px-6 py-8" onSubmit={handleSubmit}>
           {/* Refund Type */}
           <div>
             <label className="block mb-1 text-sm font-semibold text-gray-800">
@@ -128,14 +126,14 @@ export default function Refunds() {
 
           {/* Reason */}
           <div className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-3">
-            <label className="text-xs sm:text-sm font-semibold sm:pt-2 whitespace-nowrap">
+            <label className="text-xs sm:text-sm font-semibold sm:pt-0 whitespace-nowrap">
               Reason For Refund:
             </label>
             <textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              rows={3}
-              className="w-full px-3 sm:px-4 py-2 rounded-lg shadow-md h-16 sm:h-20 resize-none border border-gray-300 text-xs"
+              rows={10}
+              className="w-full px-3 sm:px-4 py-2 rounded-lg shadow-md h-full sm:h-full resize-none border border-gray-300 text-xs"
               placeholder="Enter the reason for refund"
               required
             />

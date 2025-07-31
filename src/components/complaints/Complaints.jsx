@@ -27,7 +27,7 @@ export default function Complaints() {
     const fetchComplaints = async () => {
       try {
         setLoading(true);
-        const res = await api.get(/complaints/${studentId});
+        const res = await api.get(`/complaints/${studentId}`);
         setComplaints(res.data?.complaints || []);
       } catch (err) {
         console.error('Error fetching complaint history:', err);
@@ -60,7 +60,7 @@ export default function Complaints() {
       setDescription('');
 
       // Re-fetch history
-      const res = await api.get(/complaints/${studentId});
+      const res = await api.get(`/complaints/${studentId}`);
       setComplaints(res.data?.complaints || []);
     } catch (err) {
       console.error('Error filing complaint:', err);
@@ -190,7 +190,7 @@ export default function Complaints() {
                     <td className="p-3 text-center">{c.subject}</td>
                     <td className="p-3 text-center">{formatDate(c.createdAt)}</td>
                     <td className="p-3 text-center">
-                      <span className={px-2 py-1 rounded-md text-xs font-medium ${getStatusClasses(c.status)}}>
+                      <span className={`px-2 py-1 rounded-md text-xs font-medium ${getStatusClasses(c.status)}`}>
                         {c.status || 'Pending'}
                       </span>
                     </td>
@@ -212,7 +212,7 @@ export default function Complaints() {
               <div key={idx} className="bg-gray-50 rounded-lg p-3 border border-gray-200 text-center">
                 <div className="flex justify-center items-center mb-2 space-x-2">
                   <h4 className="font-semibold text-gray-800 text-xs">{c.complaintType}</h4>
-                  <span className={px-1.5 py-0.5 rounded text-[10px] font-medium ${getStatusClasses(c.status)}}>
+                  <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${getStatusClasses(c.status)}`}>
                     {c.status || 'Pending'}
                   </span>
                 </div>
