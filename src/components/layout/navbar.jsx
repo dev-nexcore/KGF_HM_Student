@@ -6,20 +6,24 @@ import api from '@/lib/api';
 
 export default function Navbar() {
   const [studentName, setStudentName] = useState("...");
+  const [studentProfile, setStudentProfile] = useState("null");
 
   useEffect(() => {
-  const fetchStudentName = async () => {
-    try {
-      const res = await api.get('/profile'); // Uses token automatically
-      setStudentName(res.data.firstName || "Student");
-    } catch (err) {
-      console.error("Failed to fetch student name:", err);
-      setStudentName("Student");
-    }
-  };
+    const fetchStudentName = async () => {
+      try {
+        const res = await api.get('/profile'); // Uses token automatically
+        setStudentName(res.data.firstName || "Student");
+        setStudentProfile(res.data.profileImage); // <- set profile image
+      } catch (err) {
+        console.error("Failed to fetch student name:", err);
+        setStudentName("Student");
+        setStudentProfile(null);
+      }
+    };
 
-  fetchStudentName();
-}, []);
+    fetchStudentName();
+  }, []);
+
 
   return (
     <nav className="flex items-center justify-between px-4 sm:px-6 py-4 bg-[#BEC5AD] h-20 min-h-[80px]">
@@ -43,7 +47,17 @@ export default function Navbar() {
           className="cursor-pointer sm:w-[22px] sm:h-[22px]"
         />
         <Link href="/profile" aria-label="Go to profile">
-          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white border border-gray-300 cursor-pointer flex-shrink-0" />
+          {studentProfile ? (
+            <Image
+              src={`http://localhost:5000/${studentProfile}`}
+              alt="Profile"
+              width={40}
+              height={40}
+              className="rounded-full object-cover w-8 h-8 sm:w-10 sm:h-10 border border-gray-300"
+            />
+          ) : (
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white border border-gray-300 cursor-pointer" />
+          )}
         </Link>
       </div>
     </nav>

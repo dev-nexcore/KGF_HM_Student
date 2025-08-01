@@ -28,6 +28,8 @@ export default function DashboardContent() {
   const [attendanceData, setAttendanceData] = useState({ present: 0, absent: 0 });
   const [totalDays, setTotalDays] = useState(0);
   const [selectedRange, setSelectedRange] = useState('day');
+  const [barcodeId, setBarcodeId] = useState("");
+  const [floor, setFloor] = useState("");
 
 
   useEffect(() => {
@@ -73,9 +75,10 @@ export default function DashboardContent() {
           setCheckStatus(data.checkStatus || "Pending Check-in");
           setCheckTime(data.checkTime || "--:--:--");
           setRoomNo(data.roomNo);
-          setRoommateName(data.roommateName);
           setBedAllotment(data.bedAllotment);
-          setStudentId(data.studentId); // Optional if you still use it
+          setStudentId(data.studentId);
+          setBarcodeId(data.barcodeId || "N/A");
+          setFloor(data.floor || "N/A");
         }
       } catch (err) {
         console.error("Failed to fetch student profile:", err);
@@ -86,6 +89,7 @@ export default function DashboardContent() {
 
     fetchProfile();
   }, []);
+
 
   useEffect(() => {
     const fetchFeesStatus = async () => {
@@ -125,7 +129,7 @@ export default function DashboardContent() {
   useEffect(() => {
     const fetchInspectionSchedule = async () => {
       try {
-        const res = await api.get(`/inspectionSchedule/${studentId}`); 
+        const res = await api.get(`/inspectionSchedule/${studentId}`);
         setInspection(res.data);
       } catch (err) {
         if (err.response?.status === 404) {
@@ -148,10 +152,19 @@ export default function DashboardContent() {
       if (res.status === 200) {
         const data = res.data;
         setCheckStatus('Checked In');
-        setCheckTime(data.checkInDate || new Date().toLocaleTimeString());
-        alert(data.message || 'Checked in successfully');
+        setCheckTime(data.checkInDate || new Date().toLocaleString('en-US', {
+          timeZone: 'Asia/Kolkata',
+          hour12: true,
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        }));
+        toast.success('Checked in successfully');
       } else {
-        alert(res.data.message || 'Failed to check in');
+        toast.error('Failed to check in');
       }
     } catch (err) {
       alert('Error checking in');
@@ -168,10 +181,19 @@ export default function DashboardContent() {
       if (res.status === 200) {
         const data = res.data;
         setCheckStatus('Checked Out');
-        setCheckTime(data.checkInDate || new Date().toLocaleTimeString());
-        alert(data.message || 'Checked out successfully');
+        setCheckTime(data.checkOutDate || new Date().toLocaleString('en-US', {
+          timeZone: 'Asia/Kolkata',
+          hour12: true,
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        }));
+        toast.success('Checked out successfully');
       } else {
-        alert(res.data.message || 'Failed to check out');
+        toast.error('Failed to check out');
       }
     } catch (err) {
       alert('Error checking out');
@@ -179,6 +201,7 @@ export default function DashboardContent() {
     }
     setLoading(false);
   }
+
 
   return (
     <main className="bg-[#ffffff] px-4 sm:px-6 lg:px-8 py-2 min-h-screen font-sans">
@@ -315,8 +338,9 @@ export default function DashboardContent() {
             <h2 className="text-base font-semibold text-black">Bed Allotment</h2>
           </div>
           <div className="p-4 flex flex-col gap-3.5 text-sm font-semibold text-black">
-            <div className="flex justify-between"><span>Room no:</span><span>{roomNo}</span></div>
-            <div className="flex justify-between"><span>Roommate:</span><span className="truncate max-w-[60%]">{roommateName}</span></div>
+            <div className="flex justify-between"><span>Room no:</span><span>Room {roomNo}</span></div>
+            <div className="flex justify-between"><span>Floor:</span><span>Floor {floor}</span></div>
+            <div className="flex justify-between"><span>BedNo:</span><span>{barcodeId}</span></div>
           </div>
         </div>
 

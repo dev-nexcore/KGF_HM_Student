@@ -176,7 +176,6 @@ export default function Profile() {
             <div className="flex justify-between"><span>Email:</span><span className="text-gray-700 font-normal">{profile.email}</span></div>
             <div className="flex justify-between"><span>Phone no:</span><span className="text-gray-700 font-normal">{profile.contactNumber}</span></div>
             <div className="flex justify-between"><span>Room no:</span><span className="text-gray-700 font-normal">{profile.roomNo}</span></div>
-            <div className="flex justify-between"><span>Roommate:</span><span className="text-gray-700 font-normal">{profile.roommateName}</span></div>
             <div className="flex justify-between"><span>Bed Allotment:</span><span className="text-gray-700 font-normal">{profile.bedAllotment}</span></div>
             <div className="flex justify-between"><span>Check-in Date:</span><span className="text-gray-700 font-normal">{new Date(profile.lastCheckInDate).toLocaleDateString()}</span></div>
           </div>
