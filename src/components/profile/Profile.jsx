@@ -89,17 +89,11 @@ export default function Profile() {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      toast.success("Image uploaded successfully");
+      toast.success("Image uploaded");
       setProfile(prev => ({
         ...prev,
         profileImage: res.data.imageUrl,
       }));
-
-      // ✅ Clear file input so same file can be re-uploaded if needed
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-
     } catch (err) {
       console.error('Image upload failed:', err);
       toast.error("Image upload failed");
@@ -112,14 +106,11 @@ export default function Profile() {
 
     try {
       await api.delete(`/delete-profile-image/${studentId}`);
-      toast.success("Image deleted successfully");
+      toast.success("Image deleted");
       setProfile(prev => ({
         ...prev,
         profileImage: null,
       }));
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
     } catch (err) {
       console.error('Image delete failed:', err);
       toast.error("Failed to delete image");
@@ -160,7 +151,6 @@ export default function Profile() {
               <input
                 type="file"
                 accept="image/*"
-                ref={fileInputRef}
                 onChange={handleImageUpload}
                 className="hidden"
               />
