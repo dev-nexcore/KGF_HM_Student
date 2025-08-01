@@ -1,7 +1,7 @@
 'use client';
 import api from '@/lib/api';
-import React, { useEffect, useState } from 'react';
-import { FiEdit } from 'react-icons/fi';
+import React, { useEffect, useState, useRef } from 'react';
+import { FiEdit, FiUpload, FiTrash2 } from 'react-icons/fi';
 import { toast, Toaster } from "react-hot-toast";
 
 export default function Profile() {
@@ -12,6 +12,8 @@ export default function Profile() {
     email: '',
     contactNumber: '',
   });
+
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -74,6 +76,56 @@ export default function Profile() {
     }
   };
 
+  const handleImageUpload = async (e) => {
+    const studentId = localStorage.getItem("studentId");
+    const file = e.target.files[0];
+    if (!file || !studentId) return;
+
+    const formData = new FormData();
+    formData.append("profileImage", file);
+
+    try {
+      const res = await api.post(`/upload-profile-image/${studentId}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      toast.success("Image uploaded successfully");
+      setProfile(prev => ({
+        ...prev,
+        profileImage: res.data.imageUrl,
+      }));
+
+      // ✅ Clear file input so same file can be re-uploaded if needed
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+
+    } catch (err) {
+      console.error('Image upload failed:', err);
+      toast.error("Image upload failed");
+    }
+  };
+
+  const handleImageDelete = async () => {
+    const studentId = localStorage.getItem("studentId");
+    if (!studentId) return;
+
+    try {
+      await api.delete(`/delete-profile-image/${studentId}`);
+      toast.success("Image deleted successfully");
+      setProfile(prev => ({
+        ...prev,
+        profileImage: null,
+      }));
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } catch (err) {
+      console.error('Image delete failed:', err);
+      toast.error("Failed to delete image");
+    }
+  };
+
   if (!profile) return <p className="text-center mt-10">Loading profile...</p>;
 
   return (
@@ -89,7 +141,41 @@ export default function Profile() {
       <div className="flex flex-col lg:flex-row lg:justify-center gap-6">
         {/* Profile Card */}
         <div className="bg-[#BEC5AD] rounded-lg p-6 w-full lg:w-[35%] flex flex-col items-center justify-center shadow min-h-[330px] lg:min-h-[480px]">
-          <div className="w-32 h-32 rounded-full bg-white mb-4" />
+          <div className="relative">
+            {profile.profileImage ? (
+              <img
+                src={profile.profileImage}
+                alt="Profile"
+                className="w-32 h-32 rounded-full object-cover mb-4 border border-gray-300"
+              />
+            ) : (
+              <div className="w-32 h-32 rounded-full bg-white mb-4 flex items-center justify-center text-gray-500 text-sm border">
+                No Image
+              </div>
+            )}
+
+            {/* Upload icon */}
+            <label className="absolute bottom-0 right-0 bg-white p-1 rounded-full shadow cursor-pointer hover:bg-gray-100">
+              <FiUpload />
+              <input
+                type="file"
+                accept="image/*"
+                ref={fileInputRef}
+                onChange={handleImageUpload}
+                className="hidden"
+              />
+            </label>
+
+            {/* Delete icon, shown only if image exists */}
+            {profile.profileImage && (
+              <button
+                onClick={handleImageDelete}
+                className="absolute top-0 right-0 bg-red-100 text-red-600 p-1 rounded-full hover:bg-red-200"
+              >
+                <FiTrash2 />
+              </button>
+            )}
+          </div>
           <h2 className="text-lg font-bold text-black mb-1">{profile.firstName} {profile.lastName}</h2>
           <p className="text-sm font-semibold text-black">Student ID: {profile.studentId}</p>
         </div>
