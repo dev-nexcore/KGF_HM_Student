@@ -297,7 +297,7 @@ export default function DashboardContent() {
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center">
                     <p className="text-sm text-gray-500">Total</p>
-                    <p className="text-lg font-bold text-black">31</p>
+                    <p className="text-lg font-bold text-black">{totalDays ?? '-'}</p>
                   </div>
                 </div>
               </div>
