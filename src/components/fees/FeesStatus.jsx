@@ -55,51 +55,53 @@ export default function FeesStatus() {
       </h2>
 
       {/* Current Fees Status Card */}
-      <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none overflow-hidden w-full max-w-2xl min-h-[300px] mb-6 sm:mb-8">
+      <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none overflow-hidden w-full max-w-2xl min-h-[400px] mb-6 sm:mb-8">
         <div className="bg-[#A4B494] px-6 sm:px-8 py-4 sm:py-5">
           <h3 className="text-lg sm:text-xl font-bold text-black">Current Fees Status</h3>
         </div>
 
 
         {loading ? (
-          <div className="text-center my-4 text-gray-600">Loading current fee status...</div>
+          <div className="flex items-center justify-center h-80 text-gray-600">Loading current fee status...</div>
         ) : error ? (
-          <div className="text-center my-4 text-red-600">{error}</div>
+          <div className="flex items-center justify-center h-80 text-red-600">{error}</div>
         ) : currentFees.length === 0 ? (
-          <div className="text-center my-4 text-gray-500">No current fees found.</div>
+          <div className="flex items-center justify-center h-80 text-gray-500">No current fees found.</div>
         ) : (
           currentFees.map((fee, idx) => (
-            <div key={idx} className="px-6 sm:px-8 py-4 sm:py-5 text-lg">
-              <div className="flex justify-between mb-3">
-                <span className="font-semibold text-black ">Fee Type:</span>
-                <span className="font-bold text-black ">{fee.feeType}</span>
+            <div key={idx} className="flex flex-col h-80 px-6 sm:px-8 py-6 sm:py-8">
+              <div className="flex-1 flex flex-col justify-center space-y-8 text-lg">
+                <div className="flex justify-between">
+                  <span className="font-semibold text-black">Fee Type:</span>
+                  <span className="font-medium text-black">{fee.feeType}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-semibold text-black">Due Date:</span>
+                  <span className="font-medium text-black">
+                    {new Date(fee.dueDate).toLocaleDateString('en-IN')}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-semibold text-black">Amount:</span>
+                  <span className="font-medium text-black">₹ {fee.amount}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-semibold text-black">Status:</span>
+                  <span className={`font-medium ${fee.status === 'overdue' ? 'text-red-600' :
+                    fee.status === 'unpaid' ? 'text-yellow-600' :
+                      'text-green-600'
+                    }`}>
+                    {fee.status}
+                  </span>
+                </div>
               </div>
-              <div className="flex justify-between mb-3">
-                <span className="font-semibold text-black ">Due Date:</span>
-                <span className="font-bold text-black ">
-                  {new Date(fee.dueDate).toLocaleDateString('en-IN')}
-                </span>
-              </div>
-              <div className="flex justify-between mb-3">
-                <span className="font-semibold text-black ">Amount:</span>
-                <span className="font-bold text-black ">₹ {fee.amount}</span>
-              </div>
-              <div className="flex justify-between mb-4">
-                <span className="font-semibold text-black ">Status:</span>
-                <span className={`font-bold  ${fee.status === 'overdue' ? 'text-red-600' :
-                  fee.status === 'unpaid' ? 'text-yellow-600' :
-                    'text-green-600'
-                  }`}>
-                  {fee.status}
-                </span>
-              </div>
-              <div className="flex justify-center">
+              <div className="flex justify-center pb-2">
                 <button
                   onClick={() => {
                     setSelectedFeeAmount(fee.amount);
                     setShowModal(true);
                   }}
-                  className="bg-[#BEC5AD] px-6 py-2 rounded-md text-black font-semibold shadow-md text-sm hover:bg-[#a8b096] transition-colors"
+                  className="bg-[#BEC5AD] px-8 py-3 rounded-md text-black font-semibold shadow-md text-base hover:bg-[#a8b096] transition-colors"
                 >
                   Pay Now
                 </button>
@@ -123,7 +125,7 @@ export default function FeesStatus() {
               <thead>
                 <tr className="bg-gray-200">
                   <th className="text-center pl-6 p-4 font-semibold text-black">Date</th>
-                  <th className="text-center p-4 font-semibold text-black">Amount (INR)</th>
+                  <th className="text-center p-4 font-semibold text-black">Amount (₹)</th>
                   <th className="text-center p-4 font-semibold text-black">Email ID</th>
                   <th className="text-center p-4 font-semibold text-black">Status</th>
                 </tr>
@@ -157,7 +159,7 @@ export default function FeesStatus() {
                 </div>
                 <div className="text-sm">
                   <div className="flex justify-center space-x-1 mb-1">
-                    <span className="text-gray-600">Amount (INR):</span>
+                    <span className="text-gray-600">Amount (₹):</span>
                     <span className="font-medium text-gray-800">{item.amount}</span>
                   </div>
                   <div className="flex justify-center space-x-1">

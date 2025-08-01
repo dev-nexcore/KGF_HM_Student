@@ -11,19 +11,28 @@ export default function Sidebar() {
   const router = useRouter();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
 
   useEffect(() => {
     setSidebarOpen(false); // Close on route change
   }, [pathname]);
 
-  const handleLogout = () => {
+  const handleLogoutClick = () => {
+    setShowLogoutConfirmation(true);
+  };
+
+  const handleLogoutConfirm = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('studentId');
     localStorage.removeItem('forgotPasswordEmail');
     toast.success("Logged out successfully");
     router.push('/');
+    setShowLogoutConfirmation(false);
   };
 
+  const handleLogoutCancel = () => {
+    setShowLogoutConfirmation(false);
+  };
 
   const navItems = [
     { name: "Dashboard", icon: "dashboard.png", href: "/dashboard" },
@@ -79,8 +88,6 @@ export default function Sidebar() {
             </div>
           </div>
 
-
-
           {/* Nav Links */}
           <ul className="space-y-1 text-[15px] font-semibold">
             {navItems.map(({ name, icon, href }) => (
@@ -106,7 +113,7 @@ export default function Sidebar() {
           <hr className="border-t border-black my-3 mr-4" />
           <div className="flex justify-start mb-1 px-4 ml-8.5">
             <button
-              onClick={handleLogout}
+              onClick={handleLogoutClick}
               className="flex items-center gap-2 text-black text-sm hover:underline font-bold"
             >
               <Image
@@ -128,6 +135,34 @@ export default function Sidebar() {
           onClick={() => setSidebarOpen(false)}
           aria-hidden="true"
         />
+      )}
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutConfirmation && (
+        <div className="fixed inset-0 backdrop-blur bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-sm mx-4 shadow-xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Confirm Logout
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to logout?
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={handleLogoutCancel}
+                className="px-4 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleLogoutConfirm}
+                className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -33,7 +33,7 @@ export default function PaymentModal({ isOpen, onClose, amount }) {
         <div className="flex justify-between items-center mb-4 sm:mb-6">
           <p className="text-xs sm:text-sm text-[#828282] font-semibold">Amount Due:</p>
           <p className="text-xs sm:text-sm text-[#828282] font-semibold">
-            INR {amount?.toLocaleString('en-IN')}
+            ₹ {amount?.toLocaleString('en-IN')}
           </p>
         </div>
 

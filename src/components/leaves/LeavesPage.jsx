@@ -119,7 +119,9 @@ export default function LeavesPage() {
               <textarea
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg shadow-md h-24 sm:h-28 resize-none border border-gray-300 text-sm"
+                rows={8}
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg shadow-md h-full sm:h-full resize-none border border-gray-300 text-sm sm:text-base md:text-lg"
+                required
               />
             </div>
 
@@ -137,35 +139,35 @@ export default function LeavesPage() {
       </div>
 
       {/* Leave History */}
-      <div className="bg-white min-h-[200px] sm:min-h-[260px] rounded-lg sm:rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.25)] px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8 w-full max-w-6xl lg:mx-0 lg:ml-0">
-        <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-3 sm:mb-4 text-gray-800">
+      <div className="bg-white min-h-[400px] sm:min-h-[450px] rounded-lg sm:rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.25)] px-6 sm:px-8 md:px-10 py-6 sm:py-8 md:py-10 w-full">
+        <h3 className="text-base sm:text-lg md:text-xl font-semibold mb-6 sm:mb-8 text-gray-800">
           Leave History
         </h3>
 
         <div className="hidden sm:block overflow-x-auto">
-          <table className="w-full text-sm text-gray-800 min-w-full">
+          <table className="w-full text-base text-gray-800 min-w-full">
             <thead className="bg-gray-200 text-left">
               <tr>
-                <th className="p-3 font-semibold">Leave Type</th>
-                <th className="p-3 font-semibold">Reason</th>
-                <th className="p-3 font-semibold">Status</th>
+                <th className="p-5 font-semibold text-lg">Leave Type</th>
+                <th className="p-5 font-semibold text-lg">Reason</th>
+                <th className="p-5 font-semibold text-lg">Status</th>
               </tr>
             </thead>
             <tbody>
               {leaveHistory.length === 0 ? (
                 <tr>
-                  <td colSpan="3" className="text-center py-4 text-gray-500">
+                  <td colSpan="3" className="text-center py-8 text-gray-500 text-base">
                     No leave records found.
                   </td>
                 </tr>
               ) : (
                 leaveHistory.map((leave, index) => (
                   <tr key={index} className="bg-white border-b border-gray-100 hover:bg-gray-50">
-                    <td className="p-3">{leave.leaveType}</td>
-                    <td className="p-3">{leave.reason}</td>
-                    <td className="p-3">
+                    <td className="p-5 text-base font-medium">{leave.leaveType}</td>
+                    <td className="p-5 text-base">{leave.reason}</td>
+                    <td className="p-5">
                       <span
-                        className={`px-2 py-1 rounded-md text-xs font-medium ${
+                        className={`px-3 py-2 rounded-md text-sm font-medium ${
                           leave.status === 'approved'
                             ? 'bg-green-500 text-white'
                             : leave.status === 'rejected'
@@ -181,6 +183,44 @@ export default function LeavesPage() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Cards View */}
+        <div className="sm:hidden space-y-4">
+          {leaveHistory.length === 0 ? (
+            <div className="text-center py-8 text-gray-500 text-base">
+              No leave records found.
+            </div>
+          ) : (
+            leaveHistory.map((leave, index) => (
+              <div key={index} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-start">
+                    <span className="text-sm font-semibold text-gray-600">Leave Type:</span>
+                    <span className="text-base font-medium text-gray-800">{leave.leaveType}</span>
+                  </div>
+                  <div className="flex justify-between items-start">
+                    <span className="text-sm font-semibold text-gray-600">Reason:</span>
+                    <span className="text-base text-gray-800 text-right max-w-[60%]">{leave.reason}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-semibold text-gray-600">Status:</span>
+                    <span
+                      className={`px-3 py-2 rounded-md text-sm font-medium ${
+                        leave.status === 'approved'
+                          ? 'bg-green-500 text-white'
+                          : leave.status === 'rejected'
+                          ? 'bg-red-500 text-white' 
+                          : 'bg-[#4F8DCF] text-white'
+                      }`}
+                    > 
+                      {leave.status.charAt(0).toUpperCase() + leave.status.slice(1)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>
