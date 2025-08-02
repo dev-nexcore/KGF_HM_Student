@@ -131,21 +131,31 @@ export default function DashboardContent() {
   }, [studentId]);
 
   useEffect(() => {
-    const fetchInspectionSchedule = async () => {
+    const fetchInspection = async () => {
       try {
-        const res = await api.get(`/inspectionSchedule/${studentId}`);
+        const token = localStorage.getItem("token");
+        const decoded = JSON.parse(atob(token.split(".")[1]));
+        const studentId = decoded.studentId;
+        const res = await api.get(`/inspectionSchedule`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         setInspection(res.data);
       } catch (err) {
         if (err.response?.status === 404) {
-          console.log("No upcoming inspections found");
+          // This is expected when there's no upcoming inspection
           setInspection(null);
         } else {
-          console.error("Inspection API error:", err.response?.data || err.message);
+          // Only log unexpected errors (e.g. 500)
+          console.error('Unexpected error while fetching inspection:', err);
         }
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchInspectionSchedule();
+    fetchInspection();
   }, []);
 
   async function handleCheckIn() {
@@ -315,19 +325,32 @@ export default function DashboardContent() {
             <h2 className="text-lg font-semibold text-black">Room Inspection Schedule</h2>
           </div>
           <div className="p-7 flex flex-col gap-5 text-base font-semibold text-black">
-            {inspection ? (
+            {loading ? (
+              <div>Loading...</div>
+            ) : inspection ? (
               <>
                 <div className="flex justify-between">
                   <span>Next Inspection:</span>
-                  <span>{new Date(inspection.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                  <span>
+                    {new Date(inspection.datetime).toLocaleDateString('en-IN', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
+                    })}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span>Time:</span>
-                  <span>{new Date(inspection.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                  <span>
+                    {new Date(inspection.datetime).toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span>Status:</span>
-                  <span className="text-[#4F8DCF] font-semibold">{inspection.status}</span>
+                  <span className="text-[#4F8DCF] font-semibold">Scheduled</span>
                 </div>
               </>
             ) : (
