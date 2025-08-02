@@ -9,7 +9,7 @@ const NoticePage = () => {
   const [studentId, setStudentId] = useState(null);
   const [showMoreAvailable, setShowMoreAvailable] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const containerRef = useRef(null);
   const [screenHeight, setScreenHeight] = useState(0);
 
@@ -20,11 +20,11 @@ const NoticePage = () => {
 
   useEffect(() => {
     setScreenHeight(window.innerHeight);
-    
+
     const handleResize = () => {
       setScreenHeight(window.innerHeight);
     };
-    
+
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -55,20 +55,20 @@ const NoticePage = () => {
   // Calculate how many notices fit in screen height
   const calculateInitialNoticesCount = useCallback(() => {
     if (screenHeight === 0) return 3; // Default fallback
-    
+
     const availableHeight = screenHeight - HEADER_HEIGHT;
     const noticesCount = Math.floor(availableHeight / ESTIMATED_NOTICE_HEIGHT) + BUFFER_NOTICES;
-    
+
     return Math.max(3, noticesCount); // Minimum 3 notices
   }, [screenHeight]);
 
   // Initialize displayed notices when allNotices or screenHeight changes
   useEffect(() => {
     if (allNotices.length === 0) return;
-    
+
     const initialCount = calculateInitialNoticesCount();
     const initialNotices = allNotices.slice(0, initialCount);
-    
+
     setDisplayedNotices(initialNotices);
     setShowMoreAvailable(allNotices.length > initialCount);
   }, [allNotices, calculateInitialNoticesCount]);
@@ -77,14 +77,27 @@ const NoticePage = () => {
     const currentCount = displayedNotices.length;
     const additionalCount = Math.max(3, Math.floor(calculateInitialNoticesCount() / 2)); // Load half of initial amount
     const newCount = currentCount + additionalCount;
-    
+
     const newDisplayedNotices = allNotices.slice(0, newCount);
     setDisplayedNotices(newDisplayedNotices);
     setShowMoreAvailable(allNotices.length > newCount);
   };
 
+  useEffect(() => {
+    const markNoticesSeen = async () => {
+      try {
+        await api.post('/notifications/mark-seen', { type: 'notice' });
+        console.log("Marked all notices as seen");
+      } catch (err) {
+        console.error("Failed to mark all notices as seen:", err);
+      }
+    };
+    markNoticesSeen();
+  }, []);
+
+
   return (
-    <div 
+    <div
       ref={containerRef}
       className="bg-white text-black p-4 sm:p-6 md:p-8 overflow-hidden min-h-screen"
     >
@@ -113,7 +126,7 @@ const NoticePage = () => {
               </div>
             </div>
           ))}
-          
+
           {showMoreAvailable && (
             <div className="flex justify-center mt-6 sm:mt-8">
               <button
@@ -124,7 +137,7 @@ const NoticePage = () => {
               </button>
             </div>
           )}
-          
+
           {!showMoreAvailable && allNotices.length > 0 && (
             <div className="flex justify-center mt-6 sm:mt-8">
               <p className="text-gray-500 text-sm">

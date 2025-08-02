@@ -69,7 +69,11 @@ export default function DashboardContent() {
     const fetchProfile = async () => {
       setLoading(true);
       try {
-        const res = await api.get('/profile'); // No studentId in path now
+        const token = localStorage.getItem("token");
+        const decoded = JSON.parse(atob(token.split(".")[1]));
+        const studentId = decoded.studentId;
+
+        const res = await api.get(`/profile/${studentId}`);// No studentId in path now
         if (res.status === 200) {
           const data = res.data;
           setCheckStatus(data.checkStatus || "Pending Check-in");

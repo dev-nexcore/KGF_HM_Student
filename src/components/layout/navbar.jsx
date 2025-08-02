@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import api from '@/lib/api';
@@ -10,13 +11,27 @@ export default function Navbar() {
   const [hasUnseen, setHasUnseen] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [notifications, setNotifications] = useState([]);
+  const [studentId, setStudentId] = useState(null);
+  const pathname = usePathname();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const id = localStorage.getItem('studentId');
+      setStudentId(id);
+    }
+  }, []);
 
   useEffect(() => {
     const fetchStudentName = async () => {
       try {
-        const res = await api.get('/profile'); // Uses token automatically
+        const token = localStorage.getItem("token");
+        const decoded = JSON.parse(atob(token.split(".")[1]));
+        const studentId = decoded.studentId;
+
+        const res = await api.get(`/profile/${studentId}`);
         setStudentName(res.data.firstName || "Student");
-        setStudentProfile(res.data.profileImage); // <- set profile image
+        setStudentProfile(res.data.profileImage);
       } catch (err) {
         console.error("Failed to fetch student name:", err);
         setStudentName("Student");
@@ -28,18 +43,35 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    const fetchNotificationStatus = async () => {
+    const fetchNotifications = async () => {
       try {
-        const res = await api.get('/notifications'); // response includes { hasUnseen, notifications }
-        setHasUnseen(res.data.hasUnseen);
-        setNotifications(res.data.notifications || []);
+        const res = await api.get('/notifications');
+        const allNotifications = res.data.notifications || [];
+
+        const seenIds = JSON.parse(localStorage.getItem('seenNotificationIds') || '[]');
+        const unseenNotifications = allNotifications.filter(
+          (n) => !seenIds.includes(n.id)
+        );
+
+        setNotifications(unseenNotifications);
+        setHasUnseen(unseenNotifications.length > 0);
       } catch (err) {
-        console.error("Failed to fetch notifications status:", err);
+        console.error("Failed to fetch notifications:", err);
       }
     };
 
-    fetchNotificationStatus();
-  }, [])
+    fetchNotifications();
+  }, []);
+
+
+  const markAsSeen = async (type) => {
+    try {
+      await api.post('/notifications/mark-seen', { type }); // now sends body
+      setHasUnseen(false);
+    } catch (err) {
+      console.error("Failed to mark notifications as seen:", err);
+    }
+  };
 
 
   return (
@@ -65,25 +97,28 @@ export default function Navbar() {
             <Image
               src="/icons/notifications.png"
               alt="Notifications"
-              width={20}
-              height={20}
-              className="cursor-pointer sm:w-[22px] sm:h-[22px]"
+              width={22}
+              height={22}
+              className="cursor-pointer"
             />
             {hasUnseen && (
-              <span className="absolute top-0 right-0 block w-2.5 h-2.5 rounded-full bg-red-600 ring-2 ring-white"></span>
+              <span className="absolute top-0 right-0 inline-block w-2.5 h-2.5 bg-red-500 rounded-full"></span>
             )}
           </button>
 
-          {/* Notification Dropdown */}
           {showDropdown && (
             <div className="absolute right-0 mt-2 w-72 max-h-96 overflow-y-auto bg-white border border-gray-300 rounded-md shadow-md z-50">
               {notifications.length > 0 ? (
                 notifications.map((notif, i) => (
                   <Link
-                    href={notif.link} // must be included in backend
+                    href={notif.link}
                     key={i}
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 border-b"
-                    onClick={() => setShowDropdown(false)}
+                    onClick={() => {
+                      markAsSeen(notif.type, notif.id);
+                      router.push(notif.link); // or use Link if prefetching
+                      setShowDropdown(false);
+                    }}
                   >
                     {notif.message}
                   </Link>
@@ -97,7 +132,11 @@ export default function Navbar() {
         <Link href="/profile" aria-label="Go to profile">
           {studentProfile ? (
             <Image
-              src={`http://localhost:5000/${studentProfile}`}
+              src={
+                studentProfile && studentProfile !== "null"
+                  ? `http://localhost:5000/${studentProfile}`
+                  : '/default-profile.jpg'
+              }
               alt="Profile"
               width={40}
               height={40}
