@@ -20,8 +20,6 @@ export default function DashboardContent() {
   const [checkStatus, setCheckStatus] = useState('Pending Check-in');
   const [checkTime, setCheckTime] = useState('--:--:--');
   const [roomNo, setRoomNo] = useState('');
-  const [roommateName, setRoommateName] = useState('');
-  const [bedAllotment, setBedAllotment] = useState('');
   const [fees, setFees] = useState([]);
   const [latestLeave, setLatestLeave] = useState(null);
   const [inspection, setInspection] = useState(null);
@@ -43,11 +41,13 @@ export default function DashboardContent() {
     api
       .get(`/attendanceSummary/${studentId}?range=${selectedRange}`)
       .then((res) => {
-        setAttendanceData({
-          present: res.data.present,
-          absent: res.data.absent,
-        });
-        setTotalDays(res.data.present + res.data.absent);
+        if (res.data) {
+          setAttendanceData({
+            present: res.data.present ?? 0,
+            absent: res.data.absent ?? 0,
+          });
+          setTotalDays((res.data.present ?? 0) + (res.data.absent ?? 0));
+        }
       })
       .catch((err) => {
         console.error('Failed to fetch attendance summary', err);
@@ -79,7 +79,6 @@ export default function DashboardContent() {
           setCheckStatus(data.checkStatus || "Pending Check-in");
           setCheckTime(data.checkTime || "--:--:--");
           setRoomNo(data.roomNo);
-          setBedAllotment(data.bedAllotment);
           setStudentId(data.studentId);
           setBarcodeId(data.barcodeId || "N/A");
           setFloor(data.floor || "N/A");
@@ -98,7 +97,7 @@ export default function DashboardContent() {
   useEffect(() => {
     const fetchFeesStatus = async () => {
       try {
-        const res = await api.get(`/feeStatus/${studentId}`);
+        const res = await api.get(`/feeStatus`);
         if (res.status === 200 && res.data.fees) {
           setFees(res.data.fees);
         }
@@ -115,7 +114,7 @@ export default function DashboardContent() {
   useEffect(() => {
     const fetchLeaveStatus = async () => {
       try {
-        const res = await api.get(`/leaves/${studentId}`);
+        const res = await api.get(`/leaves`);
         if (res.status === 200 && res.data.leaves.length > 0) {
           setLatestLeave(res.data.leaves[0]);
           console.log("Fetching leave history for studentId:", studentId);
@@ -133,21 +132,12 @@ export default function DashboardContent() {
   useEffect(() => {
     const fetchInspection = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const decoded = JSON.parse(atob(token.split(".")[1]));
-        const studentId = decoded.studentId;
-        const res = await api.get(`/inspectionSchedule`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const res = await api.get('/inspectionSchedule'); // token added by interceptor
         setInspection(res.data);
       } catch (err) {
         if (err.response?.status === 404) {
-          // This is expected when there's no upcoming inspection
-          setInspection(null);
+          setInspection(null); // No inspection scheduled
         } else {
-          // Only log unexpected errors (e.g. 500)
           console.error('Unexpected error while fetching inspection:', err);
         }
       } finally {
@@ -161,7 +151,7 @@ export default function DashboardContent() {
   async function handleCheckIn() {
     setLoading(true);
     try {
-      const res = await api.post('/check-in', { studentId });
+      const res = await api.post('/check-in');
 
       if (res.status === 200) {
         const data = res.data;
@@ -190,7 +180,7 @@ export default function DashboardContent() {
   async function handleCheckOut() {
     setLoading(true);
     try {
-      const res = await api.post('/check-out', { studentId });
+      const res = await api.post('/check-out');
 
       if (res.status === 200) {
         const data = res.data;
@@ -332,25 +322,29 @@ export default function DashboardContent() {
                 <div className="flex justify-between">
                   <span>Next Inspection:</span>
                   <span>
-                    {new Date(inspection.datetime).toLocaleDateString('en-IN', {
-                      day: 'numeric',
-                      month: 'long',
-                      year: 'numeric',
-                    })}
+                    {inspection.date
+                      ? new Date(inspection.date).toLocaleDateString('en-IN', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                      })
+                      : 'Invalid Date'}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span>Time:</span>
                   <span>
-                    {new Date(inspection.datetime).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
+                    {inspection.date
+                      ? new Date(inspection.date).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })
+                      : '-'}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span>Status:</span>
-                  <span className="text-[#4F8DCF] font-semibold">Scheduled</span>
+                  <span className="text-[#4F8DCF] font-semibold">{inspection.status}</span>
                 </div>
               </>
             ) : (

@@ -22,7 +22,7 @@ export default function FeesStatus() {
   useEffect(() => {
     const fetchFees = async () => {
       try {
-        const res = await api.get(`/feeStatus/${studentId}`);
+        const res = await api.get(`/feeStatus`);
         setCurrentFees(res.data.fees || []);
       } catch (err) {
         console.error("Error fetching current fee status:", err);

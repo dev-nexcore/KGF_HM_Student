@@ -27,7 +27,7 @@ export default function Complaints() {
     const fetchComplaints = async () => {
       try {
         setLoading(true);
-        const res = await api.get(`/complaints/${studentId}`);
+        const res = await api.get(`/complaints`);
         setComplaints(res.data?.complaints || []);
       } catch (err) {
         console.error('Error fetching complaint history:', err);
@@ -47,13 +47,12 @@ export default function Complaints() {
     setLoading(true);
     try {
       await api.post('/complaint', {
-        studentId,
         complaintType,
         subject,
         description,
       });
 
-      toast.success('Complaint filed successfully');
+      toast.success('Complaint filed');
 
       // Reset form
       setComplaintType('');
@@ -61,7 +60,7 @@ export default function Complaints() {
       setDescription('');
 
       // Re-fetch history
-      const res = await api.get(`/complaints/${studentId}`);
+      const res = await api.get(`/complaints`);
       setComplaints(res.data?.complaints || []);
     } catch (err) {
       console.error('Error filing complaint:', err);

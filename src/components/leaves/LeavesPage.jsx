@@ -2,6 +2,7 @@
 
 import api from '@/lib/api';
 import React, { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
 export default function LeavesPage() {
   const [leaveType, setLeaveType] = useState('');
@@ -14,7 +15,7 @@ export default function LeavesPage() {
 
   const fetchLeaveHistory = async () => {
     try {
-      const res = await api.get(`/leaves/${studentId}`);
+      const res = await api.get(`/leaves`);
       setLeaveHistory(res.data.leaves);
     } catch (err) {
       console.error('Error fetching leave history:', err);
@@ -24,17 +25,18 @@ export default function LeavesPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!leaveType || !startDate || !endDate || !reason) return alert('All fields are required');
+    
+      console.log("Token from localStorage:", localStorage.getItem("token"));
 
     setLoading(true);
     try {
       await api.post('/leave', {
-        studentId,
         leaveType,
         startDate,
         endDate,
         reason,
       });
-      alert('Leave applied successfully');
+      toast.success('Applied for leave');
       setLeaveType('');
       setStartDate('');
       setEndDate('');
@@ -42,7 +44,7 @@ export default function LeavesPage() {
       fetchLeaveHistory();
     } catch (err) {
       console.error('Apply leave error:', err);
-      alert('Failed to apply for leave');
+      toast.error('Failed to apply for leave');
     } finally {
       setLoading(false);
     }

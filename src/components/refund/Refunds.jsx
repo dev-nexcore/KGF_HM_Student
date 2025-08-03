@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import api from '@/lib/api';
+import toast from 'react-hot-toast';
 
 export default function Refunds() {
   const [refundType, setRefundType] = useState('');
@@ -13,7 +14,7 @@ export default function Refunds() {
 
   const fetchRefunds = async () => {
     try {
-      const res = await api.get(`/refunds/${studentId}`);
+      const res = await api.get(`/refunds`);
       setRefunds(res.data?.refunds || []);
     } catch (error) {
       console.error('Error fetching refund history:', error);
@@ -28,13 +29,12 @@ export default function Refunds() {
     setLoading(true);
     try {
       await api.post('/refund', {
-        studentId,
         refundType,
         amount,
         reason,
       });
 
-      alert('Refund request submitted successfully');
+      toast.success('Request submitted');
       // Clear form
       setRefundType('');
       setAmount('');
@@ -42,7 +42,7 @@ export default function Refunds() {
       fetchRefunds();
     } catch (err) {
       console.error('Error submitting refund:', err);
-      alert('Failed to submit refund request');
+      toast.error('Failed to submit refund request');
     } finally {
       setLoading(false);
     }
@@ -137,7 +137,6 @@ export default function Refunds() {
               <button
                 type="submit"
                 className="bg-[#BEC5AD] text-black px-6 sm:px-8 py-2.5 sm:py-3 rounded-md shadow hover:opacity-90 text-sm sm:text-base font-medium w-full sm:w-auto"
-                title={!studentId ? 'Student not identified' : 'Submit'}
               >
                 {loading ? 'Submitting...' : 'Submit'}
               </button>

@@ -53,7 +53,7 @@ export default function Profile() {
       const [firstName, ...rest] = formData.studentName.split(" ");
       const lastName = rest.join(" ") || ""; // Handle single names
 
-      await api.put(`/profile/${studentId}`, {
+      await api.put(`/profile`, {
         firstName,
         lastName,
         email: formData.email,
@@ -176,7 +176,7 @@ export default function Profile() {
             <div className="flex justify-between"><span>Email:</span><span className="text-gray-700 font-normal">{profile.email}</span></div>
             <div className="flex justify-between"><span>Phone no:</span><span className="text-gray-700 font-normal">{profile.contactNumber}</span></div>
             <div className="flex justify-between"><span>Room no:</span><span className="text-gray-700 font-normal">{profile.roomNo}</span></div>
-            <div className="flex justify-between"><span>Bed Allotment:</span><span className="text-gray-700 font-normal">{profile.bedAllotment}</span></div>
+            <div className="flex justify-between"><span>Bed Allotment:</span><span className="text-gray-700 font-normal">{profile.barcodeId}</span></div>
             <div className="flex justify-between"><span>Check-in Date:</span><span className="text-gray-700 font-normal">{new Date(profile.lastCheckInDate).toLocaleDateString()}</span></div>
           </div>
         </div>
