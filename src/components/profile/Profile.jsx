@@ -3,6 +3,7 @@ import api from '@/lib/api';
 import React, { useEffect, useState, useRef } from 'react';
 import { FiEdit, FiUpload, FiTrash2 } from 'react-icons/fi';
 import { toast, Toaster } from "react-hot-toast";
+import Image from 'next/image';
 
 export default function Profile() {
   const [profile, setProfile] = useState(null);
@@ -134,9 +135,11 @@ export default function Profile() {
         <div className="bg-[#BEC5AD] rounded-lg p-6 w-full lg:w-[35%] flex flex-col items-center justify-center shadow min-h-[330px] lg:min-h-[480px]">
           <div className="relative">
             {profile.profileImage ? (
-              <img
+              <Image
                 src={profile.profileImage}
                 alt="Profile"
+                width={100}
+                height={100}
                 className="w-32 h-32 rounded-full object-cover mb-4 border border-gray-300"
               />
             ) : (

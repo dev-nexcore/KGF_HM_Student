@@ -134,13 +134,13 @@ export default function Navbar() {
             <Image
               src={
                 studentProfile && studentProfile !== "null"
-                  ? `http://localhost:5000/${studentProfile}`
-                  : '/default-profile.jpg'
+                  ? studentProfile
+                  : "/default-profile.jpg"
               }
               alt="Profile"
               width={40}
               height={40}
-              className="rounded-full object-cover w-8 h-8 sm:w-10 sm:h-10 border border-gray-300"
+              className="rounded-full"
             />
           ) : (
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white border border-gray-300 cursor-pointer" />
