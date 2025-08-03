@@ -9,6 +9,7 @@ export default function Refunds() {
   const [amount, setAmount] = useState('');
   const [reason, setReason] = useState('');
   const [refunds, setRefunds] = useState([]);
+  const [otherRefundType, setOtherRefundType] = useState("");
   const [loading, setLoading] = useState(false);
   const studentId = typeof window !== 'undefined' ? localStorage.getItem('studentId') : null;
 
@@ -32,6 +33,7 @@ export default function Refunds() {
         refundType,
         amount,
         reason,
+        otherRefundType: refundType === 'Others' ? otherRefundType : '',
       });
 
       toast.success('Request submitted');
@@ -102,7 +104,22 @@ export default function Refunds() {
                 <option value="Mess fee Overpayment">Mess fee Overpayment</option>
                 <option value="Security Deposit">Security Deposit</option>
                 <option value="Damages fee">Damages fee</option>
+                <option value="Others">Others</option>
               </select>
+              {refundType === 'Others' && (
+                <div className="mt-3">
+                  <label className="block mt-8 text-sm sm:text-base font-semibold text-gray-800">
+                    Specify:
+                  </label>
+                  <input
+                    type="text"
+                    value={otherRefundType}
+                    onChange={(e) => setOtherRefundType(e.target.value)}
+                    className="w-full px-4 py-3 rounded-md shadow-md border border-gray-300 text-sm sm:text-base placeholder:text-gray-400"
+                    required
+                  />
+                </div>
+              )}
             </div>
 
             <div>
@@ -172,19 +189,24 @@ export default function Refunds() {
               ) : (
                 refunds.map((refund, index) => (
                   <tr key={index} className="bg-white border-b border-gray-100 hover:bg-gray-50">
-                    <td className="p-3 md:p-4 lg:p-5 text-sm md:text-base lg:text-lg font-medium">{refund.refundType}</td>
+                    <td className="p-3 md:p-4 lg:p-5 text-sm md:text-base lg:text-lg font-medium">
+                      {
+                        refund.refundType === 'Others' && refund.otherRefundType
+                          ? `Other (${refund.otherRefundType})`
+                          : refund.refundType
+                      }
+                    </td>
                     <td className="p-3 md:p-4 lg:p-5 text-sm md:text-base lg:text-lg">{formatDate(refund.requestedAt)}</td>
                     <td className="p-3 md:p-4 lg:p-5 text-sm md:text-base lg:text-lg font-medium">₹{refund.amount}</td>
                     <td className="p-3 md:p-4 lg:p-5 text-sm md:text-base lg:text-lg max-w-xs truncate">{refund.reason}</td>
                     <td className="p-3 md:p-4 lg:p-5">
                       <span
-                        className={`px-2 md:px-3 py-1 md:py-2 rounded-md text-xs md:text-sm font-medium ${
-                          refund.status === 'approved'
-                            ? 'bg-green-500 text-white'
-                            : refund.status === 'rejected'
+                        className={`px-2 md:px-3 py-1 md:py-2 rounded-md text-xs md:text-sm font-medium ${refund.status === 'approved'
+                          ? 'bg-green-500 text-white'
+                          : refund.status === 'rejected'
                             ? 'bg-red-500 text-white'
                             : 'bg-[#4F8DCF] text-white'
-                        }`}
+                          }`}
                       >
                         {refund.status ? refund.status.charAt(0).toUpperCase() + refund.status.slice(1) : 'Pending'}
                       </span>
@@ -208,7 +230,13 @@ export default function Refunds() {
                 <div className="space-y-2 sm:space-y-3">
                   <div className="flex justify-between items-start">
                     <span className="text-xs sm:text-sm font-semibold text-gray-600">Refund Type:</span>
-                    <span className="text-sm sm:text-base font-medium text-gray-800">{refund.refundType}</span>
+                    <span className="text-sm sm:text-base font-medium text-gray-800">
+                      {
+                        refund.refundType === 'Others' && refund.otherRefundType
+                          ? `Other (${refund.otherRefundType})`
+                          : refund.refundType
+                      }
+                    </span>
                   </div>
                   <div className="flex justify-between items-start">
                     <span className="text-xs sm:text-sm font-semibold text-gray-600">Date:</span>
@@ -225,13 +253,12 @@ export default function Refunds() {
                   <div className="flex justify-between items-center">
                     <span className="text-xs sm:text-sm font-semibold text-gray-600">Status:</span>
                     <span
-                      className={`px-2 sm:px-3 py-1 sm:py-2 rounded-md text-xs sm:text-sm font-medium ${
-                        refund.status === 'approved'
-                          ? 'bg-green-500 text-white'
-                          : refund.status === 'rejected'
+                      className={`px-2 sm:px-3 py-1 sm:py-2 rounded-md text-xs sm:text-sm font-medium ${refund.status === 'approved'
+                        ? 'bg-green-500 text-white'
+                        : refund.status === 'rejected'
                           ? 'bg-red-500 text-white'
                           : 'bg-[#4F8DCF] text-white'
-                      }`}
+                        }`}
                     >
                       {refund.status ? refund.status.charAt(0).toUpperCase() + refund.status.slice(1) : 'Pending'}
                     </span>

@@ -9,8 +9,7 @@ import {
 } from 'chart.js';
 import api from '@/lib/api';
 import { toast, Toaster } from "react-hot-toast";
-
-
+import Link from 'next/link';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -28,6 +27,7 @@ export default function DashboardContent() {
   const [selectedRange, setSelectedRange] = useState('day');
   const [barcodeId, setBarcodeId] = useState("");
   const [floor, setFloor] = useState("");
+  const [legendTooltip, setLegendTooltip] = useState({ type: null, visible: false });
 
 
   useEffect(() => {
@@ -277,15 +277,38 @@ export default function DashboardContent() {
 
           <div className="p-8 pt-9 flex min-h-[280px]">
             {/* Legend */}
-            <div className="space-y-4 text-base mt-3">
-              <div className="flex items-center gap-3">
+            <div className="space-y-4 text-base mt-3 relative">
+              <div
+                className="flex items-center gap-3 relative group"
+              >
                 <span className="w-4 h-4 rounded-full bg-[#4F8DCF]"></span>
                 <span className="text-black font-medium">Present</span>
+
+                {/* Tooltip */}
+                <div className="absolute left-28 top-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <div className="relative bg-gray-900 text-white text-xs px-3 py-1 rounded-md shadow-md">
+                    {attendanceData.present ?? 0} day{attendanceData.present === 1 ? '' : 's'}
+
+                    {/* Tooltip Arrow */}
+                    <div className="absolute left-[-6px] top-1/2 -translate-y-1/2 w-0 h-0 border-t-6 border-t-transparent border-b-6 border-b-transparent border-r-6 border-r-gray-900"></div>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-3">
+
+              <div
+                className="flex items-center gap-3 relative group"
+              >
                 <span className="w-4 h-4 rounded-full bg-[#E30007]"></span>
                 <span className="text-black font-medium">Absent</span>
+
+                <div className="absolute left-28 top-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <div className="relative bg-gray-900 text-white text-xs px-3 py-1 rounded-md shadow-md">
+                    {attendanceData.absent ?? 0} day{attendanceData.absent === 1 ? '' : 's'}
+                    <div className="absolute left-[-6px] top-1/2 -translate-y-1/2 w-0 h-0 border-t-6 border-t-transparent border-b-6 border-b-transparent border-r-6 border-r-gray-900"></div>
+                  </div>
+                </div>
               </div>
+
             </div>
 
             {/* Pie Chart */}
@@ -354,7 +377,7 @@ export default function DashboardContent() {
         </div>
 
         {/* Bed Allotment */}
-        <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[600px] min-h-[300px]">
+        <Link href="/profile" passHref className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[600px] min-h-[300px]">
           <div className="bg-[#AAB491] px-6 py-3 rounded-t-lg">
             <h2 className="text-lg font-semibold text-black">Bed Allotment</h2>
           </div>
@@ -363,10 +386,10 @@ export default function DashboardContent() {
             <div className="flex justify-between"><span>Floor:</span><span>Floor {floor}</span></div>
             <div className="flex justify-between"><span>BedNo:</span><span>{barcodeId}</span></div>
           </div>
-        </div>
+        </Link>
 
         {/* Fee Alerts */}
-        <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[600px] min-h-[300px]">
+        <Link href="/fees-status" passHref className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[600px] min-h-[300px]">
           <div className="bg-[#AAB491] px-6 py-3 rounded-t-lg">
             <h2 className="text-lg font-semibold text-black">Fee Alerts</h2>
           </div>
@@ -403,10 +426,10 @@ export default function DashboardContent() {
               <div className="text-base">No fees found</div>
             )}
           </div>
-        </div>
+        </Link>
 
         {/* Leave Approval Status */}
-        <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[600px] min-h-[300px]">
+        <Link href="/leaves" passHref className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[600px] min-h-[300px]">
           <div className="bg-[#AAB491] px-6 py-3 rounded-t-lg">
             <h2 className="text-lg font-semibold text-black">Leave Approval Status</h2>
           </div>
@@ -433,7 +456,7 @@ export default function DashboardContent() {
               <div className="text-base">No leave history found</div>
             )}
           </div>
-        </div>
+        </Link>
       </div>
     </main>
 

@@ -10,6 +10,7 @@ export default function LeavesPage() {
   const [endDate, setEndDate] = useState('');
   const [reason, setReason] = useState('');
   const [leaveHistory, setLeaveHistory] = useState([]);
+  const [otherLeaveType, setOtherLeaveType] = useState("");
   const [loading, setLoading] = useState(false);
   const studentId = typeof window !== 'undefined' ? localStorage.getItem('studentId') : null;
 
@@ -25,13 +26,14 @@ export default function LeavesPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!leaveType || !startDate || !endDate || !reason) return alert('All fields are required');
-    
-      console.log("Token from localStorage:", localStorage.getItem("token"));
+
+    console.log("Token from localStorage:", localStorage.getItem("token"));
 
     setLoading(true);
     try {
       await api.post('/leave', {
         leaveType,
+        otherLeaveType: leaveType === 'Others' ? otherLeaveType : '',
         startDate,
         endDate,
         reason,
@@ -98,7 +100,21 @@ export default function LeavesPage() {
                 <option value="Sick Leave">Sick Leave</option>
                 <option value="Casual Leave">Casual Leave</option>
                 <option value="Vacation">Vacation</option>
+                <option value="Others">Others</option>
               </select>
+              {leaveType === 'Others' && (
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4 mt-8 flex-1">
+                  <label className="text-sm sm:text-base font-semibold whitespace-nowrap">
+                    Specify:
+                  </label>
+                  <input
+                    value={otherLeaveType}
+                    type="text"
+                    onChange={(e) => setOtherLeaveType(e.target.value)}
+                    className="w-full sm:w-auto px-3 py-2 rounded-md shadow-md border border-gray-300 text-sm sm:text-base"
+                  />
+                </div>
+              )}
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
@@ -177,18 +193,22 @@ export default function LeavesPage() {
               ) : (
                 leaveHistory.map((leave, index) => (
                   <tr key={index} className="bg-white border-b border-gray-100 hover:bg-gray-50">
-                    <td className="p-5 text-base font-medium">{leave.leaveType}</td>
+                    <td className="p-5 text-base font-medium">
+                      {leave.leaveType === 'Others' && leave.otherLeaveType
+                        ? `Other (${leave.otherLeaveType})`
+                        : leave.leaveType
+                      }
+                    </td>
                     <td className="p-5 text-base">{leave.reason}</td>
                     <td className="p-5">
                       <span
-                        className={`px-3 py-2 rounded-md text-sm font-medium ${
-                          leave.status === 'approved'
-                            ? 'bg-green-500 text-white'
-                            : leave.status === 'rejected'
-                            ? 'bg-red-500 text-white' 
+                        className={`px-3 py-2 rounded-md text-sm font-medium ${leave.status === 'approved'
+                          ? 'bg-green-500 text-white'
+                          : leave.status === 'rejected'
+                            ? 'bg-red-500 text-white'
                             : 'bg-[#4F8DCF] text-white'
-                        }`}
-                      > 
+                          }`}
+                      >
                         {leave.status.charAt(0).toUpperCase() + leave.status.slice(1)}
                       </span>
                     </td>
@@ -220,14 +240,13 @@ export default function LeavesPage() {
                   <div className="flex justify-between items-center">
                     <span className="text-sm font-semibold text-gray-600">Status:</span>
                     <span
-                      className={`px-3 py-2 rounded-md text-sm font-medium ${
-                        leave.status === 'approved'
-                          ? 'bg-green-500 text-white'
-                          : leave.status === 'rejected'
-                          ? 'bg-red-500 text-white' 
+                      className={`px-3 py-2 rounded-md text-sm font-medium ${leave.status === 'approved'
+                        ? 'bg-green-500 text-white'
+                        : leave.status === 'rejected'
+                          ? 'bg-red-500 text-white'
                           : 'bg-[#4F8DCF] text-white'
-                      }`}
-                    > 
+                        }`}
+                    >
                       {leave.status.charAt(0).toUpperCase() + leave.status.slice(1)}
                     </span>
                   </div>

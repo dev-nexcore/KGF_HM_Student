@@ -11,6 +11,7 @@ export default function Complaints() {
   const [complaints, setComplaints] = useState([]);
   const [studentId, setStudentId] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [otherComplaintType, setOtherComplaintType] = useState('');
 
   // Get student ID from localStorage
   useEffect(() => {
@@ -50,6 +51,7 @@ export default function Complaints() {
         complaintType,
         subject,
         description,
+        otherComplaintType: complaintType === 'Others' ? otherComplaintType : '',
       });
 
       toast.success('Complaint filed');
@@ -125,8 +127,23 @@ export default function Complaints() {
                 <option value="">Choose Complaint Type</option>
                 <option value="Noise Disturbance">Noise Disturbance</option>
                 <option value="Maintenance issue">Maintenance issue</option>
-                <option value="Damages fee">Damages fee</option>
+                <option value="Cleanliness issue">Cleanliness issue</option>
+                <option value="Others">Others</option>
               </select>
+              {complaintType === 'Others' && (
+                <div className="mt-3">
+                  <label className="block mt-8 text-sm sm:text-base font-semibold text-gray-800">
+                    Specify:
+                  </label>
+                  <input
+                    type="text"
+                    value={otherComplaintType}
+                    onChange={(e) => setOtherComplaintType(e.target.value)}
+                    className="w-full px-4 py-3 rounded-md shadow-md border border-gray-300 text-sm sm:text-base"
+                    required
+                  />
+                </div>
+              )}
             </div>
 
             <div>
@@ -204,7 +221,13 @@ export default function Complaints() {
               ) : (
                 complaints.map((complaint, index) => (
                   <tr key={index} className="bg-white border-b border-gray-100 hover:bg-gray-50">
-                    <td className="p-3 md:p-4 lg:p-5 text-sm md:text-base lg:text-lg font-medium">{complaint.complaintType}</td>
+                    <td className="p-3 md:p-4 lg:p-5 text-sm md:text-base lg:text-lg font-medium">
+                      {
+                        complaint.complaintType === 'Others' && complaint.otherComplaintType
+                          ? `Other (${complaint.otherComplaintType})`
+                          : complaint.complaintType
+                      }
+                    </td>
                     <td className="p-3 md:p-4 lg:p-5 text-sm md:text-base lg:text-lg">{complaint.subject}</td>
                     <td className="p-3 md:p-4 lg:p-5 text-sm md:text-base lg:text-lg">{formatDate(complaint.createdAt)}</td>
                     <td className="p-3 md:p-4 lg:p-5 text-sm md:text-base lg:text-lg max-w-xs truncate">{complaint.description}</td>
@@ -238,7 +261,13 @@ export default function Complaints() {
                 <div className="space-y-2 sm:space-y-3">
                   <div className="flex justify-between items-start">
                     <span className="text-xs sm:text-sm font-semibold text-gray-600">Complaint Type:</span>
-                    <span className="text-sm sm:text-base font-medium text-gray-800">{complaint.complaintType}</span>
+                    <span className="text-sm sm:text-base font-medium text-gray-800">
+                      {
+                        complaint.complaintType === 'Others' && complaint.otherComplaintType
+                          ? `Other (${complaint.otherComplaintType})`
+                          : complaint.complaintType
+                      }
+                    </span>
                   </div>
                   <div className="flex justify-between items-start">
                     <span className="text-xs sm:text-sm font-semibold text-gray-600">Subject:</span>
