@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Pie } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -12,6 +12,10 @@ import { toast, Toaster } from "react-hot-toast";
 import Link from 'next/link';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
+
+const HOSTEL_LAT = 19.072618;
+const HOSTEL_LNG = 72.880419;
+const MAX_DISTANCE_KM = 0.3; // ~300 meters
 
 export default function DashboardContent() {
   const [studentId, setStudentId] = useState(null);
@@ -27,12 +31,12 @@ export default function DashboardContent() {
   const [selectedRange, setSelectedRange] = useState('day');
   const [barcodeId, setBarcodeId] = useState("");
   const [floor, setFloor] = useState("");
-  const [legendTooltip, setLegendTooltip] = useState({ type: null, visible: false });
-
-
-  const HOSTEL_LAT = 19.0760;
-  const HOSTEL_LNG = 72.8777;
-  const MAX_DISTANCE_KM = 0.3; // ~300 meters
+  const [isWithinRange, setIsWithinRange] = useState(false);
+  const [userCoords, setUserCoords] = useState(null);
+  const [selfieModalOpen, setSelfieModalOpen] = useState(false);
+  const [isCheckIn, setIsCheckIn] = useState(true); // To know which action to do
+  const videoRef = useRef(null);
+  const streamRef = useRef(null); // store media stream
 
   function getDistanceFromHostel(lat, lng) {
     const toRad = (value) => value * Math.PI / 180;
@@ -59,23 +63,102 @@ export default function DashboardContent() {
     );
   }, []);
 
+  useEffect(() => {
+    if (selfieModalOpen) {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+          streamRef.current = stream;
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+          }
+        })
+        .catch(err => {
+          toast.error("Camera access denied.");
+          setSelfieModalOpen(false);
+        });
+    }
+  }, [selfieModalOpen]);
 
-  const captureSelfie = async () => {
-    const video = document.createElement('video');
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    video.srcObject = stream;
-    await video.play();
+  function stopCamera() {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+  }
+
+  function handleCancelSelfie() {
+    stopCamera();
+    setSelfieModalOpen(false);
+  }
+
+  async function handleCaptureSelfie() {
+    const video = videoRef.current;
+    if (!video) return;
 
     const canvas = document.createElement('canvas');
-    canvas.width = 320; // or 640
-    canvas.height = 240;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
     const ctx = canvas.getContext('2d');
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    stream.getTracks().forEach(track => track.stop());
-    return canvas.toDataURL('image/jpeg');
-  };
+    const selfieDataURL = canvas.toDataURL('image/jpeg');
 
+    stopCamera();
+    setSelfieModalOpen(false);
+
+    if (!/^data:image\/jpeg;base64,[a-zA-Z0-9+/=]+$/.test(selfieDataURL)) {
+      toast.error("Selfie capture failed.");
+      return;
+    }
+
+    if (!isWithinRange) {
+      toast.error("You are not near the hostel!");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const res = await api.post(isCheckIn ? '/check-in' : '/check-out', {
+        selfie: selfieDataURL,
+        location: userCoords,
+      });
+
+      if (res.status === 200) {
+        const newStatus = isCheckIn ? 'Checked In' : 'Checked Out';
+        const dateField = isCheckIn ? res.data.checkInDate : res.data.checkOutDate;
+
+        setCheckStatus(newStatus);
+        setCheckTime(dateField || new Date().toLocaleString('en-US', {
+          timeZone: 'Asia/Kolkata',
+          hour12: true,
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        }));
+
+        toast.success(`${newStatus} successfully`);
+
+        if (isCheckIn) {
+          setAttendanceData(prev => ({
+            ...prev,
+            present: prev.present + 1,
+            absent: prev.absent - 1
+          }));
+        }
+      } else {
+        toast.error("Failed to record entry");
+      }
+    } catch (err) {
+      console.error("Error:", err);
+      toast.error("Server error during check-in/out");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
     const id = localStorage.getItem('studentId');
@@ -195,93 +278,6 @@ export default function DashboardContent() {
     fetchInspection();
   }, []);
 
-  async function handleCheckIn() {
-    setLoading(true);
-    try {
-      if (!isWithinRange) {
-        toast.error('You are not near the hostel!');
-        setLoading(false);
-        return;
-      }
-
-      const selfieDataURL = await captureSelfie();
-      const res = await api.post('/check-in', {
-        selfie: selfieDataURL,
-        location: userCoords,
-      });
-
-      if (res.status === 200) {
-        const data = res.data;
-        setCheckStatus('Checked In');
-        setCheckTime(data.checkInDate || new Date().toLocaleString('en-US', {
-          timeZone: 'Asia/Kolkata',
-          hour12: true,
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit'
-        }));
-        toast.success('Checked in successfully');
-
-        setAttendanceData(prev => ({
-          ...prev,
-          present: prev.present + 1,
-          absent: prev.absent - 1
-        }));
-        setTotalDays(prev => prev);
-
-      } else {
-        toast.error('Failed to check in');
-      }
-    } catch (err) {
-      alert('Error checking in');
-      console.error(err);
-    }
-    setLoading(false);
-  }
-
-  async function handleCheckOut() {
-    setLoading(true);
-    try {
-      if (!isWithinRange) {
-        toast.error("You are not near the hostel!");
-        setLoading(false);
-        return;
-      }
-
-      const selfieDataURL = await captureSelfie();
-      const res = await api.post('/check-out', {
-        selfie: selfieDataURL,
-        location: userCoords,
-      });
-
-      if (res.status === 200) {
-        const data = res.data;
-        setCheckStatus('Checked Out');
-        setCheckTime(data.checkOutDate || new Date().toLocaleString('en-US', {
-          timeZone: 'Asia/Kolkata',
-          hour12: true,
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit'
-        }));
-        toast.success('Checked out successfully');
-      } else {
-        toast.error('Failed to check out');
-      }
-    } catch (err) {
-      alert('Error checking out');
-      console.error(err);
-    }
-    setLoading(false);
-  }
-
-
   return (
     <main className="bg-[#ffffff] px-6 sm:px-8 lg:px-10 py-2 min-h-screen font-sans">
       <div className="flex items-center mb-4">
@@ -317,23 +313,58 @@ export default function DashboardContent() {
             </div>
             <div className="pt-8 flex justify-center">
               <button
-                onClick={
-                  checkStatus === 'Checked In' ? handleCheckOut : handleCheckIn
-                }
+                onClick={() => {
+                  if (loading) return;
+                  setIsCheckIn(checkStatus !== "Checked In");
+                  setSelfieModalOpen(true);
+                }}
                 disabled={loading}
                 className="bg-[#AAB491] text-black text-base font-semibold px-6 py-3 rounded shadow hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading
-                  ? checkStatus === 'Checked In'
-                    ? 'Checking Out...'
-                    : 'Checking In...'
-                  : checkStatus === 'Checked In'
-                    ? 'Check-Out Now'
-                    : 'Check-In Now'}
+                  ? checkStatus === "Checked In"
+                    ? "Checking Out..."
+                    : "Checking In..."
+                  : checkStatus === "Checked In"
+                    ? "Check-Out Now"
+                    : "Check-In Now"}
               </button>
             </div>
           </div>
         </div>
+
+        {/* Selfie Capture Modal */}
+        {selfieModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md">
+              <h2 className="text-lg font-bold text-center mb-4">
+                Capture Your Selfie
+              </h2>
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                className="w-full rounded mb-4"
+              />
+              <div className="flex justify-between">
+                <button
+                  onClick={handleCancelSelfie}
+                  disabled={loading}
+                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleCaptureSelfie}
+                  disabled={loading}
+                  className="px-4 py-2 bg-[#AAB491] text-black font-semibold rounded hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Capture
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Attendance Summary */}
         <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[600px]">
@@ -534,6 +565,5 @@ export default function DashboardContent() {
         </Link>
       </div>
     </main>
-
   );
 }
