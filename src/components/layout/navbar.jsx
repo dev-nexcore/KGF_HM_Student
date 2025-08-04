@@ -45,18 +45,10 @@ export default function Navbar() {
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const res = await api.get('/notifications');
-        const allNotifications = res.data.notifications || [];
-
-        const seenIds = JSON.parse(localStorage.getItem('seenNotificationIds') || '[]');
-        const unseenNotifications = allNotifications.filter(
-          (n) => !seenIds.includes(n.id)
-        );
-
-        setNotifications(unseenNotifications);
-        setHasUnseen(unseenNotifications.length > 0);
+        const res = await api.get("/notifications");
+        setNotifications(res.data.notifications);
       } catch (err) {
-        console.error("Failed to fetch notifications:", err);
+        console.error("🔴 Notification fetch error:", err);
       }
     };
 

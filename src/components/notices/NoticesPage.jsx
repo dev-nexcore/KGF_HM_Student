@@ -83,19 +83,6 @@ const NoticePage = () => {
     setShowMoreAvailable(allNotices.length > newCount);
   };
 
-  useEffect(() => {
-    const markNoticesSeen = async () => {
-      try {
-        await api.post('/notifications/mark-seen', { type: 'notice' });
-        console.log("Marked all notices as seen");
-      } catch (err) {
-        console.error("Failed to mark all notices as seen:", err);
-      }
-    };
-    markNoticesSeen();
-  }, []);
-
-
   return (
     <div
       ref={containerRef}

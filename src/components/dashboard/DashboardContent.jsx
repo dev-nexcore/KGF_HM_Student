@@ -167,6 +167,14 @@ export default function DashboardContent() {
           second: '2-digit'
         }));
         toast.success('Checked in successfully');
+
+        setAttendanceData(prev => ({
+          ...prev,
+          present: prev.present + 1,
+          absent : prev.absent - 1
+        }));
+        setTotalDays(prev => prev);
+
       } else {
         toast.error('Failed to check in');
       }
