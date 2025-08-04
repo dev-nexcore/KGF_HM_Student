@@ -30,6 +30,53 @@ export default function DashboardContent() {
   const [legendTooltip, setLegendTooltip] = useState({ type: null, visible: false });
 
 
+  const HOSTEL_LAT = 19.0760;
+  const HOSTEL_LNG = 72.8777;
+  const MAX_DISTANCE_KM = 0.3; // ~300 meters
+
+  function getDistanceFromHostel(lat, lng) {
+    const toRad = (value) => value * Math.PI / 180;
+    const R = 6371; // km
+    const dLat = toRad(lat - HOSTEL_LAT);
+    const dLng = toRad(lng - HOSTEL_LNG);
+    const a = Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(HOSTEL_LAT)) * Math.cos(toRad(lat)) *
+      Math.sin(dLng / 2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        const dist = getDistanceFromHostel(latitude, longitude);
+        setIsWithinRange(dist <= MAX_DISTANCE_KM);
+        setUserCoords({ lat: latitude, lng: longitude }); // <--- Add this
+      },
+      () => setIsWithinRange(false),
+      { enableHighAccuracy: true }
+    );
+  }, []);
+
+
+  const captureSelfie = async () => {
+    const video = document.createElement('video');
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    video.srcObject = stream;
+    await video.play();
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 320; // or 640
+    canvas.height = 240;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    stream.getTracks().forEach(track => track.stop());
+    return canvas.toDataURL('image/jpeg');
+  };
+
+
   useEffect(() => {
     const id = localStorage.getItem('studentId');
     setStudentId(id);
@@ -151,7 +198,17 @@ export default function DashboardContent() {
   async function handleCheckIn() {
     setLoading(true);
     try {
-      const res = await api.post('/check-in');
+      if (!isWithinRange) {
+        toast.error('You are not near the hostel!');
+        setLoading(false);
+        return;
+      }
+
+      const selfieDataURL = await captureSelfie();
+      const res = await api.post('/check-in', {
+        selfie: selfieDataURL,
+        location: userCoords,
+      });
 
       if (res.status === 200) {
         const data = res.data;
@@ -171,7 +228,7 @@ export default function DashboardContent() {
         setAttendanceData(prev => ({
           ...prev,
           present: prev.present + 1,
-          absent : prev.absent - 1
+          absent: prev.absent - 1
         }));
         setTotalDays(prev => prev);
 
@@ -188,7 +245,17 @@ export default function DashboardContent() {
   async function handleCheckOut() {
     setLoading(true);
     try {
-      const res = await api.post('/check-out');
+      if (!isWithinRange) {
+        toast.error("You are not near the hostel!");
+        setLoading(false);
+        return;
+      }
+
+      const selfieDataURL = await captureSelfie();
+      const res = await api.post('/check-out', {
+        selfie: selfieDataURL,
+        location: userCoords,
+      });
 
       if (res.status === 200) {
         const data = res.data;
