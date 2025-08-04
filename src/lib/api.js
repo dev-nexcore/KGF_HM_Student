@@ -1,8 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL:
-    "http://localhost:5000/api/studentauth",
+     baseURL: process.env.NEXT_PUBLIC_PROD_API_URL + "/api/studentauth",
   withCredentials: false,
 });
 

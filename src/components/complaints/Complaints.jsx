@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
+import { FiUpload, FiX, FiFile, FiImage, FiVideo } from 'react-icons/fi';
 
 export default function Complaints() {
   const [complaintType, setComplaintType] = useState('');
@@ -12,6 +13,7 @@ export default function Complaints() {
   const [studentId, setStudentId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [otherComplaintType, setOtherComplaintType] = useState('');
+  const [selectedFiles, setSelectedFiles] = useState([]);
 
   // Get student ID from localStorage
   useEffect(() => {
@@ -40,6 +42,57 @@ export default function Complaints() {
     fetchComplaints();
   }, [studentId]);
 
+  // Handle file selection
+  const handleFileSelect = (e) => {
+    const files = Array.from(e.target.files);
+    
+    // Validate file types and sizes
+    const validFiles = files.filter(file => {
+      const isValidType = /\.(jpg|jpeg|png|gif|mp4|mov|avi|webm)$/i.test(file.name);
+      const isValidSize = file.size <= 50 * 1024 * 1024; // 50MB
+      
+      if (!isValidType) {
+        toast.error(`${file.name} is not a valid file type. Only images and videos are allowed.`);
+        return false;
+      }
+      if (!isValidSize) {
+        toast.error(`${file.name} is too large. Maximum size is 50MB.`);
+        return false;
+      }
+      return true;
+    });
+
+    // Limit to 5 files maximum
+    const totalFiles = selectedFiles.length + validFiles.length;
+    if (totalFiles > 5) {
+      toast.error('Maximum 5 files allowed');
+      return;
+    }
+
+    setSelectedFiles(prev => [...prev, ...validFiles]);
+  };
+
+  // Remove selected file
+  const removeFile = (index) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Get file icon based on type
+  const getFileIcon = (file) => {
+    if (file.type.startsWith('image/')) return <FiImage className="w-4 h-4" />;
+    if (file.type.startsWith('video/')) return <FiVideo className="w-4 h-4" />;
+    return <FiFile className="w-4 h-4" />;
+  };
+
+  // Format file size
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
   // Submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -47,11 +100,21 @@ export default function Complaints() {
 
     setLoading(true);
     try {
-      await api.post('/complaint', {
-        complaintType,
-        subject,
-        description,
-        otherComplaintType: complaintType === 'Others' ? otherComplaintType : '',
+      const formData = new FormData();
+      formData.append('studentId', studentId);
+      formData.append('complaintType', complaintType);
+      formData.append('subject', subject);
+      formData.append('description', description);
+
+      // Append files
+      selectedFiles.forEach(file => {
+        formData.append('attachments', file);
+      });
+
+      await api.post('/complaint', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
 
       toast.success('Complaint filed');
@@ -60,6 +123,7 @@ export default function Complaints() {
       setComplaintType('');
       setSubject('');
       setDescription('');
+      setSelectedFiles([]);
 
       // Re-fetch history
       const res = await api.get(`/complaints`);
@@ -174,10 +238,77 @@ export default function Complaints() {
               />
             </div>
 
+            {/* File Upload Section */}
+            <div>
+              <label className="block mb-2 text-sm sm:text-base font-semibold text-gray-800">
+                Attachments (Optional)
+              </label>
+              <div className="space-y-3">
+                {/* File Upload Area */}
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400 transition-colors">
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*,video/*"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                    id="file-upload"
+                  />
+                  <label
+                    htmlFor="file-upload"
+                    className="cursor-pointer flex flex-col items-center space-y-2"
+                  >
+                    <FiUpload className="w-8 h-8 text-gray-400" />
+                    <div className="text-sm text-gray-600">
+                      <span className="text-blue-600 hover:text-blue-700 font-medium">
+                        Click to upload
+                      </span>
+                      {' '}or drag and drop
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      Images and videos up to 50MB (Maximum 5 files)
+                    </div>
+                  </label>
+                </div>
+
+                {/* Selected Files */}
+                {selectedFiles.length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium text-gray-700">Selected Files:</h4>
+                    {selectedFiles.map((file, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-2 bg-gray-50 rounded-md border"
+                      >
+                        <div className="flex items-center space-x-2">
+                          {getFileIcon(file)}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900 truncate">
+                              {file.name}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {formatFileSize(file.size)}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeFile(index)}
+                          className="p-1 text-red-500 hover:text-red-700 transition-colors"
+                        >
+                          <FiX className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
             <div className="flex justify-center pt-4">
               <button
                 type="submit"
-                className="bg-[#BEC5AD] text-black px-6 sm:px-8 py-2.5 sm:py-3 rounded-md shadow hover:opacity-90 text-sm sm:text-base font-medium w-full sm:w-auto"
+                className="bg-[#BEC5AD] text-black px-6 sm:px-8 py-2.5 sm:py-3 rounded-md shadow hover:opacity-90 text-sm sm:text-base font-medium w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={!studentId || loading}
                 title={!studentId ? 'Student not identified' : 'Submit'}
               >
@@ -202,19 +333,20 @@ export default function Complaints() {
                 <th className="p-3 md:p-4 lg:p-5 font-semibold text-sm md:text-base lg:text-lg">Subject</th>
                 <th className="p-3 md:p-4 lg:p-5 font-semibold text-sm md:text-base lg:text-lg">Filed Date</th>
                 <th className="p-3 md:p-4 lg:p-5 font-semibold text-sm md:text-base lg:text-lg">Description</th>
+                <th className="p-3 md:p-4 lg:p-5 font-semibold text-sm md:text-base lg:text-lg">Attachments</th>
                 <th className="p-3 md:p-4 lg:p-5 font-semibold text-sm md:text-base lg:text-lg">Status</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="5" className="text-center py-6 md:py-8 text-gray-500 text-sm md:text-base">
+                  <td colSpan="6" className="text-center py-6 md:py-8 text-gray-500 text-sm md:text-base">
                     Loading...
                   </td>
                 </tr>
               ) : complaints.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="text-center py-6 md:py-8 text-gray-500 text-sm md:text-base">
+                  <td colSpan="6" className="text-center py-6 md:py-8 text-gray-500 text-sm md:text-base">
                     No complaints found.
                   </td>
                 </tr>
@@ -231,6 +363,16 @@ export default function Complaints() {
                     <td className="p-3 md:p-4 lg:p-5 text-sm md:text-base lg:text-lg">{complaint.subject}</td>
                     <td className="p-3 md:p-4 lg:p-5 text-sm md:text-base lg:text-lg">{formatDate(complaint.createdAt)}</td>
                     <td className="p-3 md:p-4 lg:p-5 text-sm md:text-base lg:text-lg max-w-xs truncate">{complaint.description}</td>
+                    <td className="p-3 md:p-4 lg:p-5 text-sm md:text-base lg:text-lg">
+                      {complaint.hasAttachments ? (
+                        <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                          <FiFile className="w-3 h-3 mr-1" />
+                          {complaint.attachmentCount} file{complaint.attachmentCount > 1 ? 's' : ''}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400">No files</span>
+                      )}
+                    </td>
                     <td className="p-3 md:p-4 lg:p-5">
                       <span
                         className={`px-2 md:px-3 py-1 md:py-2 rounded-md text-xs md:text-sm font-medium ${getStatusClasses(complaint.status)}`}
@@ -280,6 +422,17 @@ export default function Complaints() {
                   <div className="flex justify-between items-start">
                     <span className="text-xs sm:text-sm font-semibold text-gray-600">Description:</span>
                     <span className="text-sm sm:text-base text-gray-800 text-right max-w-[60%]">{complaint.description}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs sm:text-sm font-semibold text-gray-600">Attachments:</span>
+                    {complaint.hasAttachments ? (
+                      <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                        <FiFile className="w-3 h-3 mr-1" />
+                        {complaint.attachmentCount} file{complaint.attachmentCount > 1 ? 's' : ''}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400 text-xs">No files</span>
+                    )}
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-xs sm:text-sm font-semibold text-gray-600">Status:</span>
