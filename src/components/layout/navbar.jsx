@@ -45,18 +45,10 @@ export default function Navbar() {
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const res = await api.get('/notifications');
-        const allNotifications = res.data.notifications || [];
-
-        const seenIds = JSON.parse(localStorage.getItem('seenNotificationIds') || '[]');
-        const unseenNotifications = allNotifications.filter(
-          (n) => !seenIds.includes(n.id)
-        );
-
-        setNotifications(unseenNotifications);
-        setHasUnseen(unseenNotifications.length > 0);
+        const res = await api.get("/notifications");
+        setNotifications(res.data.notifications);
       } catch (err) {
-        console.error("Failed to fetch notifications:", err);
+        console.error("🔴 Notification fetch error:", err);
       }
     };
 
@@ -64,10 +56,11 @@ export default function Navbar() {
   }, []);
 
 
-  const markAsSeen = async (type) => {
+  const markAsSeen = async (type, id) => {
     try {
-      await api.post('/notifications/mark-seen', { type }); // now sends body
+      await api.post('/notifications/mark-seen', { type });
       setHasUnseen(false);
+      setNotifications(prev => prev.filter(notif => notif._id !== id)); // ✅ filter with _id
     } catch (err) {
       console.error("Failed to mark notifications as seen:", err);
     }
@@ -112,12 +105,13 @@ export default function Navbar() {
                 notifications.map((notif, i) => (
                   <Link
                     href={notif.link}
-                    key={i}
+                    key={notif._id || i}
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 border-b"
-                    onClick={() => {
-                      markAsSeen(notif.type, notif.id);
-                      router.push(notif.link); // or use Link if prefetching
+                    onClick={(e) => {
+                      e.preventDefault();
+                      markAsSeen(notif.type, notif._id);
                       setShowDropdown(false);
+                      router.push(notif.link);
                     }}
                   >
                     {notif.message}
