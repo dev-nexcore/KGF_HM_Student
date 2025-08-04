@@ -1,24 +1,24 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import api from '@/lib/api';
-import toast from 'react-hot-toast';
-import { FiUpload, FiX, FiFile, FiImage, FiVideo } from 'react-icons/fi';
+import React, { useState, useEffect } from "react";
+import api from "@/lib/api";
+import toast from "react-hot-toast";
+import { FiUpload, FiX, FiFile, FiImage, FiVideo } from "react-icons/fi";
 
 export default function Complaints() {
-  const [complaintType, setComplaintType] = useState('');
-  const [subject, setSubject] = useState('');
-  const [description, setDescription] = useState('');
+  const [complaintType, setComplaintType] = useState("");
+  const [subject, setSubject] = useState("");
+  const [description, setDescription] = useState("");
   const [complaints, setComplaints] = useState([]);
   const [studentId, setStudentId] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [otherComplaintType, setOtherComplaintType] = useState('');
+  const [otherComplaintType, setOtherComplaintType] = useState("");
   const [selectedFiles, setSelectedFiles] = useState([]);
 
   // Get student ID from localStorage
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const id = localStorage.getItem('studentId');
+    if (typeof window !== "undefined") {
+      const id = localStorage.getItem("studentId");
       setStudentId(id);
     }
   }, []);
@@ -33,7 +33,7 @@ export default function Complaints() {
         const res = await api.get(`/complaints`);
         setComplaints(res.data?.complaints || []);
       } catch (err) {
-        console.error('Error fetching complaint history:', err);
+        console.error("Error fetching complaint history:", err);
       } finally {
         setLoading(false);
       }
@@ -45,14 +45,18 @@ export default function Complaints() {
   // Handle file selection
   const handleFileSelect = (e) => {
     const files = Array.from(e.target.files);
-    
+
     // Validate file types and sizes
-    const validFiles = files.filter(file => {
-      const isValidType = /\.(jpg|jpeg|png|gif|mp4|mov|avi|webm)$/i.test(file.name);
+    const validFiles = files.filter((file) => {
+      const isValidType = /\.(jpg|jpeg|png|gif|mp4|mov|avi|webm)$/i.test(
+        file.name
+      );
       const isValidSize = file.size <= 50 * 1024 * 1024; // 50MB
-      
+
       if (!isValidType) {
-        toast.error(`${file.name} is not a valid file type. Only images and videos are allowed.`);
+        toast.error(
+          `${file.name} is not a valid file type. Only images and videos are allowed.`
+        );
         return false;
       }
       if (!isValidSize) {
@@ -65,32 +69,32 @@ export default function Complaints() {
     // Limit to 5 files maximum
     const totalFiles = selectedFiles.length + validFiles.length;
     if (totalFiles > 5) {
-      toast.error('Maximum 5 files allowed');
+      toast.error("Maximum 5 files allowed");
       return;
     }
 
-    setSelectedFiles(prev => [...prev, ...validFiles]);
+    setSelectedFiles((prev) => [...prev, ...validFiles]);
   };
 
   // Remove selected file
   const removeFile = (index) => {
-    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   // Get file icon based on type
   const getFileIcon = (file) => {
-    if (file.type.startsWith('image/')) return <FiImage className="w-4 h-4" />;
-    if (file.type.startsWith('video/')) return <FiVideo className="w-4 h-4" />;
+    if (file.type.startsWith("image/")) return <FiImage className="w-4 h-4" />;
+    if (file.type.startsWith("video/")) return <FiVideo className="w-4 h-4" />;
     return <FiFile className="w-4 h-4" />;
   };
 
   // Format file size
   const formatFileSize = (bytes) => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   // Submit form
@@ -98,62 +102,74 @@ export default function Complaints() {
     e.preventDefault();
     if (!complaintType || !subject || !description || !studentId) return;
 
+    // Validate "Others" type has specification
+    if (complaintType === "Others" && !otherComplaintType.trim()) {
+      toast.error("Please specify the complaint type");
+      return;
+    }
+
     setLoading(true);
     try {
       const formData = new FormData();
-      formData.append('studentId', studentId);
-      formData.append('complaintType', complaintType);
-      formData.append('subject', subject);
-      formData.append('description', description);
+      formData.append("complaintType", complaintType);
+      formData.append("subject", subject);
+      formData.append("description", description);
+
+      // Add otherComplaintType if "Others" is selected
+      if (complaintType === "Others" && otherComplaintType) {
+        formData.append("otherComplaintType", otherComplaintType);
+      }
 
       // Append files
-      selectedFiles.forEach(file => {
-        formData.append('attachments', file);
+      selectedFiles.forEach((file) => {
+        formData.append("attachments", file);
       });
 
-      await api.post('/complaint', formData, {
+      await api.post("/complaint", formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       });
 
-      toast.success('Complaint filed');
+      toast.success("Complaint filed");
 
       // Reset form
-      setComplaintType('');
-      setSubject('');
-      setDescription('');
+      setComplaintType("");
+      setOtherComplaintType("");
+      setSubject("");
+      setDescription("");
       setSelectedFiles([]);
 
       // Re-fetch history
       const res = await api.get(`/complaints`);
       setComplaints(res.data?.complaints || []);
     } catch (err) {
-      console.error('Error filing complaint:', err);
-      toast.error('Something went wrong!');
+      console.error("Error filing complaint:", err);
+      toast.error("Something went wrong!");
     } finally {
       setLoading(false);
     }
   };
 
   const getStatusClasses = (status) => {
-    if (status === 'Approved' || status === 'Resolved') return 'bg-green-500 text-white';
-    if (status === 'Rejected') return 'bg-red-500 text-white';
-    if (status === 'Pending') return 'bg-[#4F8DCF] text-white';
-    return 'bg-[#4F8DCF] text-white';
+    if (status === "Approved" || status === "Resolved")
+      return "bg-green-500 text-white";
+    if (status === "Rejected") return "bg-red-500 text-white";
+    if (status === "Pending") return "bg-[#4F8DCF] text-white";
+    return "bg-[#4F8DCF] text-white";
   };
 
   const formatDate = (dateStr) => {
-    if (!dateStr) return '-';
+    if (!dateStr) return "-";
     const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return '-';
+    if (isNaN(d.getTime())) return "-";
     return d.toLocaleDateString();
   };
 
   useEffect(() => {
     const markSeen = async () => {
       try {
-        await api.post('/notifications/mark-seen', { type: 'complaint' });
+        await api.post("/notifications/mark-seen", { type: "complaint" });
       } catch (err) {
         console.error("Failed to mark notices seen", err);
       }
@@ -194,7 +210,7 @@ export default function Complaints() {
                 <option value="Cleanliness issue">Cleanliness issue</option>
                 <option value="Others">Others</option>
               </select>
-              {complaintType === 'Others' && (
+              {complaintType === "Others" && (
                 <div className="mt-3">
                   <label className="block mt-8 text-sm sm:text-base font-semibold text-gray-800">
                     Specify:
@@ -203,6 +219,7 @@ export default function Complaints() {
                     type="text"
                     value={otherComplaintType}
                     onChange={(e) => setOtherComplaintType(e.target.value)}
+                    placeholder="Enter custom complaint type"
                     className="w-full px-4 py-3 rounded-md shadow-md border border-gray-300 text-sm sm:text-base"
                     required
                   />
@@ -262,8 +279,8 @@ export default function Complaints() {
                     <div className="text-sm text-gray-600">
                       <span className="text-blue-600 hover:text-blue-700 font-medium">
                         Click to upload
-                      </span>
-                      {' '}or drag and drop
+                      </span>{" "}
+                      or drag and drop
                     </div>
                     <div className="text-xs text-gray-500">
                       Images and videos up to 50MB (Maximum 5 files)
@@ -274,7 +291,9 @@ export default function Complaints() {
                 {/* Selected Files */}
                 {selectedFiles.length > 0 && (
                   <div className="space-y-2">
-                    <h4 className="text-sm font-medium text-gray-700">Selected Files:</h4>
+                    <h4 className="text-sm font-medium text-gray-700">
+                      Selected Files:
+                    </h4>
                     {selectedFiles.map((file, index) => (
                       <div
                         key={index}
@@ -310,9 +329,9 @@ export default function Complaints() {
                 type="submit"
                 className="bg-[#BEC5AD] text-black px-6 sm:px-8 py-2.5 sm:py-3 rounded-md shadow hover:opacity-90 text-sm sm:text-base font-medium w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={!studentId || loading}
-                title={!studentId ? 'Student not identified' : 'Submit'}
+                title={!studentId ? "Student not identified" : "Submit"}
               >
-                {loading ? 'Submitting...' : 'Submit'}
+                {loading ? "Submitting..." : "Submit"}
               </button>
             </div>
           </form>
@@ -327,63 +346,100 @@ export default function Complaints() {
 
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-sm md:text-base lg:text-lg text-gray-800 min-w-full">
-            <thead className="bg-gray-200 text-left">
+            <thead className="bg-gray-200 text-center">
               <tr>
-                <th className="p-3 md:p-4 lg:p-5 font-semibold text-sm md:text-base lg:text-lg">Complaint Type</th>
-                <th className="p-3 md:p-4 lg:p-5 font-semibold text-sm md:text-base lg:text-lg">Subject</th>
-                <th className="p-3 md:p-4 lg:p-5 font-semibold text-sm md:text-base lg:text-lg">Filed Date</th>
-                <th className="p-3 md:p-4 lg:p-5 font-semibold text-sm md:text-base lg:text-lg">Description</th>
-                <th className="p-3 md:p-4 lg:p-5 font-semibold text-sm md:text-base lg:text-lg">Attachments</th>
-                <th className="p-3 md:p-4 lg:p-5 font-semibold text-sm md:text-base lg:text-lg">Status</th>
+                <th className="p-3 md:p-4 lg:p-5 font-semibold text-sm md:text-base lg:text-lg">
+                  Complaint Type
+                </th>
+                <th className="p-3 md:p-4 lg:p-5 font-semibold text-sm md:text-base lg:text-lg">
+                  Subject
+                </th>
+                <th className="p-3 md:p-4 lg:p-5 font-semibold text-sm md:text-base lg:text-lg">
+                  Filed Date
+                </th>
+                <th className="p-3 md:p-4 lg:p-5 font-semibold text-sm md:text-base lg:text-lg">
+                  Description
+                </th>
+                <th className="p-3 md:p-4 lg:p-5 font-semibold text-sm md:text-base lg:text-lg">
+                  Attachments
+                </th>
+                <th className="p-3 md:p-4 lg:p-5 font-semibold text-sm md:text-base lg:text-lg">
+                  Status
+                </th>
               </tr>
             </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan="6" className="text-center py-6 md:py-8 text-gray-500 text-sm md:text-base">
-                    Loading...
-                  </td>
-                </tr>
-              ) : complaints.length === 0 ? (
-                <tr>
-                  <td colSpan="6" className="text-center py-6 md:py-8 text-gray-500 text-sm md:text-base">
-                    No complaints found.
-                  </td>
-                </tr>
-              ) : (
-                complaints.map((complaint, index) => (
-                  <tr key={index} className="bg-white border-b border-gray-100 hover:bg-gray-50">
-                    <td className="p-3 md:p-4 lg:p-5 text-sm md:text-base lg:text-lg font-medium">
-                      {
-                        complaint.complaintType === 'Others' && complaint.otherComplaintType
-                          ? `Other (${complaint.otherComplaintType})`
-                          : complaint.complaintType
-                      }
-                    </td>
-                    <td className="p-3 md:p-4 lg:p-5 text-sm md:text-base lg:text-lg">{complaint.subject}</td>
-                    <td className="p-3 md:p-4 lg:p-5 text-sm md:text-base lg:text-lg">{formatDate(complaint.createdAt)}</td>
-                    <td className="p-3 md:p-4 lg:p-5 text-sm md:text-base lg:text-lg max-w-xs truncate">{complaint.description}</td>
-                    <td className="p-3 md:p-4 lg:p-5 text-sm md:text-base lg:text-lg">
-                      {complaint.hasAttachments ? (
-                        <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
-                          <FiFile className="w-3 h-3 mr-1" />
-                          {complaint.attachmentCount} file{complaint.attachmentCount > 1 ? 's' : ''}
-                        </span>
-                      ) : (
-                        <span className="text-gray-400">No files</span>
-                      )}
-                    </td>
-                    <td className="p-3 md:p-4 lg:p-5">
-                      <span
-                        className={`px-2 md:px-3 py-1 md:py-2 rounded-md text-xs md:text-sm font-medium ${getStatusClasses(complaint.status)}`}
-                      >
-                        {complaint.status ? complaint.status.charAt(0).toUpperCase() + complaint.status.slice(1) : 'Pending'}
-                      </span>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
+          <tbody>
+  {loading ? (
+    <tr>
+      <td
+        colSpan="6"
+        className="text-center py-6 md:py-8 text-gray-500 text-sm md:text-base"
+      >
+        Loading...
+      </td>
+    </tr>
+  ) : complaints.length === 0 ? (
+    <tr>
+      <td
+        colSpan="6"
+        className="text-center py-6 md:py-8 text-gray-500 text-sm md:text-base"
+      >
+        No complaints found.
+      </td>
+    </tr>
+  ) : (
+    complaints.map((complaint, index) => (
+      <tr
+        key={index}
+        className="bg-white border-b border-gray-100 hover:bg-gray-50"
+      >
+        <td className="p-3 md:p-4 lg:p-5 text-sm md:text-base lg:text-lg font-medium text-center">
+          {complaint.complaintType === "Others" &&
+          complaint.otherComplaintType
+            ? `Other (${complaint.otherComplaintType})`
+            : complaint.complaintType}
+        </td>
+        <td className="p-3 md:p-4 lg:p-5 text-sm md:text-base lg:text-lg text-center">
+          {complaint.subject}
+        </td>
+        <td className="p-3 md:p-4 lg:p-5 text-sm md:text-base lg:text-lg text-center">
+          {formatDate(complaint.createdAt)}
+        </td>
+        <td className="p-3 md:p-4 lg:p-5 text-sm md:text-base lg:text-lg max-w-xs truncate text-center">
+          {complaint.description}
+        </td>
+        <td className="p-3 md:p-4 lg:p-5 text-sm md:text-base lg:text-lg text-center">
+          {complaint.hasAttachments ? (
+            <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+              <FiFile className="w-3 h-3 mr-1" />
+              {complaint.attachmentCount} file
+              {complaint.attachmentCount > 1 ? "s" : ""}
+            </span>
+          ) : (
+            <span className="text-gray-400">No files</span>
+          )}
+        </td>
+        <td className="p-3 md:p-4 lg:p-5 text-center">
+          <span
+            className={`px-2 md:px-3 py-1 md:py-2 rounded-md text-xs md:text-sm font-medium whitespace-nowrap ${getStatusClasses(
+              complaint.status
+            )}`}
+          >
+            {complaint.status
+              ? complaint.status
+                  .split(" ")
+                  .map(
+                    (word) =>
+                      word.charAt(0).toUpperCase() + word.slice(1)
+                  )
+                  .join(" ")
+              : "Pending"}
+          </span>
+        </td>
+      </tr>
+    ))
+  )}
+</tbody>
           </table>
         </div>
 
@@ -399,47 +455,73 @@ export default function Complaints() {
             </div>
           ) : (
             complaints.map((complaint, index) => (
-              <div key={index} className="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
+              <div
+                key={index}
+                className="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200"
+              >
                 <div className="space-y-2 sm:space-y-3">
                   <div className="flex justify-between items-start">
-                    <span className="text-xs sm:text-sm font-semibold text-gray-600">Complaint Type:</span>
+                    <span className="text-xs sm:text-sm font-semibold text-gray-600">
+                      Complaint Type:
+                    </span>
                     <span className="text-sm sm:text-base font-medium text-gray-800">
-                      {
-                        complaint.complaintType === 'Others' && complaint.otherComplaintType
-                          ? `Other (${complaint.otherComplaintType})`
-                          : complaint.complaintType
-                      }
+                      {complaint.complaintType === "Others" &&
+                      complaint.otherComplaintType
+                        ? `Other (${complaint.otherComplaintType})`
+                        : complaint.complaintType}
                     </span>
                   </div>
                   <div className="flex justify-between items-start">
-                    <span className="text-xs sm:text-sm font-semibold text-gray-600">Subject:</span>
-                    <span className="text-sm sm:text-base text-gray-800 text-right max-w-[60%]">{complaint.subject}</span>
+                    <span className="text-xs sm:text-sm font-semibold text-gray-600">
+                      Subject:
+                    </span>
+                    <span className="text-sm sm:text-base text-gray-800 text-right max-w-[60%]">
+                      {complaint.subject}
+                    </span>
                   </div>
                   <div className="flex justify-between items-start">
-                    <span className="text-xs sm:text-sm font-semibold text-gray-600">Date:</span>
-                    <span className="text-sm sm:text-base text-gray-800">{formatDate(complaint.createdAt)}</span>
+                    <span className="text-xs sm:text-sm font-semibold text-gray-600">
+                      Date:
+                    </span>
+                    <span className="text-sm sm:text-base text-gray-800">
+                      {formatDate(complaint.createdAt)}
+                    </span>
                   </div>
                   <div className="flex justify-between items-start">
-                    <span className="text-xs sm:text-sm font-semibold text-gray-600">Description:</span>
-                    <span className="text-sm sm:text-base text-gray-800 text-right max-w-[60%]">{complaint.description}</span>
+                    <span className="text-xs sm:text-sm font-semibold text-gray-600">
+                      Description:
+                    </span>
+                    <span className="text-sm sm:text-base text-gray-800 text-right max-w-[60%]">
+                      {complaint.description}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-xs sm:text-sm font-semibold text-gray-600">Attachments:</span>
+                    <span className="text-xs sm:text-sm font-semibold text-gray-600">
+                      Attachments:
+                    </span>
                     {complaint.hasAttachments ? (
                       <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
                         <FiFile className="w-3 h-3 mr-1" />
-                        {complaint.attachmentCount} file{complaint.attachmentCount > 1 ? 's' : ''}
+                        {complaint.attachmentCount} file
+                        {complaint.attachmentCount > 1 ? "s" : ""}
                       </span>
                     ) : (
                       <span className="text-gray-400 text-xs">No files</span>
                     )}
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-xs sm:text-sm font-semibold text-gray-600">Status:</span>
+                    <span className="text-xs sm:text-sm font-semibold text-gray-600">
+                      Status:
+                    </span>
                     <span
-                      className={`px-2 sm:px-3 py-1 sm:py-2 rounded-md text-xs sm:text-sm font-medium ${getStatusClasses(complaint.status)}`}
+                      className={`px-2 sm:px-3 py-1 sm:py-2 rounded-md text-xs sm:text-sm font-medium ${getStatusClasses(
+                        complaint.status
+                      )}`}
                     >
-                      {complaint.status ? complaint.status.charAt(0).toUpperCase() + complaint.status.slice(1) : 'Pending'}
+                      {complaint.status
+                        ? complaint.status.charAt(0).toUpperCase() +
+                          complaint.status.slice(1)
+                        : "Pending"}
                     </span>
                   </div>
                 </div>
