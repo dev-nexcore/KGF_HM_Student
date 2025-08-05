@@ -262,14 +262,17 @@ export default function DashboardContent() {
   useEffect(() => {
     const fetchInspection = async () => {
       try {
-        const res = await api.get('/inspectionSchedule'); // token added by interceptor
-        setInspection(res.data);
-      } catch (err) {
-        if (err.response?.status === 404) {
-          setInspection(null); // No inspection scheduled
+        const res = await api.get('/inspectionSchedule');
+
+        if (res.status === 204 || !res.data?.date) {
+          setInspection(null);
         } else {
-          console.error('Unexpected error while fetching inspection:', err);
+          setInspection(res.data);
         }
+
+      } catch (err) {
+        console.error('Error fetching inspection:', err);
+        setInspection(null);
       } finally {
         setLoading(false);
       }
@@ -457,7 +460,7 @@ export default function DashboardContent() {
                         month: 'long',
                         year: 'numeric',
                       })
-                      : 'Invalid Date'}
+                      : '-'}
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -473,7 +476,7 @@ export default function DashboardContent() {
                 </div>
                 <div className="flex justify-between">
                   <span>Status:</span>
-                  <span className="text-[#4F8DCF] font-semibold">{inspection.status}</span>
+                  <span className="text-[#4F8DCF] font-semibold">{inspection.status || '-'}</span>
                 </div>
               </>
             ) : (
