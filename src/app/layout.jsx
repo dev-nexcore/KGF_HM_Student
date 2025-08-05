@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Hostel Student Panel | KGF",
+  title: "KGF-HM | Student Portal",
   description: "A student portal for hostel residents to manage profile, fees, attendance, leave applications, complaints, and view notices. Built with Next.js for fast, secure access.",
 };
 
