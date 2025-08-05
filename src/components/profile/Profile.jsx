@@ -121,10 +121,10 @@ export default function Profile() {
   if (!profile) return <p className="text-center mt-10">Loading profile...</p>;
 
   return (
-    <div className="pt-2 px-2 md:pt-1 md:px-2">
+    <div className="pt-2 px-2 md:pt-2 md:px-2">
       {/* Page Heading */}
       <div className="flex items-center mb-4">
-        <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-black border-l-4 border-[#4F8CCF] pl-2 mb-4 sm:mb-6">
+        <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-black border-l-4 border-[#4F8CCF] pl-2 mb-4 sm:mb-2">
           Profile
         </h2>
       </div>
