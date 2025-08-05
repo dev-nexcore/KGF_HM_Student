@@ -47,7 +47,7 @@ export default function FeesStatus() {
   ];
 
   return (
-    <div className="w-full min-h-screen bg-white pt-1 pb-6 sm:pb-10 px-3 sm:px-4 dark:bg-white overflow-hidden">
+    <div className="w-full min-h-screen bg-white pt-2 pb-6 sm:pb-10 sm:px-2.5 dark:bg-white overflow-hidden">
       {/* Fees Section Title */}
 
       <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-black border-l-4 border-[#4F8CCF] pl-2 mb-4 sm:mb-6">
