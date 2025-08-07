@@ -66,8 +66,8 @@ export default function LeavesPage() {
 
       {/* Leave Application Form */}
       <div className="mt-[-10px] ml-0.5">
-        <div className="bg-white rounded-lg sm:rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.25)] mb-6 sm:mb-10 w-full ">
-          <div className="bg-[#A4B494] rounded-t-lg sm:rounded-t-xl px-6 sm:px-8 md:px-10 py-4 sm:py-5 font-semibold text-base sm:text-lg md:text-xl">
+        <div className="bg-white rounded-lg sm:rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.25)] mb-6 sm:mb-10 w-full text-black">
+          <div className="bg-[#A4B494] rounded-t-lg sm:rounded-t-xl px-6 sm:px-8 md:px-10 py-4 sm:py-5 font-semibold text-base sm:text-lg md:text-xl text-white">
             Leave Application Form
           </div>
 
