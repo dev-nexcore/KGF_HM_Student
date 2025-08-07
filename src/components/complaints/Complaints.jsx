@@ -174,8 +174,8 @@ export default function Complaints() {
 
       {/* Complaint Application Form */}
       <div className="mt-[-10px] ml-0.5">
-        <div className="bg-white rounded-lg sm:rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.25)] mb-6 sm:mb-8 lg:mb-10 w-full">
-          <div className="bg-[#A4B494] rounded-t-lg sm:rounded-t-xl px-4 sm:px-6 md:px-8 lg:px-10 py-3 sm:py-4 lg:py-5 font-semibold text-sm sm:text-base md:text-lg lg:text-xl">
+        <div className="bg-white rounded-lg sm:rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.25)] mb-6 sm:mb-8 lg:mb-10 w-full text-black">
+          <div className="bg-[#A4B494] text-white rounded-t-lg sm:rounded-t-xl px-4 sm:px-6 md:px-8 lg:px-10 py-3 sm:py-4 lg:py-5 font-semibold text-sm sm:text-base md:text-lg lg:text-xl">
             Complaint Application Form
           </div>
 

@@ -97,7 +97,7 @@ export default function Refunds() {
   }, [studentId]);
 
   return (
-    <div className="w-full min-h-screen bg-white pt-8 pb-6 sm:pb-10 sm:px-6 dark:bg-white overflow-hidden">
+    <div className="w-full min-h-screen bg-white text-black pt-8 pb-6 sm:pb-10 sm:px-6 dark:bg-white overflow-hidden">
       <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-black border-l-4 border-[#4F8CCF] pl-2 mb-4 sm:mb-9">
         Refunds
       </h2>
@@ -105,7 +105,7 @@ export default function Refunds() {
       {/* Refund Application Form */}
       <div className="mt-[-10px] ml-0.5">
         <div className="bg-white rounded-lg sm:rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.25)] mb-6 sm:mb-8 lg:mb-10 w-full">
-          <div className="bg-[#A4B494] rounded-t-lg sm:rounded-t-xl px-4 sm:px-6 md:px-8 lg:px-10 py-3 sm:py-4 lg:py-5 font-semibold text-sm sm:text-base md:text-lg lg:text-xl">
+          <div className="bg-[#A4B494] text-white rounded-t-lg sm:rounded-t-xl px-4 sm:px-6 md:px-8 lg:px-10 py-3 sm:py-4 lg:py-5 font-semibold text-sm sm:text-base md:text-lg lg:text-xl">
             Refund Application Form
           </div>
 
