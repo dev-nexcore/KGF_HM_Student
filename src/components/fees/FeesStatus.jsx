@@ -22,8 +22,25 @@ export default function FeesStatus() {
   useEffect(() => {
     const fetchFees = async () => {
       try {
-        const res = await api.get(`/feeStatus`);
-        setCurrentFees(res.data.fees || []);
+        // Temporarily using dummy data for client presentation
+        const dummyFees = [
+          {
+            feeType: "Hostel Fee",
+            dueDate: "2025-08-15",
+            amount: "12,000",
+            status: "paid"
+          }
+        ];
+        
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Use dummy data instead of API call
+        setCurrentFees(dummyFees);
+        
+        // Uncomment below for actual API call when backend is ready
+        // const res = await api.get(`/feeStatus`);
+        // setCurrentFees(res.data.fees || []);
       } catch (err) {
         console.error("Error fetching current fee status:", err);
         setError('Failed to fetch fee status');
@@ -96,15 +113,17 @@ export default function FeesStatus() {
                 </div>
               </div>
               <div className="flex justify-center pb-2">
-                <button
-                  onClick={() => {
-                    setSelectedFeeAmount(fee.amount);
-                    setShowModal(true);
-                  }}
-                  className="bg-[#BEC5AD] px-8 py-3 rounded-md text-black font-semibold shadow-md text-base hover:bg-[#a8b096] transition-colors"
-                >
-                  Pay Now
-                </button>
+                {fee.status !== 'paid' && (
+                  <button
+                    onClick={() => {
+                      setSelectedFeeAmount(fee.amount);
+                      setShowModal(true);
+                    }}
+                    className="bg-[#BEC5AD] px-8 py-3 rounded-md text-black font-semibold shadow-md text-base hover:bg-[#a8b096] transition-colors"
+                  >
+                    Pay Now
+                  </button>
+                )}
               </div>
             </div>
           ))
@@ -174,10 +193,6 @@ export default function FeesStatus() {
           </div>
         </div>
       </div>
-
-
-
-
 
       {/* Payment Modal */}
       <PaymentModal

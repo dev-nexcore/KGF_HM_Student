@@ -119,23 +119,25 @@ export default function Navbar() {
                 ))
               ) : (
                 <div className="px-4 py-2 text-sm text-gray-500">No notifications</div>
-              )}
+                )}
             </div>
           )}
         </div>
         <Link href="/profile" aria-label="Go to profile">
           {studentProfile ? (
-            <Image
-              src={
-                studentProfile && studentProfile !== "null"
-                  ? studentProfile
-                  : "/default-profile.jpg"
-              }
-              alt="Profile"
-              width={40}
-              height={40}
-              className="rounded-full"
-            />
+            <div className="w-8 h-8 sm:w-15 sm:h-15 rounded-full overflow-hidden bg-white border border-gray-300 cursor-pointer">
+              <Image
+                src={
+                  studentProfile && studentProfile !== "null"
+                    ? studentProfile
+                    : "/default-profile.jpg"
+                }
+                alt="Profile"
+                width={40}
+                height={40}
+                className="w-full h-full object-cover"
+              />
+            </div>
           ) : (
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white border border-gray-300 cursor-pointer" />
           )}

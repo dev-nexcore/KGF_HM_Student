@@ -15,8 +15,41 @@ export default function Refunds() {
 
   const fetchRefunds = async () => {
     try {
-      const res = await api.get(`/refunds`);
-      setRefunds(res.data?.refunds || []);
+      // Temporarily using dummy data for client presentation
+      const dummyRefunds = [
+        {
+          refundType: "Security Deposit",
+          requestedAt: "2025-07-15",
+          amount: "5000",
+          reason: "Room change - excess security deposit refund",
+          status: "approved"
+        },
+        {
+          refundType: "Mess fee Overpayment",
+          requestedAt: "2025-06-28",
+          amount: "1200",
+          reason: "Overpaid mess fee for June month",
+          status: "pending"
+        },
+        {
+          refundType: "Others",
+          otherRefundType: "Laundry Fee",
+          requestedAt: "2025-06-10",
+          amount: "300",
+          reason: "Duplicate payment for laundry services",
+          status: "rejected"
+        }
+      ];
+      
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      // Use dummy data instead of API call
+      setRefunds(dummyRefunds);
+      
+      // Uncomment below for actual API call when backend is ready
+      // const res = await api.get(`/refunds`);
+      // setRefunds(res.data?.refunds || []);
     } catch (error) {
       console.error('Error fetching refund history:', error);
     }

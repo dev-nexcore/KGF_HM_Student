@@ -205,7 +205,7 @@ export default function Profile() {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 backdrop-blur bg-opacity-50 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-xl w-[90%] max-w-md p-6 shadow-lg">
+          <div className="bg-white text-black rounded-xl w-[90%] max-w-md p-6 shadow-lg">
             <h2 className="text-xl font-semibold mb-4">Edit Profile</h2>
 
             <div className="flex flex-col gap-4">
