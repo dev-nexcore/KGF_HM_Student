@@ -27,8 +27,6 @@ export default function LeavesPage() {
     e.preventDefault();
     if (!leaveType || !startDate || !endDate || !reason) return alert('All fields are required');
 
-    console.log("Token from localStorage:", localStorage.getItem("token"));
-
     setLoading(true);
     try {
       await api.post('/leave', {
