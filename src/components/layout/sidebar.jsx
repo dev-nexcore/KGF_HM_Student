@@ -54,7 +54,7 @@ export default function Sidebar() {
     <div className="bg-[#BEC5AD]">
       {/* Hamburger menu (Mobile) */}
       <button
-        className="md:hidden fixed top-4 left-4 z-50 p-2 bg-[#A4B494] rounded-md shadow text-black"
+        className="md:hidden fixed top-2 left-2 z-50 p-2 bg-[#A4B494] rounded-md shadow text-black"
         onClick={() => setSidebarOpen(true)}
         aria-label="Open sidebar"
       >
@@ -63,7 +63,7 @@ export default function Sidebar() {
 
       {/* Sidebar Panel */}
       <aside
-        className={`fixed top-0 left-0 z-40 w-60 h-full bg-[#A4B494] py-8 pl-5 flex flex-col justify-between
+        className={`fixed top-0 left-0 z-40 md:w-60 sm:w-[40vw] h-full bg-[#A4B494] py-8 md:pl-5 sm:pl-0 flex flex-col justify-between
         rounded-tr-4xl shadow transform transition-transform duration-300
         ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 md:static`}
       >
@@ -78,7 +78,7 @@ export default function Sidebar() {
 
         <div>
           {/* Logo */}
-          <div className="flex justify-start mb-6 px-4 ml-8.5">
+          <div className="flex justify-start mb-6 px-4 md:ml-8.5 ml-4.5">
             <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-white shadow">
               <img
                 src="/logo.png"

@@ -262,14 +262,17 @@ export default function DashboardContent() {
   useEffect(() => {
     const fetchInspection = async () => {
       try {
-        const res = await api.get('/inspectionSchedule'); // token added by interceptor
-        setInspection(res.data);
-      } catch (err) {
-        if (err.response?.status === 404) {
-          setInspection(null); // No inspection scheduled
+        const res = await api.get('/inspectionSchedule');
+
+        if (res.status === 204 || !res.data?.date) {
+          setInspection(null);
         } else {
-          console.error('Unexpected error while fetching inspection:', err);
+          setInspection(res.data);
         }
+
+      } catch (err) {
+        console.error('Error fetching inspection:', err);
+        setInspection(null);
       } finally {
         setLoading(false);
       }
@@ -279,14 +282,14 @@ export default function DashboardContent() {
   }, []);
 
   return (
-    <main className="bg-[#ffffff] px-6 sm:px-8 lg:px-10 py-2 min-h-screen font-sans">
-      <div className="flex items-center mb-4">
+    <main className="bg-[#ffffff] px-6 sm:px-8 lg:px-2.5 py-2 min-h-screen font-sans">
+      <div className="flex items-center">
         <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-black border-l-4 border-[#4F8CCF] pl-2 mb-4 sm:mb-6">
           Overview
         </h2>
       </div>
 
-      <div className="mt-4 flex flex-wrap justify-start gap-4 sm:gap-6">
+      <div className="flex flex-wrap justify-start gap-4 sm:gap-6">
 
         {/* Check-in / Out Card */}
         <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[600px]">
@@ -457,7 +460,7 @@ export default function DashboardContent() {
                         month: 'long',
                         year: 'numeric',
                       })
-                      : 'Invalid Date'}
+                      : '-'}
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -473,7 +476,7 @@ export default function DashboardContent() {
                 </div>
                 <div className="flex justify-between">
                   <span>Status:</span>
-                  <span className="text-[#4F8DCF] font-semibold">{inspection.status}</span>
+                  <span className="text-[#4F8DCF] font-semibold">{inspection.status || '-'}</span>
                 </div>
               </>
             ) : (
