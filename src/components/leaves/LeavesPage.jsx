@@ -23,34 +23,37 @@ export default function LeavesPage() {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!leaveType || !startDate || !endDate || !reason) return alert('All fields are required');
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!leaveType || !startDate || !endDate || !reason) return alert('All fields are required');
 
-    console.log("Token from localStorage:", localStorage.getItem("token"));
+  // console.log("Token from localStorage:", localStorage.getItem("token"));
+  // console.log("StudentId from localStorage:", studentId);
 
-    setLoading(true);
-    try {
-      await api.post('/leave', {
-        leaveType,
-        otherLeaveType: leaveType === 'Others' ? otherLeaveType : '',
-        startDate,
-        endDate,
-        reason,
-      });
-      toast.success('Applied for leave');
-      setLeaveType('');
-      setStartDate('');
-      setEndDate('');
-      setReason('');
-      fetchLeaveHistory();
-    } catch (err) {
-      console.error('Apply leave error:', err);
-      toast.error('Failed to apply for leave');
-    } finally {
-      setLoading(false);
-    }
-  };
+  setLoading(true);
+  try {
+    await api.post('/leave', {
+      studentId: studentId, // Add this - your backend expects it!
+      leaveType,
+      otherLeaveType: leaveType === 'Others' ? otherLeaveType : '',
+      startDate,
+      endDate,
+      reason,
+    });
+    toast.success('Applied for leave');
+    setLeaveType('');
+    setStartDate('');
+    setEndDate('');
+    setReason('');
+    fetchLeaveHistory();
+  } catch (err) {
+    console.error('Apply leave error:', err);
+    console.error('Error response:', err.response?.data);
+    toast.error('Failed to apply for leave');
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     if (studentId) {
