@@ -247,7 +247,6 @@ export default function DashboardContent() {
         const res = await api.get(`/leaves`);
         if (res.status === 200 && res.data.leaves.length > 0) {
           setLatestLeave(res.data.leaves[0]);
-          console.log("Fetching leave history for studentId:", studentId);
         }
       } catch (error) {
         console.error("Failed to fetch leave history:", error);
