@@ -394,7 +394,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen w-full bg-white overflow-x-hidden">
-      <Toaster position="top-right" />
+      {/* <Toaster position="top-right" /> */}
 
       {/* Mobile Layout */}
       <div className="md:hidden flex flex-col min-h-screen">
