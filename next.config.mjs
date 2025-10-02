@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  basePath: '/student',          // ensures all routes start with /student
+  assetPrefix: '/student/',      // ensures JS/CSS assets load correctly
+  trailingSlash: true,           // helps when serving from a subdirectory
+
   images: {
     remotePatterns: [
       {
