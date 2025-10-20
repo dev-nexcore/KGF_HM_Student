@@ -65,7 +65,7 @@
 //           }`}>
 //             Welcome Back!
 //           </h1>
-          
+
 //           <div className={`transition-all duration-700 delay-500 ease-out transform ${
 //             mounted ? 'scale-100 opacity-100 rotate-0' : 'scale-75 opacity-0 rotate-12'
 //           }`}>
@@ -77,7 +77,7 @@
 //               />
 //             </div>
 //           </div>
-          
+
 //           <p className={`mt-4 text-xs font-bold text-black leading-tight transition-all duration-700 delay-700 ease-out px-2 ${
 //             mounted ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
 //           }`}>
@@ -139,8 +139,8 @@
 
 //               {/* Forgot Password Link */}
 //               <div className="flex justify-end pt-1">
-//                 <p 
-//                   onClick={() => router.push('/forget')} 
+//                 <p
+//                   onClick={() => router.push('/forget')}
 //                   className="text-xs text-blue-500 hover:text-blue-700 hover:underline cursor-pointer transition-all duration-200"
 //                 >
 //                   Forget Password?
@@ -180,7 +180,7 @@
 //           }`}>
 //             Welcome Back!
 //           </h1>
-          
+
 //           <div className={`transition-all duration-700 delay-500 ease-out transform ${
 //             mounted ? 'scale-100 opacity-100 rotate-0' : 'scale-75 opacity-0 rotate-12'
 //           }`}>
@@ -192,7 +192,7 @@
 //               />
 //             </div>
 //           </div>
-          
+
 //           <p className={`mt-10 text-xl font-bold text-black leading-tight transition-all duration-700 delay-700 ease-out ${
 //             mounted ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
 //           }`}>
@@ -256,8 +256,8 @@
 
 //               {/* Forgot Password Link */}
 //               <div className="flex justify-end">
-//                 <p 
-//                   onClick={() => router.push('/forget')} 
+//                 <p
+//                   onClick={() => router.push('/forget')}
 //                   className="text-sm text-blue-500 hover:text-blue-700 hover:underline cursor-pointer transition-all duration-200 transform hover:translate-x-1"
 //                 >
 //                   Forget Password?
@@ -298,11 +298,11 @@
 //             transform: translateY(0);
 //           }
 //         }
-        
+
 //         .animate-fadeInUp {
 //           animation: fadeInUp 0.5s ease-out forwards;
 //         }
-        
+
 //         /* Pulse animation for loading states */
 //         @keyframes pulse {
 //           0%, 100% {
@@ -312,7 +312,7 @@
 //             opacity: 0.5;
 //           }
 //         }
-        
+
 //         .animate-pulse {
 //           animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 //         }
@@ -371,6 +371,7 @@ export default function Login() {
       const res = await api.post("/login", { studentId, otp });
       toast.success("Login successful!");
 
+      sessionStorage.clear(); // ONLY ADDITION - Clear sessionStorage for notice popup
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("studentId", res.data.student.studentId);
 
@@ -378,7 +379,7 @@ export default function Login() {
     } catch (err) {
       const msg = err?.response?.data?.message || "Login failed";
       toast.error(msg);
-    } finally {
+    } finally { 
       setLoading(false);
     }
   };
@@ -400,7 +401,9 @@ export default function Login() {
       <div className="md:hidden flex flex-col min-h-screen">
         <div
           className={`bg-[#A4B494] px-4 py-8 flex flex-col items-center justify-center text-center transition-all duration-1000 ease-out ${
-            mounted ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
+            mounted
+              ? "translate-y-0 opacity-100"
+              : "-translate-y-full opacity-0"
           }`}
         >
           <h1
@@ -413,11 +416,17 @@ export default function Login() {
 
           <div
             className={`transition-all duration-700 delay-500 ease-out transform ${
-              mounted ? "scale-100 opacity-100 rotate-0" : "scale-75 opacity-0 rotate-12"
+              mounted
+                ? "scale-100 opacity-100 rotate-0"
+                : "scale-75 opacity-0 rotate-12"
             }`}
           >
             <div className="w-32 h-32 rounded-xl overflow-hidden bg-white shadow-lg">
-              <img src="logo.png" alt="Kokan Global Foundation" className="w-full h-full object-cover" />
+              <img
+                src="logo.png"
+                alt="Kokan Global Foundation"
+                className="w-full h-full object-cover"
+              />
             </div>
           </div>
 
@@ -452,7 +461,9 @@ export default function Login() {
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Student ID */}
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-black block">User ID</label>
+                <label className="text-sm font-semibold text-black block">
+                  User ID
+                </label>
                 <input
                   type="text"
                   value={studentId}
@@ -467,7 +478,9 @@ export default function Login() {
               {/* OTP Input */}
               {otpSent && (
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-black block">OTP</label>
+                  <label className="text-sm font-semibold text-black block">
+                    OTP
+                  </label>
                   <input
                     type="text"
                     value={otp}
@@ -499,7 +512,9 @@ export default function Login() {
                   {loading ? (
                     <div className="flex items-center justify-center space-x-2">
                       <div className="w-3 h-3 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-                      <span>{otpSent ? "Logging in..." : "Sending OTP..."}</span>
+                      <span>
+                        {otpSent ? "Logging in..." : "Sending OTP..."}
+                      </span>
                     </div>
                   ) : otpSent ? (
                     "Login"
@@ -518,7 +533,9 @@ export default function Login() {
         {/* Left Panel */}
         <div
           className={`w-1/2 bg-[#A4B494] p-8 rounded-r-[5rem] flex flex-col items-center justify-center text-center transition-all duration-1000 ease-out ${
-            mounted ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0"
+            mounted
+              ? "translate-x-0 opacity-100"
+              : "-translate-x-full opacity-0"
           }`}
         >
           <h1
@@ -531,11 +548,17 @@ export default function Login() {
 
           <div
             className={`transition-all duration-700 delay-500 ease-out transform ${
-              mounted ? "scale-100 opacity-100 rotate-0" : "scale-75 opacity-0 rotate-12"
+              mounted
+                ? "scale-100 opacity-100 rotate-0"
+                : "scale-75 opacity-0 rotate-12"
             }`}
           >
             <div className="w-72 h-72 rounded-xl overflow-hidden bg-white shadow-lg hover:scale-110 transition-transform duration-300 ease-in-out">
-              <img src="logo.png" alt="Kokan Global Foundation" className="w-full h-full object-cover" />
+              <img
+                src="logo.png"
+                alt="Kokan Global Foundation"
+                className="w-full h-full object-cover"
+              />
             </div>
           </div>
 
@@ -571,9 +594,9 @@ export default function Login() {
           >
             <form onSubmit={handleSubmit} className="w-full space-y-6">
               {/* Student ID */}
-            <label className="text-xl font-semibold text-black w-full text-left block transition-colors duration-200">
-                    Student ID
-                  </label>
+              <label className="text-xl font-semibold text-black w-full text-left block transition-colors duration-200">
+                Student ID
+              </label>
               <input
                 type="text"
                 value={studentId}

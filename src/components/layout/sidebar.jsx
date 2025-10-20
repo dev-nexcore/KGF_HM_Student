@@ -114,7 +114,7 @@ export default function Sidebar() {
           <div className="flex justify-start mb-1 px-4 ml-8.5">
             <button
               onClick={handleLogoutClick}
-              className="flex items-center gap-2 text-black text-sm hover:underline font-bold"
+              className="flex items-center gap-2 text-black text-sm hover:underline font-bold cursor-pointer"
             >
               <Image
                 src="/icons/logout.png"
@@ -150,13 +150,13 @@ export default function Sidebar() {
             <div className="flex gap-3 justify-end">
               <button
                 onClick={handleLogoutCancel}
-                className="px-4 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+                className="px-4 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleLogoutConfirm}
-                className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+                className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors cursor-pointer"
               >
                 Logout
               </button>

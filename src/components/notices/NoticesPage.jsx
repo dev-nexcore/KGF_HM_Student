@@ -118,7 +118,7 @@ const NoticePage = () => {
             <div className="flex justify-center mt-6 sm:mt-8">
               <button
                 onClick={handleShowMore}
-                className="bg-[#4F8CCF] hover:bg-[#3a6ba3] text-white font-semibold py-2 px-6 rounded-md transition-colors duration-200 shadow-md"
+                className="bg-[#4F8CCF] hover:bg-[#3a6ba3] text-white font-semibold py-2 px-6 rounded-md transition-colors duration-200 shadow-md cursor-pointer"
               >
                 Show More
               </button>

@@ -1,15 +1,12 @@
-'use client';
-import React, { useState, useEffect, useRef } from 'react';
-import { Pie } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  ArcElement,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-import api from '@/lib/api';
+"use client";
+import React, { useState, useEffect, useRef } from "react";
+import { Pie } from "react-chartjs-2";
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+import api from "@/lib/api";
 import { toast, Toaster } from "react-hot-toast";
-import Link from 'next/link';
+import Link from "next/link";
+import NoticePopup from "../notices/NoticePopup";
+
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -20,32 +17,41 @@ const MAX_DISTANCE_KM = 0.3; // ~300 meters
 export default function DashboardContent() {
   const [studentId, setStudentId] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [checkStatus, setCheckStatus] = useState('Pending Check-in');
-  const [checkTime, setCheckTime] = useState('--:--:--');
-  const [roomNo, setRoomNo] = useState('');
+  const [checkStatus, setCheckStatus] = useState("Pending Check-in");
+  const [checkTime, setCheckTime] = useState("--:--:--");
+  const [roomNo, setRoomNo] = useState("");
   const [fees, setFees] = useState([]);
   const [latestLeave, setLatestLeave] = useState(null);
   const [inspection, setInspection] = useState(null);
-  const [attendanceData, setAttendanceData] = useState({ present: 0, absent: 0 });
+  const [attendanceData, setAttendanceData] = useState({
+    present: 0,
+    absent: 0,
+  });
   const [totalDays, setTotalDays] = useState(0);
-  const [selectedRange, setSelectedRange] = useState('day');
+  const [selectedRange, setSelectedRange] = useState("day");
   const [barcodeId, setBarcodeId] = useState("");
   const [floor, setFloor] = useState("");
   const [isWithinRange, setIsWithinRange] = useState(false);
   const [userCoords, setUserCoords] = useState(null);
   const [selfieModalOpen, setSelfieModalOpen] = useState(false);
-  const [isCheckIn, setIsCheckIn] = useState(true); // To know which action to do
+  const [isCheckIn, setIsCheckIn] = useState(true);
   const videoRef = useRef(null);
-  const streamRef = useRef(null); // store media stream
+  const streamRef = useRef(null);
+
+  // Notice Popup States
+  const [latestNotice, setLatestNotice] = useState(null);
+  const [showNoticePopup, setShowNoticePopup] = useState(false);
 
   function getDistanceFromHostel(lat, lng) {
-    const toRad = (value) => value * Math.PI / 180;
-    const R = 6371; // km
+    const toRad = (value) => (value * Math.PI) / 180;
+    const R = 6371;
     const dLat = toRad(lat - HOSTEL_LAT);
     const dLng = toRad(lng - HOSTEL_LNG);
-    const a = Math.sin(dLat / 2) ** 2 +
-      Math.cos(toRad(HOSTEL_LAT)) * Math.cos(toRad(lat)) *
-      Math.sin(dLng / 2) ** 2;
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(HOSTEL_LAT)) *
+        Math.cos(toRad(lat)) *
+        Math.sin(dLng / 2) ** 2;
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }
@@ -56,7 +62,7 @@ export default function DashboardContent() {
         const { latitude, longitude } = pos.coords;
         const dist = getDistanceFromHostel(latitude, longitude);
         setIsWithinRange(dist <= MAX_DISTANCE_KM);
-        setUserCoords({ lat: latitude, lng: longitude }); // <--- Add this
+        setUserCoords({ lat: latitude, lng: longitude });
       },
       () => setIsWithinRange(false),
       { enableHighAccuracy: true }
@@ -65,14 +71,15 @@ export default function DashboardContent() {
 
   useEffect(() => {
     if (selfieModalOpen) {
-      navigator.mediaDevices.getUserMedia({ video: true })
-        .then(stream => {
+      navigator.mediaDevices
+        .getUserMedia({ video: true })
+        .then((stream) => {
           streamRef.current = stream;
           if (videoRef.current) {
             videoRef.current.srcObject = stream;
           }
         })
-        .catch(err => {
+        .catch((err) => {
           toast.error("Camera access denied.");
           setSelfieModalOpen(false);
         });
@@ -81,7 +88,7 @@ export default function DashboardContent() {
 
   function stopCamera() {
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
   }
@@ -95,14 +102,14 @@ export default function DashboardContent() {
     const video = videoRef.current;
     if (!video) return;
 
-    const canvas = document.createElement('canvas');
+    const canvas = document.createElement("canvas");
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    const selfieDataURL = canvas.toDataURL('image/jpeg');
+    const selfieDataURL = canvas.toDataURL("image/jpeg");
 
     stopCamera();
     setSelfieModalOpen(false);
@@ -119,34 +126,39 @@ export default function DashboardContent() {
 
     try {
       setLoading(true);
-      const res = await api.post(isCheckIn ? '/check-in' : '/check-out', {
+      const res = await api.post(isCheckIn ? "/check-in" : "/check-out", {
         selfie: selfieDataURL,
         location: userCoords,
       });
 
       if (res.status === 200) {
-        const newStatus = isCheckIn ? 'Checked In' : 'Checked Out';
-        const dateField = isCheckIn ? res.data.checkInDate : res.data.checkOutDate;
+        const newStatus = isCheckIn ? "Checked In" : "Checked Out";
+        const dateField = isCheckIn
+          ? res.data.checkInDate
+          : res.data.checkOutDate;
 
         setCheckStatus(newStatus);
-        setCheckTime(dateField || new Date().toLocaleString('en-US', {
-          timeZone: 'Asia/Kolkata',
-          hour12: true,
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit'
-        }));
+        setCheckTime(
+          dateField ||
+            new Date().toLocaleString("en-US", {
+              timeZone: "Asia/Kolkata",
+              hour12: true,
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+            })
+        );
 
         toast.success(`${newStatus} successfully`);
 
         if (isCheckIn) {
-          setAttendanceData(prev => ({
+          setAttendanceData((prev) => ({
             ...prev,
             present: prev.present + 1,
-            absent: prev.absent - 1
+            absent: prev.absent - 1,
           }));
         }
       } else {
@@ -161,9 +173,84 @@ export default function DashboardContent() {
   }
 
   useEffect(() => {
-    const id = localStorage.getItem('studentId');
+    const id = localStorage.getItem("studentId");
     setStudentId(id);
   }, []);
+
+  // Check for new notices - ONLY SHOW ONCE PER LOGIN SESSION
+  useEffect(() => {
+    if (!studentId) return;
+
+    let isMounted = true;
+
+    const checkForNewNotice = async () => {
+      try {
+        // Check if notice was already shown in this session
+        const noticeShownThisSession = sessionStorage.getItem(
+          `noticeShown_${studentId}`
+        );
+
+        if (noticeShownThisSession === "true") {
+          console.log("Notice already shown in this session");
+          return; // Don't show again in same session
+        }
+
+        const res = await api.get(`/notices`);
+
+        if (!isMounted) return;
+
+        if (res.data.notices && res.data.notices.length > 0) {
+          // Sort by issueDate descending (latest first)
+          const sortedNotices = [...res.data.notices].sort(
+            (a, b) => new Date(b.issueDate) - new Date(a.issueDate)
+          );
+
+          const newestNotice = sortedNotices[0];
+
+          // Check if student has permanently marked this notice as read
+          const lastReadNoticeId = localStorage.getItem(
+            `lastReadNotice_${studentId}`
+          );
+
+          // Show popup only if it's a new notice AND not shown this session
+          if (lastReadNoticeId !== (newestNotice._id || newestNotice.id)) {
+            setLatestNotice(newestNotice);
+            setShowNoticePopup(true);
+
+            // Mark that we've shown a notice in this session
+            sessionStorage.setItem(`noticeShown_${studentId}`, "true");
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching latest notice:", err);
+      }
+    };
+
+    // Delay for better UX
+    const timer = setTimeout(checkForNewNotice, 1000);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
+  }, [studentId]);
+
+  // Handle marking notice as read - PERMANENT
+  const handleMarkNoticeAsRead = () => {
+    if (latestNotice && studentId) {
+      // Save to localStorage - persists even after logout
+      localStorage.setItem(
+        `lastReadNotice_${studentId}`,
+        latestNotice._id || latestNotice.id
+      );
+
+      // Also mark in sessionStorage that we've shown it
+      sessionStorage.setItem(`noticeShown_${studentId}`, "true");
+    }
+
+    // Close the popup
+    setShowNoticePopup(false);
+  };
 
   useEffect(() => {
     if (!studentId) return;
@@ -180,16 +267,16 @@ export default function DashboardContent() {
         }
       })
       .catch((err) => {
-        console.error('Failed to fetch attendance summary', err);
+        console.error("Failed to fetch attendance summary", err);
       });
   }, [studentId, selectedRange]);
 
   const chartData = {
-    labels: ['Present', 'Absent'],
+    labels: ["Present", "Absent"],
     datasets: [
       {
         data: [attendanceData.present ?? 0, attendanceData.absent ?? 0],
-        backgroundColor: ['#4F8DCF', '#FF0000'],
+        backgroundColor: ["#4F8DCF", "#FF0000"],
         borderWidth: 0,
       },
     ],
@@ -203,7 +290,7 @@ export default function DashboardContent() {
         const decoded = JSON.parse(atob(token.split(".")[1]));
         const studentId = decoded.studentId;
 
-        const res = await api.get(`/profile/${studentId}`);// No studentId in path now
+        const res = await api.get(`/profile/${studentId}`);
         if (res.status === 200) {
           const data = res.data;
           setCheckStatus(data.checkStatus || "Pending Check-in");
@@ -223,7 +310,6 @@ export default function DashboardContent() {
     fetchProfile();
   }, []);
 
-
   useEffect(() => {
     const fetchFeesStatus = async () => {
       try {
@@ -232,7 +318,7 @@ export default function DashboardContent() {
           setFees(res.data.fees);
         }
       } catch (error) {
-        console.error('Failed to fetch fees:', error);
+        console.error("Failed to fetch fees:", error);
       }
     };
 
@@ -261,16 +347,15 @@ export default function DashboardContent() {
   useEffect(() => {
     const fetchInspection = async () => {
       try {
-        const res = await api.get('/inspectionSchedule');
+        const res = await api.get("/inspectionSchedule");
 
         if (res.status === 204 || !res.data?.date) {
           setInspection(null);
         } else {
           setInspection(res.data);
         }
-
       } catch (err) {
-        console.error('Error fetching inspection:', err);
+        console.error("Error fetching inspection:", err);
         setInspection(null);
       } finally {
         setLoading(false);
@@ -282,6 +367,8 @@ export default function DashboardContent() {
 
   return (
     <main className="bg-[#ffffff] px-6 sm:px-8 lg:px-2.5 py-2 min-h-screen font-sans">
+      <Toaster position="top-right" />
+
       <div className="flex items-center">
         <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-black border-l-4 border-[#4F8CCF] pl-2 mb-4 sm:mb-6">
           Overview
@@ -289,22 +376,24 @@ export default function DashboardContent() {
       </div>
 
       <div className="flex flex-wrap justify-start gap-4 sm:gap-6">
-
         {/* Check-in / Out Card */}
         <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[600px]">
           <div className="bg-[#AAB491] px-6 py-3 rounded-t-lg">
-            <h2 className="text-lg font-semibold text-black text-center">Check-in /Out Status</h2>
+            <h2 className="text-lg font-semibold text-black text-center">
+              Check-in /Out Status
+            </h2>
           </div>
           <div className="p-8 pt-10 space-y-7 min-h-[280px]">
             <div className="flex justify-center items-center gap-3 text-base font-semibold text-black">
               <span>Status:</span>
               <span
-                className={`${checkStatus === 'Checked In'
-                  ? 'text-green-600'
-                  : checkStatus === 'Checked Out'
-                    ? 'text-blue-600'
-                    : 'text-[#FF7700]'
-                  }`}
+                className={`${
+                  checkStatus === "Checked In"
+                    ? "text-green-600"
+                    : checkStatus === "Checked Out"
+                    ? "text-blue-600"
+                    : "text-[#FF7700]"
+                }`}
               >
                 {checkStatus}
               </span>
@@ -328,8 +417,8 @@ export default function DashboardContent() {
                     ? "Checking Out..."
                     : "Checking In..."
                   : checkStatus === "Checked In"
-                    ? "Check-Out Now"
-                    : "Check-In Now"}
+                  ? "Check-Out Now"
+                  : "Check-In Now"}
               </button>
             </div>
           </div>
@@ -371,11 +460,13 @@ export default function DashboardContent() {
         {/* Attendance Summary */}
         <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[600px]">
           <div className="bg-[#AAB491] px-6 py-3 rounded-t-lg flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-black">Attendance Summary</h2>
+            <h2 className="text-lg font-semibold text-black">
+              Attendance Summary
+            </h2>
             <select
               className="text-base text-black rounded px-3 py-2 bg-white"
               value={selectedRange}
-              onChange={e => setSelectedRange(e.target.value.toLowerCase())}
+              onChange={(e) => setSelectedRange(e.target.value.toLowerCase())}
             >
               <option value="day">Day</option>
               <option value="week">Week</option>
@@ -384,55 +475,47 @@ export default function DashboardContent() {
           </div>
 
           <div className="p-8 pt-9 flex min-h-[280px]">
-            {/* Legend */}
             <div className="space-y-4 text-base mt-3 relative">
-              <div
-                className="flex items-center gap-3 relative group"
-              >
+              <div className="flex items-center gap-3 relative group">
                 <span className="w-4 h-4 rounded-full bg-[#4F8DCF]"></span>
                 <span className="text-black font-medium">Present</span>
-
-                {/* Tooltip */}
                 <div className="absolute left-28 top-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                   <div className="relative bg-gray-900 text-white text-xs px-3 py-1 rounded-md shadow-md">
-                    {attendanceData.present ?? 0} day{attendanceData.present === 1 ? '' : 's'}
-
-                    {/* Tooltip Arrow */}
+                    {attendanceData.present ?? 0} day
+                    {attendanceData.present === 1 ? "" : "s"}
                     <div className="absolute left-[-6px] top-1/2 -translate-y-1/2 w-0 h-0 border-t-6 border-t-transparent border-b-6 border-b-transparent border-r-6 border-r-gray-900"></div>
                   </div>
                 </div>
               </div>
 
-              <div
-                className="flex items-center gap-3 relative group"
-              >
+              <div className="flex items-center gap-3 relative group">
                 <span className="w-4 h-4 rounded-full bg-[#E30007]"></span>
                 <span className="text-black font-medium">Absent</span>
-
                 <div className="absolute left-28 top-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                   <div className="relative bg-gray-900 text-white text-xs px-3 py-1 rounded-md shadow-md">
-                    {attendanceData.absent ?? 0} day{attendanceData.absent === 1 ? '' : 's'}
+                    {attendanceData.absent ?? 0} day
+                    {attendanceData.absent === 1 ? "" : "s"}
                     <div className="absolute left-[-6px] top-1/2 -translate-y-1/2 w-0 h-0 border-t-6 border-t-transparent border-b-6 border-b-transparent border-r-6 border-r-gray-900"></div>
                   </div>
                 </div>
               </div>
-
             </div>
 
-            {/* Pie Chart */}
             <div className="flex-1 flex justify-center items-center">
               <div className="relative w-36 h-36">
                 <Pie
                   data={chartData}
                   options={{
-                    cutout: '50%',
+                    cutout: "50%",
                     plugins: { legend: { display: false } },
                   }}
                 />
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center">
                     <p className="text-base text-gray-500">Total</p>
-                    <p className="text-xl font-bold text-black">{totalDays ?? '-'}</p>
+                    <p className="text-xl font-bold text-black">
+                      {totalDays ?? "-"}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -443,7 +526,9 @@ export default function DashboardContent() {
         {/* Room Inspection Schedule */}
         <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[600px] min-h-[300px]">
           <div className="bg-[#AAB491] px-6 py-3 rounded-t-lg">
-            <h2 className="text-lg font-semibold text-black">Room Inspection Schedule</h2>
+            <h2 className="text-lg font-semibold text-black">
+              Room Inspection Schedule
+            </h2>
           </div>
           <div className="p-7 flex flex-col gap-5 text-base font-semibold text-black">
             {loading ? (
@@ -454,12 +539,12 @@ export default function DashboardContent() {
                   <span>Next Inspection:</span>
                   <span>
                     {inspection.date
-                      ? new Date(inspection.date).toLocaleDateString('en-IN', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric',
-                      })
-                      : '-'}
+                      ? new Date(inspection.date).toLocaleDateString("en-IN", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        })
+                      : "-"}
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -467,37 +552,58 @@ export default function DashboardContent() {
                   <span>
                     {inspection.date
                       ? new Date(inspection.date).toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })
-                      : '-'}
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : "-"}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span>Status:</span>
-                  <span className="text-[#4F8DCF] font-semibold">{inspection.status || '-'}</span>
+                  <span className="text-[#4F8DCF] font-semibold">
+                    {inspection.status || "-"}
+                  </span>
                 </div>
               </>
             ) : (
-              <div className="text-base text-black">No upcoming inspections found</div>
+              <div className="text-base text-black">
+                No upcoming inspections found
+              </div>
             )}
           </div>
         </div>
 
         {/* Bed Allotment */}
-        <Link href="/profile" passHref className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[600px] min-h-[300px]">
+        <Link
+          href="/profile"
+          passHref
+          className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[600px] min-h-[300px]"
+        >
           <div className="bg-[#AAB491] px-6 py-3 rounded-t-lg">
             <h2 className="text-lg font-semibold text-black">Bed Allotment</h2>
           </div>
           <div className="p-7 flex flex-col gap-5 text-base font-semibold text-black">
-            <div className="flex justify-between"><span>Room no:</span><span>Room {roomNo}</span></div>
-            <div className="flex justify-between"><span>Floor:</span><span>Floor {floor}</span></div>
-            <div className="flex justify-between"><span>BedNo:</span><span>{barcodeId}</span></div>
+            <div className="flex justify-between">
+              <span>Room no:</span>
+              <span>Room {roomNo}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Floor:</span>
+              <span>Floor {floor}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>BedNo:</span>
+              <span>{barcodeId}</span>
+            </div>
           </div>
         </Link>
 
         {/* Fee Alerts */}
-        <Link href="/fees-status" passHref className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[600px] min-h-[300px]">
+        <Link
+          href="/fees-status"
+          passHref
+          className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[600px] min-h-[300px]"
+        >
           <div className="bg-[#AAB491] px-6 py-3 rounded-t-lg">
             <h2 className="text-lg font-semibold text-black">Fee Alerts</h2>
           </div>
@@ -509,11 +615,11 @@ export default function DashboardContent() {
                     <span>{fee.feeType} Fee:</span>
                     <span
                       className={
-                        fee.status === 'paid'
-                          ? 'text-green-600'
-                          : fee.status === 'unpaid'
-                            ? 'text-yellow-600'
-                            : 'text-red-600'
+                        fee.status === "paid"
+                          ? "text-green-600"
+                          : fee.status === "unpaid"
+                          ? "text-yellow-600"
+                          : "text-red-600"
                       }
                     >
                       {fee.status.charAt(0).toUpperCase() + fee.status.slice(1)}
@@ -521,13 +627,17 @@ export default function DashboardContent() {
                   </div>
                   <div className="flex justify-between">
                     <span>Due Date:</span>
-                    <span>{new Date(fee.dueDate).toLocaleDateString('en-IN')}</span>
+                    <span>
+                      {new Date(fee.dueDate).toLocaleDateString("en-IN")}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span>Amount:</span>
                     <span>₹ {fee.amount}</span>
                   </div>
-                  {index < fees.length - 1 && <hr className="border-gray-300" />}
+                  {index < fees.length - 1 && (
+                    <hr className="border-gray-300" />
+                  )}
                 </div>
               ))
             ) : (
@@ -537,24 +647,35 @@ export default function DashboardContent() {
         </Link>
 
         {/* Leave Approval Status */}
-        <Link href="/leaves" passHref className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[600px] min-h-[300px]">
+        <Link
+          href="/leaves"
+          passHref
+          className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[600px] min-h-[300px]"
+        >
           <div className="bg-[#AAB491] px-6 py-3 rounded-t-lg">
-            <h2 className="text-lg font-semibold text-black">Leave Approval Status</h2>
+            <h2 className="text-lg font-semibold text-black">
+              Leave Approval Status
+            </h2>
           </div>
           <div className="p-7 flex flex-col gap-5 text-base font-semibold text-black">
             {latestLeave ? (
               <>
                 <div className="flex justify-between">
                   <span>Last request:</span>
-                  <span className="truncate max-w-[60%]">{latestLeave.leaveType}</span>
+                  <span className="truncate max-w-[60%]">
+                    {latestLeave.leaveType}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span>Status:</span>
                   <span
-                    className={`${latestLeave.status === 'approved' ? 'text-[#36FF09]' :
-                      latestLeave.status === 'rejected' ? 'text-red-600' :
-                        'text-yellow-500'
-                      } font-semibold`}
+                    className={`${
+                      latestLeave.status === "approved"
+                        ? "text-[#36FF09]"
+                        : latestLeave.status === "rejected"
+                        ? "text-red-600"
+                        : "text-yellow-500"
+                    } font-semibold`}
                   >
                     {latestLeave.status}
                   </span>
@@ -566,6 +687,14 @@ export default function DashboardContent() {
           </div>
         </Link>
       </div>
+
+      {/* Notice Popup */}
+      {showNoticePopup && (
+        <NoticePopup
+          notice={latestNotice}
+          onMarkAsRead={handleMarkNoticeAsRead}
+        />
+      )}
     </main>
   );
 }
