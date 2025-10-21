@@ -1,9 +1,9 @@
-'use client';
-import { useEffect, useState } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
-import Link from 'next/link';
-import Image from 'next/image';
-import api from '@/lib/api';
+"use client";
+import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
+import api from "@/lib/api";
 
 export default function Navbar() {
   const [studentName, setStudentName] = useState("...");
@@ -16,8 +16,8 @@ export default function Navbar() {
   const router = useRouter();
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const id = localStorage.getItem('studentId');
+    if (typeof window !== "undefined") {
+      const id = localStorage.getItem("studentId");
       setStudentId(id);
     }
   }, []);
@@ -55,35 +55,33 @@ export default function Navbar() {
     fetchNotifications();
   }, []);
 
-
   const markAsSeen = async (type, id) => {
     try {
-      await api.post('/notifications/mark-seen', { type });
+      await api.post("/notifications/mark-seen", { type });
       setHasUnseen(false);
-      setNotifications(prev => prev.filter(notif => notif._id !== id)); // ✅ filter with _id
+      setNotifications((prev) => prev.filter((notif) => notif._id !== id));
     } catch (err) {
       console.error("Failed to mark notifications as seen:", err);
     }
   };
 
-
   return (
-    <nav className="flex items-center justify-between px-4 sm:px-6 py-4 bg-[#BEC5AD] h-20 min-h-[80px]">
+    <nav className="flex items-center justify-between px-3 sm:px-4 md:px-6 py-4 bg-[#BEC5AD] h-20 min-h-[80px]">
       {/* Left Text */}
-      <div className="pl-13 sm:pl-6 md:pl-10 lg:pl-0 flex-1 min-w-0">
-        <h2 className="text-base sm:text-lg md:text-xl font-semibold text-gray-800 truncate">
+      <div className="pl-2 sm:pl-4 md:pl-6 lg:pl-0 flex-1 min-w-0">
+        <h2 className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold text-gray-800 truncate">
           Welcome Back, {studentName}
         </h2>
-        <p className="text-xs sm:text-sm text-gray-600 truncate">
+        <p className="text-xs sm:text-xs md:text-sm text-gray-600 truncate">
           - have a great day
         </p>
       </div>
 
       {/* Right Icons aligned on same line */}
-      <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
+      <div className="flex items-center gap-2 sm:gap-3 md:gap-4 flex-shrink-0">
         <div className="relative">
           <button
-            onClick={() => setShowDropdown(prev => !prev)}
+            onClick={() => setShowDropdown((prev) => !prev)}
             className="relative"
             aria-label="Notifications"
           >
@@ -100,13 +98,13 @@ export default function Navbar() {
           </button>
 
           {showDropdown && (
-            <div className="absolute right-0 mt-2 w-72 max-h-96 overflow-y-auto bg-white border border-gray-300 rounded-md shadow-md z-50">
+            <div className="absolute right-0 mt-2 w-screen sm:w-80 md:w-96 max-h-80 sm:max-h-96 overflow-y-auto bg-white border border-gray-300 rounded-md shadow-md z-50 -mx-3 sm:mx-0">
               {notifications.length > 0 ? (
                 notifications.map((notif, i) => (
                   <Link
                     href={notif.link}
                     key={notif._id || i}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 border-b"
+                    className="block px-3 sm:px-4 py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-100 border-b"
                     onClick={(e) => {
                       e.preventDefault();
                       markAsSeen(notif.type, notif._id);
@@ -118,14 +116,16 @@ export default function Navbar() {
                   </Link>
                 ))
               ) : (
-                <div className="px-4 py-2 text-sm text-gray-500">No notifications</div>
-                )}
+                <div className="px-3 sm:px-4 py-2 text-xs sm:text-sm text-gray-500">
+                  No notifications
+                </div>
+              )}
             </div>
           )}
         </div>
         <Link href="/profile" aria-label="Go to profile">
           {studentProfile ? (
-            <div className="w-8 h-8 sm:w-15 sm:h-15 rounded-full overflow-hidden bg-white border border-gray-300 cursor-pointer">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden bg-white border border-gray-300 cursor-pointer">
               <Image
                 src={
                   studentProfile && studentProfile !== "null"
