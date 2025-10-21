@@ -15,6 +15,53 @@ export default function Complaints() {
   const [otherComplaintType, setOtherComplaintType] = useState("");
   const [selectedFiles, setSelectedFiles] = useState([]);
 
+  // Maintenance-specific fields
+  const [floorNumber, setFloorNumber] = useState("");
+  const [maintenanceItems, setMaintenanceItems] = useState([]);
+
+  const maintenanceOptions = [
+    "Electrical Issues",
+    "Plumbing Issues",
+    "Water Supply Problem",
+    "Furniture Damage",
+    "Door Repair",
+    "Window Repair",
+    "Air Conditioning",
+    "Fan Issues",
+    "Ventilation Problem",
+    "Lighting Issues",
+    "Bulb Replacement",
+    "Bed Issues",
+    "Mattress Problem",
+    "Cupboard Issues",
+    "Wardrobe Problem",
+    "Study Table Issues",
+    "Chair Damage",
+    "Bathroom Fittings",
+    "Toilet Issues",
+    "Flush Problem",
+    "Washbasin Issues",
+    "Tap Leakage",
+    "Wall Damage",
+    "Paint Issues",
+    "Ceiling Issues",
+    "Roof Leakage",
+    "Flooring Issues",
+    "Tiles Damage",
+    "Lock Issues",
+    "Key Problem",
+    "Wi-Fi Problem",
+    "Internet Issues",
+    "Geyser Problem",
+    "Water Heater Issues",
+    "Pest Control",
+    "Drainage Problem",
+    "Sewage Issues",
+    "Curtains Issues",
+    "Blinds Problem",
+    "Other",
+  ];
+
   // Get student ID from localStorage
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -42,16 +89,34 @@ export default function Complaints() {
     fetchComplaints();
   }, [studentId]);
 
+  // Handle complaint type change
+  const handleComplaintTypeChange = (e) => {
+    const value = e.target.value;
+    setComplaintType(value);
+
+    // Reset maintenance fields when switching away from Maintenance issue
+    if (value !== "Maintenance issue") {
+      setFloorNumber("");
+      setMaintenanceItems([]);
+    }
+  };
+
+  // Handle maintenance item toggle
+  const toggleMaintenanceItem = (item) => {
+    setMaintenanceItems((prev) =>
+      prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item]
+    );
+  };
+
   // Handle file selection
   const handleFileSelect = (e) => {
     const files = Array.from(e.target.files);
 
-    // Validate file types and sizes
     const validFiles = files.filter((file) => {
       const isValidType = /\.(jpg|jpeg|png|gif|mp4|mov|avi|webm)$/i.test(
         file.name
       );
-      const isValidSize = file.size <= 50 * 1024 * 1024; // 50MB
+      const isValidSize = file.size <= 50 * 1024 * 1024;
 
       if (!isValidType) {
         toast.error(
@@ -66,7 +131,6 @@ export default function Complaints() {
       return true;
     });
 
-    // Limit to 5 files maximum
     const totalFiles = selectedFiles.length + validFiles.length;
     if (totalFiles > 5) {
       toast.error("Maximum 5 files allowed");
@@ -97,15 +161,47 @@ export default function Complaints() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
-  // Submit form
+  // Submit handler
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!complaintType || !subject || !description || !studentId) return;
 
-    // Validate "Others" type has specification
+    // Validate all required fields
+    if (!complaintType) {
+      toast.error("Please select a complaint type");
+      return;
+    }
+
+    if (!subject.trim()) {
+      toast.error("Please enter a subject");
+      return;
+    }
+
+    if (!description.trim()) {
+      toast.error("Please enter a description");
+      return;
+    }
+
+    if (!studentId) {
+      toast.error("Student not identified. Please login again.");
+      return;
+    }
+
+    // Validate "Others" type
     if (complaintType === "Others" && !otherComplaintType.trim()) {
       toast.error("Please specify the complaint type");
       return;
+    }
+
+    // Validate Maintenance fields
+    if (complaintType === "Maintenance issue") {
+      if (!floorNumber.trim()) {
+        toast.error("Please specify the floor number");
+        return;
+      }
+      if (maintenanceItems.length === 0) {
+        toast.error("Please select at least one maintenance item");
+        return;
+      }
     }
 
     setLoading(true);
@@ -115,9 +211,14 @@ export default function Complaints() {
       formData.append("subject", subject);
       formData.append("description", description);
 
-      // Add otherComplaintType if "Others" is selected
       if (complaintType === "Others" && otherComplaintType) {
         formData.append("otherComplaintType", otherComplaintType);
+      }
+
+      // Add maintenance fields
+      if (complaintType === "Maintenance issue") {
+        formData.append("floorNumber", floorNumber);
+        formData.append("maintenanceItems", JSON.stringify(maintenanceItems));
       }
 
       // Append files
@@ -131,14 +232,16 @@ export default function Complaints() {
         },
       });
 
-      toast.success("Complaint filed");
+      toast.success("Complaint filed successfully");
 
-      // Reset form
+      // Reset
       setComplaintType("");
       setOtherComplaintType("");
       setSubject("");
       setDescription("");
       setSelectedFiles([]);
+      setFloorNumber("");
+      setMaintenanceItems([]);
 
       // Re-fetch history
       const res = await api.get(`/complaints`);
@@ -167,279 +270,322 @@ export default function Complaints() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-white pt-8 pb-6 sm:pb-10 sm:px-6 dark:bg-white overflow-hidden">
-      <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-black border-l-4 border-[#4F8CCF] pl-2 mb-4 sm:mb-9">
+    <div className="w-full bg-white px-4 sm:px-6 py-6 sm:py-8">
+      <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-black border-l-4 border-[#4F8CCF] pl-2 mb-6 sm:mb-8">
         Complaints
       </h2>
 
       {/* Complaint Application Form */}
-      <div className="mt-[-10px] ml-0.5">
-        <div className="bg-white rounded-lg sm:rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.25)] mb-6 sm:mb-8 lg:mb-10 w-full text-black">
-          <div className="bg-[#A4B494] text-white rounded-t-lg sm:rounded-t-xl px-4 sm:px-6 md:px-8 lg:px-10 py-3 sm:py-4 lg:py-5 font-semibold text-sm sm:text-base md:text-lg lg:text-xl">
-            Complaint Application Form
-          </div>
+      <div className="bg-white rounded-lg sm:rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.25)] mb-6 sm:mb-8 text-black max-w-full">
+        <div className="bg-[#A4B494] text-white rounded-t-lg sm:rounded-t-xl px-4 sm:px-6 md:px-8 py-3 sm:py-4 font-semibold text-sm sm:text-base md:text-lg">
+          Complaint Application Form
+        </div>
 
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-3 sm:space-y-4 md:space-y-6 lg:space-y-8 px-4 sm:px-6 md:px-8 lg:px-10 py-4 sm:py-6 md:py-8 lg:py-10"
-          >
-            <div>
-              <label className="block mb-2 text-sm sm:text-base font-semibold text-gray-800">
-                Complaint Type
-              </label>
-              <select
-                value={complaintType}
-                onChange={(e) => setComplaintType(e.target.value)}
-                className="w-full px-4 py-3 rounded-md shadow-md border border-gray-300 text-sm sm:text-base"
-                required
-              >
-                <option value="">Choose Complaint Type</option>
-                <option value="Noise Disturbance">Noise Disturbance</option>
-                <option value="Maintenance issue">Maintenance issue</option>
-                <option value="Cleanliness issue">Cleanliness issue</option>
-                <option value="Others">Others</option>
-              </select>
-              {complaintType === "Others" && (
-                <div className="mt-3">
-                  <label className="block mt-8 text-sm sm:text-base font-semibold text-gray-800">
-                    Specify:
+        <div className="px-4 sm:px-6 md:px-8 py-4 sm:py-6 md:py-8 space-y-4 sm:space-y-6">
+          <div>
+            <label className="block mb-2 text-sm sm:text-base font-semibold text-gray-800">
+              Complaint Type
+            </label>
+            <select
+              value={complaintType}
+              onChange={handleComplaintTypeChange}
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-md shadow-md border border-gray-300 text-sm sm:text-base"
+              required
+            >
+              <option value="">Choose Complaint Type</option>
+              <option value="Noise Disturbance">Noise Disturbance</option>
+              <option value="Maintenance issue">Maintenance issue</option>
+              <option value="Cleanliness issue">Cleanliness issue</option>
+              <option value="Others">Others</option>
+            </select>
+
+            {complaintType === "Others" && (
+              <div className="mt-3">
+                <label className="block mb-2 text-sm sm:text-base font-semibold text-gray-800">
+                  Specify:
+                </label>
+                <input
+                  type="text"
+                  value={otherComplaintType}
+                  onChange={(e) => setOtherComplaintType(e.target.value)}
+                  placeholder="Enter custom complaint type"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-md shadow-md border border-gray-300 text-sm sm:text-base"
+                  required
+                />
+              </div>
+            )}
+
+            {/* Maintenance-specific fields */}
+            {complaintType === "Maintenance issue" && (
+              <div className="mt-4 space-y-4">
+                <div>
+                  <label className="block mb-2 text-sm sm:text-base font-semibold text-gray-800">
+                    Floor Number
                   </label>
                   <input
                     type="text"
-                    value={otherComplaintType}
-                    onChange={(e) => setOtherComplaintType(e.target.value)}
-                    placeholder="Enter custom complaint type"
-                    className="w-full px-4 py-3 rounded-md shadow-md border border-gray-300 text-sm sm:text-base"
+                    value={floorNumber}
+                    onChange={(e) => setFloorNumber(e.target.value)}
+                    placeholder="Enter floor number (e.g., Ground, 1st, 2nd)"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-md shadow-md border border-gray-300 text-sm sm:text-base"
                     required
                   />
                 </div>
-              )}
-            </div>
 
-            <div>
-              <label className="block mb-2 text-sm sm:text-base font-semibold text-gray-800">
-                Subject
-              </label>
-              <input
-                type="text"
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                placeholder="Enter The Subject"
-                className="w-full px-4 py-3 rounded-md shadow-md border border-gray-300 text-sm sm:text-base placeholder:text-gray-400"
-                required
-              />
-            </div>
-
-            <div className="flex flex-col sm:flex-row sm:items-start gap-3">
-              <label className="text-sm sm:text-base font-semibold sm:pt-2 whitespace-nowrap">
-                Description:
-              </label>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={8}
-                className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg shadow-md h-full sm:h-full resize-none border border-gray-300 text-sm sm:text-base md:text-lg"
-                placeholder="Enter complaint description"
-                required
-              />
-            </div>
-
-            {/* File Upload Section */}
-            <div>
-              <label className="block mb-2 text-sm sm:text-base font-semibold text-gray-800">
-                Attachments (Optional)
-              </label>
-              <div className="space-y-3">
-                {/* File Upload Area */}
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400 transition-colors">
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*,video/*"
-                    onChange={handleFileSelect}
-                    className="hidden"
-                    id="file-upload"
-                  />
-                  <label
-                    htmlFor="file-upload"
-                    className="cursor-pointer flex flex-col items-center space-y-2"
-                  >
-                    <FiUpload className="w-8 h-8 text-gray-400" />
-                    <div className="text-sm text-gray-600">
-                      <span className="text-blue-600 hover:text-blue-700 font-medium">
-                        Click to upload
-                      </span>{" "}
-                      or drag and drop
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      Images and videos up to 50MB (Maximum 5 files)
-                    </div>
+                <div>
+                  <label className="block mb-2 text-sm sm:text-base font-semibold text-gray-800">
+                    Maintenance Items (Select all that apply)
                   </label>
-                </div>
-
-                {/* Selected Files */}
-                {selectedFiles.length > 0 && (
-                  <div className="space-y-2">
-                    <h4 className="text-sm font-medium text-gray-700">
-                      Selected Files:
-                    </h4>
-                    {selectedFiles.map((file, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between p-2 bg-gray-50 rounded-md border"
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
+                    {maintenanceOptions.map((item) => (
+                      <label
+                        key={item}
+                        className="flex items-center space-x-2 p-2 sm:p-3 border rounded-md cursor-pointer hover:bg-gray-50 transition-colors"
                       >
-                        <div className="flex items-center space-x-2">
-                          {getFileIcon(file)}
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 truncate">
-                              {file.name}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              {formatFileSize(file.size)}
-                            </p>
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => removeFile(index)}
-                          className="p-1 text-red-500 hover:text-red-700 transition-colors"
-                        >
-                          <FiX className="w-4 h-4" />
-                        </button>
-                      </div>
+                        <input
+                          type="checkbox"
+                          checked={maintenanceItems.includes(item)}
+                          onChange={() => toggleMaintenanceItem(item)}
+                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 flex-shrink-0"
+                        />
+                        <span className="text-xs sm:text-sm text-gray-700 break-words">
+                          {item}
+                        </span>
+                      </label>
                     ))}
                   </div>
-                )}
+                  {maintenanceItems.length > 0 && (
+                    <div className="mt-2 text-xs sm:text-sm text-gray-600">
+                      Selected: {maintenanceItems.join(", ")}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
+          </div>
 
-            <div className="flex justify-center pt-4">
-              <button
-                type="submit"
-                className="bg-[#BEC5AD] text-black px-6 sm:px-8 py-2.5 sm:py-3 rounded-md shadow hover:opacity-90 text-sm sm:text-base font-medium w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={!studentId || loading}
-                title={!studentId ? "Student not identified" : "Submit"}
-              >
-                {loading ? "Submitting..." : "Submit"}
-              </button>
+          <div>
+            <label className="block mb-2 text-sm sm:text-base font-semibold text-gray-800">
+              Subject
+            </label>
+            <input
+              type="text"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              placeholder="Enter The Subject"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-md shadow-md border border-gray-300 text-sm sm:text-base placeholder:text-gray-400"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block mb-2 text-sm sm:text-base font-semibold text-gray-800">
+              Description:
+            </label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={6}
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg shadow-md resize-none border border-gray-300 text-sm sm:text-base"
+              placeholder="Enter complaint description"
+              required
+            />
+          </div>
+
+          {/* File Upload Section */}
+          <div>
+            <label className="block mb-2 text-sm sm:text-base font-semibold text-gray-800">
+              Attachments (Optional)
+            </label>
+            <div className="space-y-3">
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400 transition-colors">
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*,video/*"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                  id="file-upload"
+                />
+                <label
+                  htmlFor="file-upload"
+                  className="cursor-pointer flex flex-col items-center space-y-2"
+                >
+                  <FiUpload className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" />
+                  <div className="text-xs sm:text-sm text-gray-600">
+                    <span className="text-blue-600 hover:text-blue-700 font-medium">
+                      Click to upload
+                    </span>{" "}
+                    or drag and drop
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    Images and videos up to 50MB (Maximum 5 files)
+                  </div>
+                </label>
+              </div>
+
+              {selectedFiles.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium text-gray-700">
+                    Selected Files:
+                  </h4>
+                  {selectedFiles.map((file, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-2 bg-gray-50 rounded-md border"
+                    >
+                      <div className="flex items-center space-x-2 min-w-0 flex-1">
+                        {getFileIcon(file)}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">
+                            {file.name}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {formatFileSize(file.size)}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeFile(index)}
+                        className="p-1 text-red-500 hover:text-red-700 transition-colors ml-2 flex-shrink-0"
+                      >
+                        <FiX className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          </form>
+          </div>
+
+          <div className="flex justify-center pt-2">
+            <button
+              type="button"
+              onClick={handleSubmit}
+              className="bg-[#BEC5AD] text-black px-6 sm:px-8 py-2.5 sm:py-3 rounded-md shadow hover:opacity-90 text-sm sm:text-base font-medium w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!studentId || loading}
+              title={!studentId ? "Student not identified" : "Submit"}
+            >
+              {loading ? "Submitting..." : "Submit"}
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Complaint History */}
-      <div className="bg-white min-h-[300px] sm:min-h-[400px] md:min-h-[450px] rounded-lg sm:rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.25)] px-4 sm:px-6 md:px-8 lg:px-10 py-4 sm:py-6 md:py-8 lg:py-10 w-full">
-        <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold mb-4 sm:mb-6 lg:mb-8 text-gray-800">
+      <div className="bg-white rounded-lg sm:rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.25)] px-4 sm:px-6 md:px-8 py-4 sm:py-6 md:py-8 max-w-full">
+        <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-4 sm:mb-6 text-gray-800">
           Complaint History
         </h3>
 
-        <div className="hidden md:block overflow-x-auto">
-          <table className="w-full text-sm md:text-base lg:text-lg text-gray-800 min-w-full">
+        <div className="hidden lg:block overflow-x-auto">
+          <table className="w-full text-sm text-gray-800 min-w-full">
             <thead className="bg-gray-200 text-center">
               <tr>
-                <th className="p-3 md:p-4 lg:p-5 font-semibold text-sm md:text-base lg:text-lg">
-                  Complaint Type
-                </th>
-                <th className="p-3 md:p-4 lg:p-5 font-semibold text-sm md:text-base lg:text-lg">
-                  Subject
-                </th>
-                <th className="p-3 md:p-4 lg:p-5 font-semibold text-sm md:text-base lg:text-lg">
-                  Filed Date
-                </th>
-                <th className="p-3 md:p-4 lg:p-5 font-semibold text-sm md:text-base lg:text-lg">
-                  Description
-                </th>
-                <th className="p-3 md:p-4 lg:p-5 font-semibold text-sm md:text-base lg:text-lg">
-                  Attachments
-                </th>
-                <th className="p-3 md:p-4 lg:p-5 font-semibold text-sm md:text-base lg:text-lg">
-                  Status
-                </th>
+                <th className="p-3 font-semibold text-sm">Complaint Type</th>
+                <th className="p-3 font-semibold text-sm">Subject</th>
+                <th className="p-3 font-semibold text-sm">Filed Date</th>
+                <th className="p-3 font-semibold text-sm">Description</th>
+                <th className="p-3 font-semibold text-sm">Attachments</th>
+                <th className="p-3 font-semibold text-sm">Status</th>
               </tr>
             </thead>
-          <tbody>
-  {loading ? (
-    <tr>
-      <td
-        colSpan="6"
-        className="text-center py-6 md:py-8 text-gray-500 text-sm md:text-base"
-      >
-        Loading...
-      </td>
-    </tr>
-  ) : complaints.length === 0 ? (
-    <tr>
-      <td
-        colSpan="6"
-        className="text-center py-6 md:py-8 text-gray-500 text-sm md:text-base"
-      >
-        No complaints found.
-      </td>
-    </tr>
-  ) : (
-    complaints.map((complaint, index) => (
-      <tr
-        key={index}
-        className="bg-white border-b border-gray-100 hover:bg-gray-50"
-      >
-        <td className="p-3 md:p-4 lg:p-5 text-sm md:text-base lg:text-lg font-medium text-center">
-          {complaint.complaintType === "Others" &&
-          complaint.otherComplaintType
-            ? `Other (${complaint.otherComplaintType})`
-            : complaint.complaintType}
-        </td>
-        <td className="p-3 md:p-4 lg:p-5 text-sm md:text-base lg:text-lg text-center">
-          {complaint.subject}
-        </td>
-        <td className="p-3 md:p-4 lg:p-5 text-sm md:text-base lg:text-lg text-center">
-          {formatDate(complaint.createdAt)}
-        </td>
-        <td className="p-3 md:p-4 lg:p-5 text-sm md:text-base lg:text-lg max-w-xs truncate text-center">
-          {complaint.description}
-        </td>
-        <td className="p-3 md:p-4 lg:p-5 text-sm md:text-base lg:text-lg text-center">
-          {complaint.hasAttachments ? (
-            <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
-              <FiFile className="w-3 h-3 mr-1" />
-              {complaint.attachmentCount} file
-              {complaint.attachmentCount > 1 ? "s" : ""}
-            </span>
-          ) : (
-            <span className="text-gray-400">No files</span>
-          )}
-        </td>
-        <td className="p-3 md:p-4 lg:p-5 text-center">
-          <span
-            className={`px-2 md:px-3 py-1 md:py-2 rounded-md text-xs md:text-sm font-medium whitespace-nowrap ${getStatusClasses(
-              complaint.status
-            )}`}
-          >
-            {complaint.status
-              ? complaint.status
-                  .split(" ")
-                  .map(
-                    (word) =>
-                      word.charAt(0).toUpperCase() + word.slice(1)
-                  )
-                  .join(" ")
-              : "Pending"}
-          </span>
-        </td>
-      </tr>
-    ))
-  )}
-</tbody>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td
+                    colSpan="6"
+                    className="text-center py-6 text-gray-500 text-sm"
+                  >
+                    Loading...
+                  </td>
+                </tr>
+              ) : complaints.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan="6"
+                    className="text-center py-6 text-gray-500 text-sm"
+                  >
+                    No complaints found.
+                  </td>
+                </tr>
+              ) : (
+                complaints.map((complaint, index) => (
+                  <tr
+                    key={index}
+                    className="bg-white border-b border-gray-100 hover:bg-gray-50"
+                  >
+                    <td className="p-3 text-sm font-medium text-center">
+                      {complaint.complaintType === "Others" &&
+                      complaint.otherComplaintType
+                        ? `Other (${complaint.otherComplaintType})`
+                        : complaint.complaintType}
+                      {complaint.complaintType === "Maintenance issue" &&
+                        complaint.floorNumber && (
+                          <div className="text-xs text-gray-500 mt-1">
+                            Floor: {complaint.floorNumber}
+                          </div>
+                        )}
+                    </td>
+                    <td className="p-3 text-sm text-center">
+                      {complaint.subject}
+                    </td>
+                    <td className="p-3 text-sm text-center">
+                      {formatDate(complaint.createdAt)}
+                    </td>
+                    <td className="p-3 text-sm max-w-xs truncate text-center">
+                      {complaint.description}
+                      {complaint.maintenanceItems &&
+                        complaint.maintenanceItems.length > 0 && (
+                          <div className="text-xs text-gray-500 mt-1">
+                            Items: {complaint.maintenanceItems.join(", ")}
+                          </div>
+                        )}
+                    </td>
+                    <td className="p-3 text-sm text-center">
+                      {complaint.hasAttachments ? (
+                        <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                          <FiFile className="w-3 h-3 mr-1" />
+                          {complaint.attachmentCount} file
+                          {complaint.attachmentCount > 1 ? "s" : ""}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400">No files</span>
+                      )}
+                    </td>
+                    <td className="p-3 text-center">
+                      <span
+                        className={`px-2 py-1 rounded-md text-xs font-medium whitespace-nowrap ${getStatusClasses(
+                          complaint.status
+                        )}`}
+                      >
+                        {complaint.status
+                          ? complaint.status
+                              .split(" ")
+                              .map(
+                                (word) =>
+                                  word.charAt(0).toUpperCase() + word.slice(1)
+                              )
+                              .join(" ")
+                          : "Pending"}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
           </table>
         </div>
 
-        {/* Mobile Cards View */}
-        <div className="md:hidden space-y-3 sm:space-y-4">
+        {/* Mobile/Tablet Cards View */}
+        <div className="lg:hidden space-y-3 sm:space-y-4">
           {loading ? (
-            <div className="text-center py-6 sm:py-8 text-gray-500 text-sm sm:text-base">
+            <div className="text-center py-6 text-gray-500 text-sm">
               Loading...
             </div>
           ) : complaints.length === 0 ? (
-            <div className="text-center py-6 sm:py-8 text-gray-500 text-sm sm:text-base">
+            <div className="text-center py-6 text-gray-500 text-sm">
               No complaints found.
             </div>
           ) : (
@@ -448,43 +594,68 @@ export default function Complaints() {
                 key={index}
                 className="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200"
               >
-                <div className="space-y-2 sm:space-y-3">
-                  <div className="flex justify-between items-start">
+                <div className="space-y-2">
+                  <div className="flex justify-between items-start gap-2">
                     <span className="text-xs sm:text-sm font-semibold text-gray-600">
                       Complaint Type:
                     </span>
-                    <span className="text-sm sm:text-base font-medium text-gray-800">
+                    <span className="text-xs sm:text-sm font-medium text-gray-800 text-right">
                       {complaint.complaintType === "Others" &&
                       complaint.otherComplaintType
                         ? `Other (${complaint.otherComplaintType})`
                         : complaint.complaintType}
                     </span>
                   </div>
-                  <div className="flex justify-between items-start">
+
+                  {complaint.complaintType === "Maintenance issue" &&
+                    complaint.floorNumber && (
+                      <div className="flex justify-between items-start gap-2">
+                        <span className="text-xs sm:text-sm font-semibold text-gray-600">
+                          Floor:
+                        </span>
+                        <span className="text-xs sm:text-sm text-gray-800">
+                          {complaint.floorNumber}
+                        </span>
+                      </div>
+                    )}
+
+                  {complaint.maintenanceItems &&
+                    complaint.maintenanceItems.length > 0 && (
+                      <div className="flex justify-between items-start gap-2">
+                        <span className="text-xs sm:text-sm font-semibold text-gray-600">
+                          Items:
+                        </span>
+                        <span className="text-xs sm:text-sm text-gray-800 text-right flex-1">
+                          {complaint.maintenanceItems.join(", ")}
+                        </span>
+                      </div>
+                    )}
+
+                  <div className="flex justify-between items-start gap-2">
                     <span className="text-xs sm:text-sm font-semibold text-gray-600">
                       Subject:
                     </span>
-                    <span className="text-sm sm:text-base text-gray-800 text-right max-w-[60%]">
+                    <span className="text-xs sm:text-sm text-gray-800 text-right flex-1">
                       {complaint.subject}
                     </span>
                   </div>
-                  <div className="flex justify-between items-start">
+                  <div className="flex justify-between items-start gap-2">
                     <span className="text-xs sm:text-sm font-semibold text-gray-600">
                       Date:
                     </span>
-                    <span className="text-sm sm:text-base text-gray-800">
+                    <span className="text-xs sm:text-sm text-gray-800">
                       {formatDate(complaint.createdAt)}
                     </span>
                   </div>
-                  <div className="flex justify-between items-start">
+                  <div className="flex justify-between items-start gap-2">
                     <span className="text-xs sm:text-sm font-semibold text-gray-600">
                       Description:
                     </span>
-                    <span className="text-sm sm:text-base text-gray-800 text-right max-w-[60%]">
+                    <span className="text-xs sm:text-sm text-gray-800 text-right flex-1">
                       {complaint.description}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center gap-2">
                     <span className="text-xs sm:text-sm font-semibold text-gray-600">
                       Attachments:
                     </span>
@@ -498,12 +669,12 @@ export default function Complaints() {
                       <span className="text-gray-400 text-xs">No files</span>
                     )}
                   </div>
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center gap-2">
                     <span className="text-xs sm:text-sm font-semibold text-gray-600">
                       Status:
                     </span>
                     <span
-                      className={`px-2 sm:px-3 py-1 sm:py-2 rounded-md text-xs sm:text-sm font-medium ${getStatusClasses(
+                      className={`px-2 py-1 rounded-md text-xs font-medium ${getStatusClasses(
                         complaint.status
                       )}`}
                     >
