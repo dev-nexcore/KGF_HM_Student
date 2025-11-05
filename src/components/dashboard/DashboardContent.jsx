@@ -403,7 +403,7 @@ export default function DashboardContent() {
               <span>{checkTime}</span>
             </div>
             <div className="pt-8 flex justify-center">
-              <button
+              {/* <button
                 onClick={() => {
                   if (loading) return;
                   setIsCheckIn(checkStatus !== "Checked In");
@@ -419,7 +419,7 @@ export default function DashboardContent() {
                   : checkStatus === "Checked In"
                   ? "Check-Out Now"
                   : "Check-In Now"}
-              </button>
+              </button> */}
             </div>
           </div>
         </div>
