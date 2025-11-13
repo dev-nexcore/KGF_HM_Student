@@ -147,9 +147,9 @@ export default function Complaints() {
 
   // Get file icon based on type
   const getFileIcon = (file) => {
-    if (file.type.startsWith("image/")) return <FiImage className="w-3 h-3 sm:w-4 sm:h-4" />;
-    if (file.type.startsWith("video/")) return <FiVideo className="w-3 h-3 sm:w-4 sm:h-4" />;
-    return <FiFile className="w-3 h-3 sm:w-4 sm:h-4" />;
+    if (file.type.startsWith("image/")) return <FiImage className="w-3 h-3" />;
+    if (file.type.startsWith("video/")) return <FiVideo className="w-3 h-3" />;
+    return <FiFile className="w-3 h-3" />;
   };
 
   // Format file size
@@ -272,26 +272,26 @@ export default function Complaints() {
   };
 
   return (
-    <div className="w-full min-w-0 bg-white px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
-      <h2 className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-semibold text-black border-l-4 border-[#4F8CCF] pl-2 mb-3 sm:mb-4 md:mb-6 break-words">
+    <div className="w-full max-w-full overflow-x-hidden bg-white px-2 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 md:py-6">
+      <h2 className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold text-black border-l-4 border-[#4F8CCF] pl-2 mb-3 sm:mb-4 md:mb-6 break-words">
         Complaints
       </h2>
 
       {/* Complaint Application Form */}
-      <div className="bg-white rounded-lg shadow-lg mb-4 sm:mb-6 md:mb-8 text-black w-full min-w-0 overflow-hidden">
-        <div className="bg-[#A4B494] text-white rounded-t-lg px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 font-semibold text-xs sm:text-sm md:text-base">
+      <div className="bg-white rounded-lg shadow-md mb-4 sm:mb-6 text-black w-full max-w-full overflow-hidden">
+        <div className="bg-[#A4B494] text-white rounded-t-lg px-2.5 sm:px-4 md:px-6 py-2 sm:py-2.5 font-semibold text-xs sm:text-sm md:text-base">
           Complaint Application Form
         </div>
 
-        <div className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 md:py-6 space-y-3 sm:space-y-4">
-          <div className="w-full min-w-0">
-            <label className="block mb-1.5 sm:mb-2 text-xs sm:text-sm font-semibold text-gray-800">
+        <div className="px-2.5 sm:px-4 md:px-6 py-3 sm:py-4 md:py-6 space-y-2.5 sm:space-y-3 md:space-y-4">
+          <div className="w-full max-w-full">
+            <label className="block mb-1 sm:mb-1.5 text-xs sm:text-sm font-semibold text-gray-800">
               Complaint Type
             </label>
             <select
               value={complaintType}
               onChange={handleComplaintTypeChange}
-              className="w-full min-w-0 px-2.5 sm:px-3 md:px-4 py-2 sm:py-2.5 rounded-md shadow-md border border-gray-300 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full max-w-full px-2 sm:px-3 py-1.5 sm:py-2 rounded-md shadow-sm border border-gray-300 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             >
               <option value="">Choose Complaint Type</option>
@@ -302,8 +302,8 @@ export default function Complaints() {
             </select>
 
             {complaintType === "Others" && (
-              <div className="mt-2 sm:mt-3 w-full min-w-0">
-                <label className="block mb-1.5 sm:mb-2 text-xs sm:text-sm font-semibold text-gray-800">
+              <div className="mt-2 sm:mt-2.5 w-full max-w-full">
+                <label className="block mb-1 sm:mb-1.5 text-xs sm:text-sm font-semibold text-gray-800">
                   Specify:
                 </label>
                 <input
@@ -311,7 +311,7 @@ export default function Complaints() {
                   value={otherComplaintType}
                   onChange={(e) => setOtherComplaintType(e.target.value)}
                   placeholder="Enter custom complaint type"
-                  className="w-full min-w-0 px-2.5 sm:px-3 md:px-4 py-2 sm:py-2.5 rounded-md shadow-md border border-gray-300 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full max-w-full px-2 sm:px-3 py-1.5 sm:py-2 rounded-md shadow-sm border border-gray-300 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
               </div>
@@ -319,45 +319,45 @@ export default function Complaints() {
 
             {/* Maintenance-specific fields */}
             {complaintType === "Maintenance issue" && (
-              <div className="mt-3 sm:mt-4 space-y-3 w-full min-w-0">
-                <div className="w-full min-w-0">
-                  <label className="block mb-1.5 sm:mb-2 text-xs sm:text-sm font-semibold text-gray-800">
+              <div className="mt-2.5 sm:mt-3 space-y-2.5 sm:space-y-3 w-full max-w-full">
+                <div className="w-full max-w-full">
+                  <label className="block mb-1 sm:mb-1.5 text-xs sm:text-sm font-semibold text-gray-800">
                     Floor Number
                   </label>
                   <input
                     type="text"
                     value={floorNumber}
                     onChange={(e) => setFloorNumber(e.target.value)}
-                    placeholder="Enter floor number"
-                    className="w-full min-w-0 px-2.5 sm:px-3 md:px-4 py-2 sm:py-2.5 rounded-md shadow-md border border-gray-300 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="e.g., Ground, 1st, 2nd"
+                    className="w-full max-w-full px-2 sm:px-3 py-1.5 sm:py-2 rounded-md shadow-sm border border-gray-300 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
                   />
                 </div>
 
-                <div className="w-full min-w-0">
-                  <label className="block mb-1.5 sm:mb-2 text-xs sm:text-sm font-semibold text-gray-800">
-                    Maintenance Items (Select all that apply)
+                <div className="w-full max-w-full">
+                  <label className="block mb-1 sm:mb-1.5 text-xs sm:text-sm font-semibold text-gray-800">
+                    Maintenance Items
                   </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1.5 sm:gap-2">
                     {maintenanceOptions.map((item) => (
                       <label
                         key={item}
-                        className="flex items-start space-x-2 p-2 border rounded-md cursor-pointer hover:bg-gray-50 transition-colors min-w-0"
+                        className="flex items-start space-x-1.5 p-1.5 sm:p-2 border rounded-md cursor-pointer hover:bg-gray-50 transition-colors"
                       >
                         <input
                           type="checkbox"
                           checked={maintenanceItems.includes(item)}
                           onChange={() => toggleMaintenanceItem(item)}
-                          className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 flex-shrink-0 mt-0.5"
+                          className="w-3.5 h-3.5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 flex-shrink-0 mt-0.5"
                         />
-                        <span className="text-xs sm:text-sm text-gray-700 break-words leading-tight flex-1 min-w-0">
+                        <span className="text-[11px] sm:text-xs text-gray-700 break-words leading-tight">
                           {item}
                         </span>
                       </label>
                     ))}
                   </div>
                   {maintenanceItems.length > 0 && (
-                    <div className="mt-2 text-xs sm:text-sm text-gray-600 break-words">
+                    <div className="mt-1.5 text-[10px] sm:text-xs text-gray-600 break-words">
                       Selected: {maintenanceItems.join(", ")}
                     </div>
                   )}
@@ -366,8 +366,8 @@ export default function Complaints() {
             )}
           </div>
 
-          <div className="w-full min-w-0">
-            <label className="block mb-1.5 sm:mb-2 text-xs sm:text-sm font-semibold text-gray-800">
+          <div className="w-full max-w-full">
+            <label className="block mb-1 sm:mb-1.5 text-xs sm:text-sm font-semibold text-gray-800">
               Subject
             </label>
             <input
@@ -375,32 +375,32 @@ export default function Complaints() {
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               placeholder="Enter The Subject"
-              className="w-full min-w-0 px-2.5 sm:px-3 md:px-4 py-2 sm:py-2.5 rounded-md shadow-md border border-gray-300 text-xs sm:text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full max-w-full px-2 sm:px-3 py-1.5 sm:py-2 rounded-md shadow-sm border border-gray-300 text-xs sm:text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </div>
 
-          <div className="w-full min-w-0">
-            <label className="block mb-1.5 sm:mb-2 text-xs sm:text-sm font-semibold text-gray-800">
+          <div className="w-full max-w-full">
+            <label className="block mb-1 sm:mb-1.5 text-xs sm:text-sm font-semibold text-gray-800">
               Description:
             </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              rows={4}
-              className="w-full min-w-0 px-2.5 sm:px-3 md:px-4 py-2 sm:py-2.5 rounded-lg shadow-md resize-none border border-gray-300 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              rows={3}
+              className="w-full max-w-full px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg shadow-sm resize-none border border-gray-300 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter complaint description"
               required
             />
           </div>
 
           {/* File Upload Section */}
-          <div className="w-full min-w-0">
-            <label className="block mb-1.5 sm:mb-2 text-xs sm:text-sm font-semibold text-gray-800">
+          <div className="w-full max-w-full">
+            <label className="block mb-1 sm:mb-1.5 text-xs sm:text-sm font-semibold text-gray-800">
               Attachments (Optional)
             </label>
             <div className="space-y-2">
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 sm:p-4 md:p-6 text-center hover:border-gray-400 transition-colors">
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 sm:p-4 text-center hover:border-gray-400 transition-colors">
                 <input
                   type="file"
                   multiple
@@ -411,35 +411,35 @@ export default function Complaints() {
                 />
                 <label
                   htmlFor="file-upload"
-                  className="cursor-pointer flex flex-col items-center space-y-1.5 sm:space-y-2"
+                  className="cursor-pointer flex flex-col items-center space-y-1"
                 >
-                  <FiUpload className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-gray-400" />
-                  <div className="text-xs sm:text-sm text-gray-600">
+                  <FiUpload className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400" />
+                  <div className="text-[11px] sm:text-xs text-gray-600">
                     <span className="text-blue-600 hover:text-blue-700 font-medium">
                       Click to upload
                     </span>{" "}
-                    or drag and drop
+                    or drag
                   </div>
                   <div className="text-[10px] sm:text-xs text-gray-500">
-                    Images and videos up to 50MB (Max 5 files)
+                    Images/videos (50MB, Max 5)
                   </div>
                 </label>
               </div>
 
               {selectedFiles.length > 0 && (
-                <div className="space-y-2 w-full min-w-0">
+                <div className="space-y-1.5 w-full max-w-full">
                   <h4 className="text-xs sm:text-sm font-medium text-gray-700">
                     Selected Files:
                   </h4>
                   {selectedFiles.map((file, index) => (
                     <div
                       key={index}
-                      className="flex items-center justify-between p-2 sm:p-2.5 bg-gray-50 rounded-md border gap-2 w-full min-w-0"
+                      className="flex items-center justify-between p-1.5 sm:p-2 bg-gray-50 rounded-md border gap-1.5 w-full max-w-full overflow-hidden"
                     >
-                      <div className="flex items-center space-x-1.5 sm:space-x-2 min-w-0 flex-1">
+                      <div className="flex items-center space-x-1.5 min-w-0 flex-1 overflow-hidden">
                         {getFileIcon(file)}
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">
+                        <div className="flex-1 min-w-0 overflow-hidden">
+                          <p className="text-[11px] sm:text-xs font-medium text-gray-900 truncate">
                             {file.name}
                           </p>
                           <p className="text-[10px] sm:text-xs text-gray-500">
@@ -452,7 +452,7 @@ export default function Complaints() {
                         onClick={() => removeFile(index)}
                         className="p-1 text-red-500 hover:text-red-700 transition-colors flex-shrink-0"
                       >
-                        <FiX className="w-4 h-4" />
+                        <FiX className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   ))}
@@ -461,7 +461,7 @@ export default function Complaints() {
             </div>
           </div>
 
-          <div className="flex justify-center pt-2 w-full">
+          <div className="flex justify-center pt-1.5 w-full">
             <button
               type="button"
               onClick={handleSubmit}
@@ -476,8 +476,8 @@ export default function Complaints() {
       </div>
 
       {/* Complaint History */}
-      <div className="bg-white rounded-lg shadow-lg px-3 sm:px-4 md:px-6 py-3 sm:py-4 md:py-6 w-full min-w-0 overflow-hidden">
-        <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-3 sm:mb-4 text-gray-800">
+      <div className="bg-white rounded-lg shadow-md px-2.5 sm:px-4 md:px-6 py-3 sm:py-4 md:py-6 w-full max-w-full overflow-hidden">
+        <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-2.5 sm:mb-3 md:mb-4 text-gray-800">
           Complaint History
         </h3>
 
@@ -582,27 +582,27 @@ export default function Complaints() {
         </div>
 
         {/* Mobile/Tablet Cards View */}
-        <div className="lg:hidden space-y-2.5 sm:space-y-3 w-full min-w-0">
+        <div className="lg:hidden space-y-2 w-full max-w-full">
           {loading ? (
-            <div className="text-center py-4 text-gray-500 text-xs sm:text-sm">
+            <div className="text-center py-4 text-gray-500 text-xs">
               Loading...
             </div>
           ) : complaints.length === 0 ? (
-            <div className="text-center py-4 text-gray-500 text-xs sm:text-sm">
+            <div className="text-center py-4 text-gray-500 text-xs">
               No complaints found.
             </div>
           ) : (
             complaints.map((complaint, index) => (
               <div
                 key={index}
-                className="bg-gray-50 rounded-lg p-2.5 sm:p-3 border border-gray-200 w-full min-w-0"
+                className="bg-gray-50 rounded-lg p-2 sm:p-2.5 border border-gray-200 w-full max-w-full overflow-hidden"
               >
-                <div className="space-y-1.5 sm:space-y-2">
-                  <div className="flex justify-between items-start gap-2 min-w-0">
-                    <span className="text-xs sm:text-sm font-semibold text-gray-600 flex-shrink-0">
+                <div className="space-y-1.5">
+                  <div className="flex justify-between items-start gap-2">
+                    <span className="text-[11px] sm:text-xs font-semibold text-gray-600 flex-shrink-0">
                       Type:
                     </span>
-                    <span className="text-xs sm:text-sm font-medium text-gray-800 text-right flex-1 min-w-0 break-words">
+                    <span className="text-[11px] sm:text-xs font-medium text-gray-800 text-right break-words">
                       {complaint.complaintType === "Others" &&
                       complaint.otherComplaintType
                         ? `Other (${complaint.otherComplaintType})`
@@ -612,11 +612,11 @@ export default function Complaints() {
 
                   {complaint.complaintType === "Maintenance issue" &&
                     complaint.floorNumber && (
-                      <div className="flex justify-between items-start gap-2 min-w-0">
-                        <span className="text-xs sm:text-sm font-semibold text-gray-600 flex-shrink-0">
+                      <div className="flex justify-between items-start gap-2">
+                        <span className="text-[11px] sm:text-xs font-semibold text-gray-600 flex-shrink-0">
                           Floor:
                         </span>
-                        <span className="text-xs sm:text-sm text-gray-800">
+                        <span className="text-[11px] sm:text-xs text-gray-800">
                           {complaint.floorNumber}
                         </span>
                       </div>
@@ -624,66 +624,65 @@ export default function Complaints() {
 
                   {complaint.maintenanceItems &&
                     complaint.maintenanceItems.length > 0 && (
-                      <div className="flex justify-between items-start gap-2 min-w-0">
-                        <span className="text-xs sm:text-sm font-semibold text-gray-600 flex-shrink-0">
+                      <div className="flex justify-between items-start gap-2">
+                        <span className="text-[11px] sm:text-xs font-semibold text-gray-600 flex-shrink-0">
                           Items:
                         </span>
-                        <span className="text-xs sm:text-sm text-gray-800 text-right flex-1 min-w-0 break-words">
+                        <span className="text-[11px] sm:text-xs text-gray-800 text-right break-words">
                           {complaint.maintenanceItems.join(", ")}
                         </span>
                       </div>
                     )}
 
-                  <div className="flex justify-between items-start gap-2 min-w-0">
-                    <span className="text-xs sm:text-sm font-semibold text-gray-600 flex-shrink-0">
+                  <div className="flex justify-between items-start gap-2">
+                    <span className="text-[11px] sm:text-xs font-semibold text-gray-600 flex-shrink-0">
                       Subject:
                     </span>
-                    <span className="text-xs sm:text-sm text-gray-800 text-right flex-1 min-w-0 break-words">
+                    <span className="text-[11px] sm:text-xs text-gray-800 text-right break-words">
                       {complaint.subject}
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-start gap-2 min-w-0">
-                    <span className="text-xs sm:text-sm font-semibold text-gray-600 flex-shrink-0">
+                  <div className="flex justify-between items-start gap-2">
+                    <span className="text-[11px] sm:text-xs font-semibold text-gray-600 flex-shrink-0">
                       Date:
                     </span>
-                    <span className="text-xs sm:text-sm text-gray-800 flex-shrink-0">
+                    <span className="text-[11px] sm:text-xs text-gray-800 flex-shrink-0">
                       {formatDate(complaint.createdAt)}
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-start gap-2 min-w-0">
-                    <span className="text-xs sm:text-sm font-semibold text-gray-600 flex-shrink-0">
+                  <div className="flex justify-between items-start gap-2">
+                    <span className="text-[11px] sm:text-xs font-semibold text-gray-600 flex-shrink-0">
                       Description:
                     </span>
-                    <span className="text-xs sm:text-sm text-gray-800 text-right flex-1 min-w-0 break-words">
+                    <span className="text-[11px] sm:text-xs text-gray-800 text-right break-words">
                       {complaint.description}
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center gap-2 min-w-0">
-                    <span className="text-xs sm:text-sm font-semibold text-gray-600 flex-shrink-0">
+                  <div className="flex justify-between items-center gap-2">
+                    <span className="text-[11px] sm:text-xs font-semibold text-gray-600 flex-shrink-0">
                       Attachments:
                     </span>
                     {complaint.hasAttachments ? (
-                      <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-[10px] sm:text-xs font-medium rounded-full flex-shrink-0">
-                        <FiFile className="w-3 h-3 mr-1" />
-                        {complaint.attachmentCount} file
-                        {complaint.attachmentCount > 1 ? "s" : ""}
+                      <span className="inline-flex items-center px-1.5 py-0.5 bg-blue-100 text-blue-800 text-[10px] sm:text-xs font-medium rounded-full flex-shrink-0">
+                        <FiFile className="w-2.5 h-2.5 mr-1" />
+                        {complaint.attachmentCount}
                       </span>
                     ) : (
-                      <span className="text-gray-400 text-xs flex-shrink-0">
-                        No files
+                      <span className="text-gray-400 text-[10px] sm:text-xs flex-shrink-0">
+                        None
                       </span>
                     )}
                   </div>
 
-                  <div className="flex justify-between items-center gap-2 min-w-0">
-                    <span className="text-xs sm:text-sm font-semibold text-gray-600 flex-shrink-0">
+                  <div className="flex justify-between items-center gap-2">
+                    <span className="text-[11px] sm:text-xs font-semibold text-gray-600 flex-shrink-0">
                       Status:
                     </span>
                     <span
-                      className={`px-2 py-1 rounded-md text-[10px] sm:text-xs font-medium flex-shrink-0 ${getStatusClasses(
+                      className={`px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-medium flex-shrink-0 ${getStatusClasses(
                         complaint.status
                       )}`}
                     >
