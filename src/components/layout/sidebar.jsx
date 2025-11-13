@@ -43,7 +43,6 @@ export default function Sidebar() {
     },
     { name: "Leaves", icon: "calendar.png", href: "/leaves" },
     { name: "Notices", icon: "filter_frames.png", href: "/notices" },
-    { name: "Refunds", icon: "refund.png", href: "/refunds" },
     { name: "Complaints", icon: "chat_bubble.png", href: "/complaints" },
   ];
 
