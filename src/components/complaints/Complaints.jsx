@@ -272,18 +272,18 @@ export default function Complaints() {
   };
 
   return (
-    <div className="w-full max-w-full overflow-x-hidden bg-white px-2 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 md:py-6">
+    <div className="w-full max-w-full overflow-x-hidden bg-white px-1 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 md:py-6 box-border">
       <h2 className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold text-black border-l-4 border-[#4F8CCF] pl-2 mb-3 sm:mb-4 md:mb-6 break-words">
         Complaints
       </h2>
 
       {/* Complaint Application Form */}
-      <div className="bg-white rounded-lg shadow-md mb-4 sm:mb-6 text-black w-full max-w-full overflow-hidden">
-        <div className="bg-[#A4B494] text-white rounded-t-lg px-2.5 sm:px-4 md:px-6 py-2 sm:py-2.5 font-semibold text-xs sm:text-sm md:text-base">
+      <div className="bg-white rounded-lg shadow-md mb-4 sm:mb-6 text-black w-full max-w-full overflow-hidden box-border">
+        <div className="bg-[#A4B494] text-white rounded-t-lg px-2 sm:px-4 md:px-6 py-2 sm:py-2.5 font-semibold text-xs sm:text-sm md:text-base">
           Complaint Application Form
         </div>
 
-        <div className="px-2.5 sm:px-4 md:px-6 py-3 sm:py-4 md:py-6 space-y-2.5 sm:space-y-3 md:space-y-4">
+        <div className="px-2 sm:px-4 md:px-6 py-3 sm:py-4 md:py-6 space-y-2.5 sm:space-y-3 md:space-y-4">
           <div className="w-full max-w-full">
             <label className="block mb-1 sm:mb-1.5 text-xs sm:text-sm font-semibold text-gray-800">
               Complaint Type
@@ -476,7 +476,7 @@ export default function Complaints() {
       </div>
 
       {/* Complaint History */}
-      <div className="bg-white rounded-lg shadow-md px-2.5 sm:px-4 md:px-6 py-3 sm:py-4 md:py-6 w-full max-w-full overflow-hidden">
+      <div className="bg-white rounded-lg shadow-md px-2 sm:px-4 md:px-6 py-3 sm:py-4 md:py-6 w-full max-w-full overflow-hidden box-border">
         <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-2.5 sm:mb-3 md:mb-4 text-gray-800">
           Complaint History
         </h3>
