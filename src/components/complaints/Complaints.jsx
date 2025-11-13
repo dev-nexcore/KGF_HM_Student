@@ -272,18 +272,18 @@ export default function Complaints() {
   };
 
   return (
-    <div className="w-full max-w-full overflow-x-hidden bg-white px-1 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 md:py-6 box-border">
-      <h2 className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold text-black border-l-4 border-[#4F8CCF] pl-2 mb-3 sm:mb-4 md:mb-6 break-words">
-        Complaints
-      </h2>
+   <div className="w-full min-w-0 bg-white px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 md:py-6">
+      <h2 className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold text-black border-l-4 border-[#4F8CCF] pl-2 mb-3 sm:mb-4 md:mb-6">
+  Complaints
+</h2>
 
       {/* Complaint Application Form */}
-      <div className="bg-white rounded-lg shadow-md mb-4 sm:mb-6 text-black w-full max-w-full overflow-hidden box-border">
+     <div className="bg-white rounded-lg shadow-md mb-4 sm:mb-6 text-black w-full min-w-0">
         <div className="bg-[#A4B494] text-white rounded-t-lg px-2 sm:px-4 md:px-6 py-2 sm:py-2.5 font-semibold text-xs sm:text-sm md:text-base">
           Complaint Application Form
         </div>
 
-        <div className="px-2 sm:px-4 md:px-6 py-3 sm:py-4 md:py-6 space-y-2.5 sm:space-y-3 md:space-y-4">
+<div className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 md:py-6 space-y-2.5 sm:space-y-3 md:space-y-4">
           <div className="w-full max-w-full">
             <label className="block mb-1 sm:mb-1.5 text-xs sm:text-sm font-semibold text-gray-800">
               Complaint Type
@@ -291,7 +291,7 @@ export default function Complaints() {
             <select
               value={complaintType}
               onChange={handleComplaintTypeChange}
-              className="w-full max-w-full px-2 sm:px-3 py-1.5 sm:py-2 rounded-md shadow-sm border border-gray-300 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+className="w-full min-w-0 px-2 sm:px-3 py-1.5 sm:py-2 rounded-md shadow-sm border border-gray-300 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             >
               <option value="">Choose Complaint Type</option>
@@ -311,8 +311,7 @@ export default function Complaints() {
                   value={otherComplaintType}
                   onChange={(e) => setOtherComplaintType(e.target.value)}
                   placeholder="Enter custom complaint type"
-                  className="w-full max-w-full px-2 sm:px-3 py-1.5 sm:py-2 rounded-md shadow-sm border border-gray-300 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
+                className="w-full min-w-0 px-2 sm:px-3 py-1.5 sm:py-2 rounded-md shadow-sm border border-gray-300 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             )}
@@ -329,7 +328,7 @@ export default function Complaints() {
                     value={floorNumber}
                     onChange={(e) => setFloorNumber(e.target.value)}
                     placeholder="e.g., Ground, 1st, 2nd"
-                    className="w-full max-w-full px-2 sm:px-3 py-1.5 sm:py-2 rounded-md shadow-sm border border-gray-300 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+className="w-full min-w-0 px-2 sm:px-3 py-1.5 sm:py-2 rounded-md shadow-sm border border-gray-300 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
                   />
                 </div>
@@ -338,7 +337,7 @@ export default function Complaints() {
                   <label className="block mb-1 sm:mb-1.5 text-xs sm:text-sm font-semibold text-gray-800">
                     Maintenance Items
                   </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1.5 sm:gap-2">
+               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1.5 sm:gap-2 w-full min-w-0">
                     {maintenanceOptions.map((item) => (
                       <label
                         key={item}
@@ -375,7 +374,7 @@ export default function Complaints() {
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               placeholder="Enter The Subject"
-              className="w-full max-w-full px-2 sm:px-3 py-1.5 sm:py-2 rounded-md shadow-sm border border-gray-300 text-xs sm:text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+             className="w-full min-w-0 px-2 sm:px-3 py-1.5 sm:py-2 rounded-md shadow-sm border border-gray-300 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </div>
@@ -388,7 +387,7 @@ export default function Complaints() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              className="w-full max-w-full px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg shadow-sm resize-none border border-gray-300 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+             className="w-full min-w-0 px-2 sm:px-3 py-1.5 sm:py-2 rounded-md shadow-sm border border-gray-300 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter complaint description"
               required
             />
@@ -476,7 +475,7 @@ export default function Complaints() {
       </div>
 
       {/* Complaint History */}
-      <div className="bg-white rounded-lg shadow-md px-2 sm:px-4 md:px-6 py-3 sm:py-4 md:py-6 w-full max-w-full overflow-hidden box-border">
+    <div className="bg-white rounded-lg shadow-md px-3 sm:px-4 md:px-6 py-3 sm:py-4 md:py-6 w-full min-w-0">
         <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-2.5 sm:mb-3 md:mb-4 text-gray-800">
           Complaint History
         </h3>
