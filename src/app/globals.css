@@ -25,6 +25,18 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Prevent mobile browsers from auto-zooming when focusing inputs by
+   ensuring controls have at least 16px font-size on small screens */
+@media (max-width: 640px) {
+  input,
+  select,
+  textarea,
+  button {
+    font-size: 16px;
+    line-height: 1.4;
+  }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
