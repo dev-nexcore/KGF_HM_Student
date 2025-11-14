@@ -5,14 +5,14 @@ import Sidebar from "@/components/layout/sidebar";
 
 export default function ComplaintsPage() {
   return (
-    <div className="flex min-h-screen bg-white">
+    <div className="flex min-h-screen bg-white w-full overflow-x-hidden">
       {/* Sidebar */}
       <Sidebar />
 
       {/* Main Content */}
-      <main className="flex flex-col flex-1">
+      <main className="flex flex-col flex-1 min-w-0 overflow-x-hidden">
         <Header />
-        <div className="px-6 py-4">
+        <div className="w-full overflow-x-hidden">
           <Complaints />
         </div>
       </main>
