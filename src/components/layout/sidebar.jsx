@@ -101,7 +101,7 @@ export default function Sidebar() {
                 <Link href={href}>
                   <div className={getLinkClass(href)}>
                     <Image
-                      src={`/icons/${icon}`}
+                      src={`/student/icons/${icon}`}
                       alt={`${name} icon`}
                       width={18}
                       height={18}
