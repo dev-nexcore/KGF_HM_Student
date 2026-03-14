@@ -86,7 +86,7 @@ export default function Navbar() {
             aria-label="Notifications"
           >
             <Image
-              src="student/icons/notifications.png"
+              src="/student/icons/notifications.png"
               alt="Notifications"
               width={22}
               height={22}
