@@ -13,7 +13,7 @@ export default function ProfilePage() {
                <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
          
                {/* Main Content */}
-               <div className="flex flex-col flex-1">
+               <div className="flex flex-col flex-1 md:ml-55 ">
                  {/* Navbar */}
                  <Navbar />
 
