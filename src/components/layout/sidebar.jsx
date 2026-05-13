@@ -221,6 +221,7 @@ export default function Sidebar() {
 
   const navItems = [
     { name: "Dashboard", icon: "dashboard.png", href: "/dashboard" },
+    { name: "Attendance", icon: "calendar.png", href: "/attendance" },
     { name: "Fees Status", icon: "account_balance_wallet.png", href: "/fees-status" },
     { name: "Leaves", icon: "calendar.png", href: "/leaves" },
     { name: "Notices", icon: "filter_frames.png", href: "/notices" },

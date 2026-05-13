@@ -6,6 +6,16 @@ import api from "@/lib/api";
 import { toast, Toaster } from "react-hot-toast";
 import Link from "next/link";
 import NoticePopup from "../notices/NoticePopup";
+import { 
+  FiCoffee, 
+  FiAlertCircle, 
+  FiFileText, 
+  FiUser, 
+  FiClock, 
+  FiCheckCircle, 
+  FiInfo,
+  FiArrowRight
+} from "react-icons/fi";
 
 
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -30,6 +40,7 @@ export default function DashboardContent() {
   const [totalDays, setTotalDays] = useState(0);
   const [selectedRange, setSelectedRange] = useState("day");
   const [barcodeId, setBarcodeId] = useState("");
+  const [bedAllotment, setBedAllotment] = useState("");
   const [floor, setFloor] = useState("");
   const [isWithinRange, setIsWithinRange] = useState(false);
   const [userCoords, setUserCoords] = useState(null);
@@ -41,6 +52,10 @@ export default function DashboardContent() {
   // Notice Popup States
   const [latestNotice, setLatestNotice] = useState(null);
   const [showNoticePopup, setShowNoticePopup] = useState(false);
+  const [recentNotices, setRecentNotices] = useState([]);
+
+  // New States
+  const [complaints, setComplaints] = useState([]);
 
   function getDistanceFromHostel(lat, lng) {
     const toRad = (value) => (value * Math.PI) / 180;
@@ -205,6 +220,7 @@ export default function DashboardContent() {
             (a, b) => new Date(b.issueDate) - new Date(a.issueDate)
           );
 
+          setRecentNotices(sortedNotices.slice(0, 3));
           const newestNotice = sortedNotices[0];
 
           // Check if student has permanently marked this notice as read
@@ -298,6 +314,7 @@ export default function DashboardContent() {
           setRoomNo(data.roomNo);
           setStudentId(data.studentId);
           setBarcodeId(data.barcodeId || "N/A");
+          setBedAllotment(data.bedAllotment || "N/A");
           setFloor(data.floor || "N/A");
         }
       } catch (err) {
@@ -345,6 +362,23 @@ export default function DashboardContent() {
   }, [studentId]);
 
   useEffect(() => {
+    const fetchComplaints = async () => {
+      try {
+        const res = await api.get(`/complaints`);
+        if (res.status === 200 && res.data.complaints) {
+          setComplaints(res.data.complaints.slice(0, 2));
+        }
+      } catch (err) {
+        console.error("Error fetching complaints:", err);
+      }
+    };
+
+    if (studentId) {
+      fetchComplaints();
+    }
+  }, [studentId]);
+
+  useEffect(() => {
     const fetchInspection = async () => {
       try {
         const res = await api.get("/inspectionSchedule");
@@ -369,15 +403,59 @@ export default function DashboardContent() {
     <main className="bg-[#ffffff] px-6 sm:px-8 lg:px-2.5 py-2 min-h-screen font-sans">
       <Toaster position="top-right" />
 
-      <div className="flex items-center">
-        <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-black border-l-4 border-[#4F8CCF] pl-2 mb-4 sm:mb-6">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-black border-l-4 border-[#4F8DCF] pl-2">
           Overview
         </h2>
+        <div className="text-sm text-gray-500 font-medium">
+          Last login: {new Date().toLocaleDateString('en-IN')}
+        </div>
       </div>
 
-      <div className="flex flex-wrap justify-start gap-4 sm:gap-6">
+      {/* Quick Actions */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8">
+        <Link href="/leaves" className="flex flex-col md:flex-row items-center gap-2 md:gap-3 bg-white p-3 md:p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all active:scale-95">
+          <div className="p-2 md:p-3 bg-blue-50 rounded-lg text-blue-600 text-lg md:text-xl">
+            <FiFileText />
+          </div>
+          <div className="text-center md:text-left">
+            <p className="text-xs md:text-sm font-bold text-gray-800">Apply Leave</p>
+            <p className="hidden md:block text-[10px] md:text-xs text-gray-500">Gate pass/Leave</p>
+          </div>
+        </Link>
+        <Link href="/complaints" className="flex flex-col md:flex-row items-center gap-2 md:gap-3 bg-white p-3 md:p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all active:scale-95">
+          <div className="p-2 md:p-3 bg-orange-50 rounded-lg text-orange-600 text-lg md:text-xl">
+            <FiAlertCircle />
+          </div>
+          <div className="text-center md:text-left">
+            <p className="text-xs md:text-sm font-bold text-gray-800">Complaint</p>
+            <p className="hidden md:block text-[10px] md:text-xs text-gray-500">Maintenance</p>
+          </div>
+        </Link>
+        <Link href="/fees-status" className="flex flex-col md:flex-row items-center gap-2 md:gap-3 bg-white p-3 md:p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all active:scale-95">
+          <div className="p-2 md:p-3 bg-green-50 rounded-lg text-green-600 text-lg md:text-xl">
+            <FiCheckCircle />
+          </div>
+          <div className="text-center md:text-left">
+            <p className="text-xs md:text-sm font-bold text-gray-800">Fee Payment</p>
+            <p className="hidden md:block text-[10px] md:text-xs text-gray-500">Dues & Alerts</p>
+          </div>
+        </Link>
+        <Link href="/profile" className="flex flex-col md:flex-row items-center gap-2 md:gap-3 bg-white p-3 md:p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all active:scale-95">
+          <div className="p-2 md:p-3 bg-purple-50 rounded-lg text-purple-600 text-lg md:text-xl">
+            <FiUser />
+          </div>
+          <div className="text-center md:text-left">
+            <p className="text-xs md:text-sm font-bold text-gray-800">My Profile</p>
+            <p className="hidden md:block text-[10px] md:text-xs text-gray-500">ID & Records</p>
+          </div>
+        </Link>
+      </div>
+
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Check-in / Out Card */}
-        <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[600px]">
+        <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full">
           <div className="bg-[#AAB491] px-6 py-3 rounded-t-lg">
             <h2 className="text-lg font-semibold text-black text-center">
               Check-in /Out Status
@@ -403,23 +481,6 @@ export default function DashboardContent() {
               <span>{checkTime}</span>
             </div>
             <div className="pt-8 flex justify-center">
-              {/* <button
-                onClick={() => {
-                  if (loading) return;
-                  setIsCheckIn(checkStatus !== "Checked In");
-                  setSelfieModalOpen(true);
-                }}
-                disabled={loading}
-                className="bg-[#AAB491] text-black text-base font-semibold px-6 py-3 rounded shadow hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading
-                  ? checkStatus === "Checked In"
-                    ? "Checking Out..."
-                    : "Checking In..."
-                  : checkStatus === "Checked In"
-                  ? "Check-Out Now"
-                  : "Check-In Now"}
-              </button> */}
             </div>
           </div>
         </div>
@@ -458,28 +519,19 @@ export default function DashboardContent() {
         )}
 
         {/* Attendance Summary */}
-        <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[600px]">
+        <Link href="/attendance" className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full min-h-[300px] hover:shadow-xl transition-shadow group">
           <div className="bg-[#AAB491] px-6 py-3 rounded-t-lg flex items-center justify-between">
             <h2 className="text-lg font-semibold text-black">
               Attendance Summary
             </h2>
-            <select
-              className="text-base text-black rounded px-3 py-2 bg-white"
-              value={selectedRange}
-              onChange={(e) => setSelectedRange(e.target.value.toLowerCase())}
-            >
-              <option value="day">Day</option>
-              <option value="week">Week</option>
-              <option value="month">Month</option>
-            </select>
+            <FiArrowRight className="text-black opacity-0 group-hover:opacity-100 transition-opacity" />
           </div>
-
-          <div className="p-8 pt-9 flex min-h-[280px]">
-            <div className="space-y-4 text-base mt-3 relative">
-              <div className="flex items-center gap-3 relative group">
-                <span className="w-4 h-4 rounded-full bg-[#4F8DCF]"></span>
+          <div className="p-7 flex flex-col sm:flex-row items-center gap-5">
+            <div className="flex flex-col gap-6 text-sm font-semibold">
+              <div className="flex items-center gap-3 relative group/tip">
+                <span className="w-4 h-4 rounded-full bg-[#1853A1]"></span>
                 <span className="text-black font-medium">Present</span>
-                <div className="absolute left-28 top-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <div className="absolute left-28 top-1 opacity-0 group-hover/tip:opacity-100 transition-opacity duration-200">
                   <div className="relative bg-gray-900 text-white text-xs px-3 py-1 rounded-md shadow-md">
                     {attendanceData.present ?? 0} day
                     {attendanceData.present === 1 ? "" : "s"}
@@ -488,16 +540,20 @@ export default function DashboardContent() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 relative group">
+              <div className="flex items-center gap-3 relative group/tip">
                 <span className="w-4 h-4 rounded-full bg-[#E30007]"></span>
                 <span className="text-black font-medium">Absent</span>
-                <div className="absolute left-28 top-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <div className="absolute left-28 top-1 opacity-0 group-hover/tip:opacity-100 transition-opacity duration-200">
                   <div className="relative bg-gray-900 text-white text-xs px-3 py-1 rounded-md shadow-md">
                     {attendanceData.absent ?? 0} day
                     {attendanceData.absent === 1 ? "" : "s"}
                     <div className="absolute left-[-6px] top-1/2 -translate-y-1/2 w-0 h-0 border-t-6 border-t-transparent border-b-6 border-b-transparent border-r-6 border-r-gray-900"></div>
                   </div>
                 </div>
+              </div>
+              
+              <div className="mt-2 text-[10px] text-blue-600 font-bold flex items-center gap-1">
+                <FiClock /> Click to view detailed logs
               </div>
             </div>
 
@@ -521,10 +577,10 @@ export default function DashboardContent() {
               </div>
             </div>
           </div>
-        </div>
+        </Link>
 
         {/* Room Inspection Schedule */}
-        <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[600px] min-h-[300px]">
+        <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full min-h-[300px]">
           <div className="bg-[#AAB491] px-6 py-3 rounded-t-lg">
             <h2 className="text-lg font-semibold text-black">
               Room Inspection Schedule
@@ -577,7 +633,7 @@ export default function DashboardContent() {
         <Link
           href="/profile"
           passHref
-          className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[600px] min-h-[300px]"
+          className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full min-h-[300px]"
         >
           <div className="bg-[#AAB491] px-6 py-3 rounded-t-lg">
             <h2 className="text-lg font-semibold text-black">Bed Allotment</h2>
@@ -593,7 +649,7 @@ export default function DashboardContent() {
             </div>
             <div className="flex justify-between">
               <span>BedNo:</span>
-              <span>{barcodeId}</span>
+              <span>{bedAllotment}</span>
             </div>
           </div>
         </Link>
@@ -602,7 +658,7 @@ export default function DashboardContent() {
         <Link
           href="/fees-status"
           passHref
-          className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[600px] min-h-[300px]"
+          className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full min-h-[300px]"
         >
           <div className="bg-[#AAB491] px-6 py-3 rounded-t-lg">
             <h2 className="text-lg font-semibold text-black">Fee Alerts</h2>
@@ -646,46 +702,79 @@ export default function DashboardContent() {
           </div>
         </Link>
 
-        {/* Leave Approval Status */}
+
+        {/* Complaint Status Card */}
         <Link
-          href="/leaves"
+          href="/complaints"
           passHref
-          className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full sm:w-[calc(50%-12px)] max-w-[600px] min-h-[300px]"
+          className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full min-h-[300px]"
         >
-          <div className="bg-[#AAB491] px-6 py-3 rounded-t-lg">
-            <h2 className="text-lg font-semibold text-black">
-              Leave Approval Status
+          <div className="bg-[#AAB491] px-6 py-3 rounded-t-lg flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-black flex items-center gap-2">
+              <FiAlertCircle /> Active Complaints
             </h2>
+            <FiArrowRight className="text-black" />
           </div>
-          <div className="p-7 flex flex-col gap-5 text-base font-semibold text-black">
-            {latestLeave ? (
-              <>
-                <div className="flex justify-between">
-                  <span>Last request:</span>
-                  <span className="truncate max-w-[60%]">
-                    {latestLeave.leaveType}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Status:</span>
-                  <span
-                    className={`${
-                      latestLeave.status === "approved"
-                        ? "text-[#36FF09]"
-                        : latestLeave.status === "rejected"
-                        ? "text-red-600"
-                        : "text-yellow-500"
-                    } font-semibold`}
-                  >
-                    {latestLeave.status}
-                  </span>
-                </div>
-              </>
+          <div className="p-6">
+            {complaints.length > 0 ? (
+              <div className="space-y-4">
+                {complaints.map((comp, idx) => (
+                  <div key={idx} className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                    <div className="flex justify-between items-start mb-1">
+                      <span className="text-sm font-bold text-gray-800 truncate max-w-[70%]">{comp.subject}</span>
+                      <span className={`text-[10px] uppercase px-2 py-0.5 rounded-full font-bold ${
+                        comp.status === 'Resolved' ? 'bg-green-100 text-green-700' : 
+                        comp.status === 'In Progress' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700'
+                      }`}>
+                        {comp.status}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 text-[11px] text-gray-500">
+                      <FiClock /> {new Date(comp.filedDate || comp.createdAt).toLocaleDateString()}
+                    </div>
+                  </div>
+                ))}
+                <p className="text-center text-xs text-[#4F8DCF] font-semibold mt-2">View all complaints</p>
+              </div>
             ) : (
-              <div className="text-base">No leave history found</div>
+              <div className="flex flex-col items-center justify-center py-10 text-gray-400">
+                <FiCheckCircle size={40} className="mb-2 opacity-20" />
+                <p className="text-sm">No active complaints</p>
+              </div>
             )}
           </div>
         </Link>
+
+        {/* Recent Notices Card */}
+        <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full min-h-[300px]">
+          <div className="bg-[#AAB491] px-6 py-3 rounded-t-lg">
+            <h2 className="text-lg font-semibold text-black flex items-center gap-2">
+              <FiInfo /> Recent Notices
+            </h2>
+          </div>
+          <div className="p-6">
+            {recentNotices.length > 0 ? (
+              <div className="space-y-4">
+                {recentNotices.map((notice, idx) => (
+                  <div key={idx} className="border-l-4 border-blue-400 pl-3 py-1">
+                    <h4 className="text-sm font-bold text-gray-800 line-clamp-1">{notice.title}</h4>
+                    <p className="text-xs text-gray-500 line-clamp-1">{notice.description}</p>
+                    <span className="text-[10px] text-gray-400 font-medium">
+                      {new Date(notice.issueDate).toLocaleDateString()}
+                    </span>
+                  </div>
+                ))}
+                <Link href="/notices" className="block text-center text-xs text-[#4F8DCF] font-semibold mt-2">
+                  View all notices
+                </Link>
+              </div>
+            ) : (
+              <div className="text-center py-10 text-gray-400">
+                <p className="text-sm">No recent notices</p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Notice Popup */}

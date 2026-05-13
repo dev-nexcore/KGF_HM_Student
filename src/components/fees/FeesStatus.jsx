@@ -2,71 +2,59 @@
 import React, { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import PaymentModal from './PaymentModal';
+import { toast } from 'react-hot-toast';
 
 export default function FeesStatus() {
   const [showModal, setShowModal] = useState(false);
   const [currentFees, setCurrentFees] = useState([]);
+  const [paymentHistory, setPaymentHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [studentId, setStudentId] = useState(null);
-  const [ready, setReady] = useState(false); // Replaces isClient
+  const [studentProfile, setStudentProfile] = useState(null);
+  const [ready, setReady] = useState(false);
   const [selectedFeeAmount, setSelectedFeeAmount] = useState(null);
 
   useEffect(() => {
-    // Run only on client
-    const id = localStorage.getItem('studentId');
-    if (id) setStudentId(id);
-    setReady(true); // Now it's safe to run other logic
+    setReady(true);
   }, []);
 
   useEffect(() => {
-    const fetchFees = async () => {
+    const fetchData = async () => {
       try {
-        // Temporarily using dummy data for client presentation
-        const dummyFees = [
-          {
-            feeType: "Hostel Fee",
-            dueDate: "2025-08-15",
-            amount: "12,000",
-            status: "paid"
-          }
-        ];
+        setLoading(true);
+        // 1. Fetch Profile to get Email
+        const profileRes = await api.get('/profile');
+        setStudentProfile(profileRes.data);
+console.log(profileRes.data)
+        // 2. Fetch Fees Status
+        const feesRes = await api.get('/feeStatus');
+        const allFees = feesRes.data.fees || [];
         
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Filter into Current (unpaid/overdue) and History (paid)
+        const current = allFees.filter(f => f.status !== 'paid');
+        const history = allFees.filter(f => f.status === 'paid');
         
-        // Use dummy data instead of API call
-        setCurrentFees(dummyFees);
+        setCurrentFees(current);
+        setPaymentHistory(history);
         
-        // Uncomment below for actual API call when backend is ready
-        // const res = await api.get(`/feeStatus`);
-        // setCurrentFees(res.data.fees || []);
       } catch (err) {
-        console.error("Error fetching current fee status:", err);
-        setError('Failed to fetch fee status');
+        console.error("Error fetching fee data:", err);
+        setError('Failed to fetch fee status. Please try again later.');
+        toast.error('Could not load fee data');
       } finally {
         setLoading(false);
       }
     };
 
-    if (ready && studentId) {
-      fetchFees();
+    if (ready) {
+      fetchData();
     }
-  }, [ready, studentId]);
+  }, [ready]);
 
-  if (!ready) return null; // Prevent premature render
-
-  const paymentHistory = [
-    { date: '23-03-2025', amount: '6,000', email: 'xyz@gmail.com', status: 'Paid' },
-    { date: '31-03-2025', amount: '6,000', email: 'xyz@gmail.com', status: 'Paid' },
-    { date: '15-04-2025', amount: '6,000', email: 'xyz@gmail.com', status: 'Paid' },
-    { date: '26-04-2025', amount: '6,000', email: 'xyz@gmail.com', status: 'Paid' },
-  ];
+  if (!ready) return null;
 
   return (
     <div className="w-full min-h-screen bg-white pt-2 pb-6 sm:pb-10 sm:px-2.5 dark:bg-white overflow-hidden">
-      {/* Fees Section Title */}
-
       <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-black border-l-4 border-[#4F8CCF] pl-2 mb-4 sm:mb-6">
         Fees Status
       </h2>
@@ -77,13 +65,18 @@ export default function FeesStatus() {
           <h3 className="text-lg sm:text-xl font-bold text-black">Current Fees Status</h3>
         </div>
 
-
         {loading ? (
-          <div className="flex items-center justify-center h-80 text-gray-600">Loading current fee status...</div>
+          <div className="flex items-center justify-center h-80 text-gray-600">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#A4B494]"></div>
+            <span className="ml-3">Loading fees...</span>
+          </div>
         ) : error ? (
-          <div className="flex items-center justify-center h-80 text-red-600">{error}</div>
+          <div className="flex items-center justify-center h-80 text-red-600 px-6 text-center">{error}</div>
         ) : currentFees.length === 0 ? (
-          <div className="flex items-center justify-center h-80 text-gray-500">No current fees found.</div>
+          <div className="flex flex-col items-center justify-center h-80 text-gray-500">
+            <p className="text-lg font-medium">All dues cleared!</p>
+            <p className="text-sm">No pending fees at the moment.</p>
+          </div>
         ) : (
           currentFees.map((fee, idx) => (
             <div key={idx} className="flex flex-col h-80 px-6 sm:px-8 py-6 sm:py-8">
@@ -95,46 +88,48 @@ export default function FeesStatus() {
                 <div className="flex justify-between">
                   <span className="font-semibold text-black">Due Date:</span>
                   <span className="font-medium text-black">
-                    {new Date(fee.dueDate).toLocaleDateString('en-IN')}
+                    {new Date(fee.dueDate).toLocaleDateString('en-IN', {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric'
+                    })}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-semibold text-black">Amount:</span>
-                  <span className="font-medium text-black">₹ {fee.amount}</span>
+                  <span className="font-medium text-black text-xl font-bold">₹ {fee.amount?.toLocaleString('en-IN')}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-semibold text-black">Status:</span>
-                  <span className={`font-medium ${fee.status === 'overdue' ? 'text-red-600' :
-                    fee.status === 'unpaid' ? 'text-yellow-600' :
-                      'text-green-600'
-                    }`}>
+                  <span className={`font-bold px-3 py-1 rounded-full text-xs uppercase tracking-wider ${
+                    fee.status === 'overdue' ? 'bg-red-100 text-red-700' :
+                    fee.status === 'unpaid' ? 'bg-yellow-100 text-yellow-700' :
+                    'bg-green-100 text-green-700'
+                  }`}>
                     {fee.status}
                   </span>
                 </div>
               </div>
               <div className="flex justify-center pb-2">
-                {fee.status !== 'paid' && (
-                  <button
-                    onClick={() => {
-                      setSelectedFeeAmount(fee.amount);
-                      setShowModal(true);
-                    }}
-                    className="bg-[#BEC5AD] px-8 py-3 rounded-md text-black font-semibold shadow-md text-base hover:bg-[#a8b096] transition-colors"
-                  >
-                    Pay Now
-                  </button>
-                )}
+                <button
+                  onClick={() => {
+                    setSelectedFeeAmount(fee.amount);
+                    setShowModal(true);
+                  }}
+                  className="bg-[#A4B494] hover:bg-[#8fa082] px-12 py-3 rounded-xl text-black font-bold shadow-lg transition-all active:scale-95"
+                >
+                  Pay Now
+                </button>
               </div>
             </div>
           ))
         )}
       </div>
 
-
       {/* Payment History Table */}
-      <div className="bg-white rounded-lg shadow-md w-full max-w-7xl">
-        <div className="p-5 sm:p-6">
-          <h3 className="text-lg sm:text-xl font-bold mb-6 text-black">
+      <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.1)] w-full max-w-7xl overflow-hidden">
+        <div className="p-5 sm:p-8">
+          <h3 className="text-lg sm:text-xl font-bold mb-6 text-black flex items-center gap-2">
             Payment History
           </h3>
 
@@ -142,54 +137,69 @@ export default function FeesStatus() {
           <div className="hidden sm:block overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-gray-200">
-                  <th className="text-center pl-6 p-4 font-semibold text-black">Date</th>
-                  <th className="text-center p-4 font-semibold text-black">Amount (₹)</th>
-                  <th className="text-center p-4 font-semibold text-black">Email ID</th>
-                  <th className="text-center p-4 font-semibold text-black">Status</th>
+                <tr className="bg-gray-50 border-b border-gray-100">
+                  <th className="text-left p-4 font-bold text-gray-600">Date</th>
+                  <th className="text-left p-4 font-bold text-gray-600">Fee Type</th>
+                  <th className="text-left p-4 font-bold text-gray-600">Amount (₹)</th>
+                  <th className="text-left p-4 font-bold text-gray-600">Reference</th>
+                  <th className="text-left p-4 font-bold text-gray-600">Status</th>
                 </tr>
               </thead>
               <tbody>
-                {paymentHistory.map((item, idx) => (
-                  <tr key={idx} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="text-center pl-6 p-4 text-gray-700">{item.date}</td>
-                    <td className="text-center p-4 text-gray-700">{item.amount}</td>
-                    <td className="text-center p-4 text-gray-700">{item.email}</td>
-                    <td className="text-center p-4">
-                      <span className="text-green-600 font-semibold">
-                        {item.status}
-                      </span>
-                    </td>
+                {paymentHistory.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" className="text-center p-10 text-gray-400">No payment records found</td>
                   </tr>
-                ))}
+                ) : (
+                  paymentHistory.map((item, idx) => (
+                    <tr key={idx} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                      <td className="p-4 text-gray-700 font-medium">
+                        {new Date(item.updatedAt || item.dueDate).toLocaleDateString('en-IN')}
+                      </td>
+                      <td className="p-4 text-gray-700">{item.feeType}</td>
+                      <td className="p-4 text-gray-900 font-bold">₹{item.amount?.toLocaleString('en-IN')}</td>
+                      <td className="p-4 text-gray-500 text-sm">{studentProfile?.email}</td>
+                      <td className="p-4">
+                        <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold uppercase">
+                          Paid
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
 
           {/* Mobile Cards View */}
-          <div className="sm:hidden">
-            {paymentHistory.map((item, idx) => (
-              <div key={idx} className="bg-gray-50 rounded-lg p-3 text-center mb-2">
-                <div className="flex justify-center items-center mb-2 space-x-2">
-                  <h4 className="font-semibold text-gray-800 text-sm">{item.date}</h4>
-                  <span className="text-green-600 font-semibold text-sm">
-                    {item.status}
-                  </span>
-                </div>
-                <div className="text-sm">
-                  <div className="flex justify-center space-x-1 mb-1">
-                    <span className="text-gray-600">Amount (₹):</span>
-                    <span className="font-medium text-gray-800">{item.amount}</span>
-                  </div>
-                  <div className="flex justify-center space-x-1">
-                    <span className="text-gray-600">Email ID:</span>
-                    <span className="font-medium text-gray-800 break-words max-w-[60%]">
-                      {item.email}
+          <div className="sm:hidden space-y-4">
+            {paymentHistory.length === 0 ? (
+              <p className="text-center py-10 text-gray-400">No payment records found</p>
+            ) : (
+              paymentHistory.map((item, idx) => (
+                <div key={idx} className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">Date</p>
+                      <p className="text-sm font-bold text-gray-900">{new Date(item.updatedAt || item.dueDate).toLocaleDateString('en-IN')}</p>
+                    </div>
+                    <span className="bg-green-100 text-green-700 px-2 py-1 rounded-lg text-[10px] font-bold uppercase">
+                      Paid
                     </span>
                   </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-xs text-gray-500">Type</p>
+                      <p className="text-sm font-medium">{item.feeType}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Amount</p>
+                      <p className="text-sm font-black text-gray-900">₹{item.amount?.toLocaleString('en-IN')}</p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>

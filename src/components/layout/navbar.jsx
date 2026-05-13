@@ -130,7 +130,7 @@ export default function Navbar() {
                 src={
                   studentProfile && studentProfile !== "null"
                     ? studentProfile
-                    : "/default-profile.jpg"
+                    : "/default-icon.jpg"
                 }
                 alt="Profile"
                 width={40}
