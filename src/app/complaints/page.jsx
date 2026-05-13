@@ -1,52 +1,21 @@
-// // complaints/page.jsx
-// import Header from "@/components/layout/navbar";
-// import Complaints from "@/components/complaints/Complaints";
-// import Sidebar from "@/components/layout/sidebar";
-
-// export default function ComplaintsPage() {
-//   return (
-//     <div className="flex min-h-screen bg-white w-full overflow-x-hidden">
-//       {/* Sidebar */}
-//       <Sidebar />
-
-//       {/* Main Content */}
-//       <main className="flex flex-col flex-1 min-w-0 overflow-x-hidden">
-//         <Header />
-//         <div className="w-full overflow-x-hidden">
-//           <Complaints />
-//         </div>
-//       </main>
-//     </div>
-//   );
-// }
-
-
-
-// complaints/page.jsx
+"use client";
+import React, { useState } from 'react';
 import Header from "@/components/layout/navbar";
 import Complaints from "@/components/complaints/Complaints";
 import Sidebar from "@/components/layout/sidebar";
 
 export default function ComplaintsPage() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
-    <div className="flex min-h-screen bg-white overflow-x-hidden">
-
-      {/* Sidebar */}
-      <Sidebar />
-
-      {/* Main Content */}
-      <main className="flex flex-col flex-1 md:ml-55 min-w-0 overflow-x-hidden">
-
-        {/* Navbar */}
-        <Header />
-
-        {/* Page Content */}
-        <div className="flex-1 w-full overflow-y-auto p-4 lg:p-8">
+    <div className="flex min-h-screen bg-[#F8FAF5]">
+      <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+      <div className="flex flex-col flex-1 lg:ml-72 transition-all duration-500">
+        <Header setSidebarOpen={setSidebarOpen} />
+        <main className="flex-1 p-4 sm:p-8 lg:p-12 overflow-y-auto">
           <Complaints />
-        </div>
-
-      </main>
-
+        </main>
+      </div>
     </div>
   );
 }

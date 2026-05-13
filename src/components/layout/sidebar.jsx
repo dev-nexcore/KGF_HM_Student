@@ -1,389 +1,163 @@
-// "use client";
-// import { useState, useEffect } from "react";
-// import Link from "next/link";
-// import { Menu, X } from "lucide-react";
-// import { usePathname } from "next/navigation";
-// import Image from "next/image";
-// import { useRouter } from "next/navigation";
-// import { toast } from "react-hot-toast";
-
-// export default function Sidebar() {
-//   const router = useRouter();
-//   const pathname = usePathname();
-//   const [sidebarOpen, setSidebarOpen] = useState(false);
-//   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
-
-//   useEffect(() => {
-//     setSidebarOpen(false);
-//   }, [pathname]);
-
-//   const handleLogoutClick = () => {
-//     setShowLogoutConfirmation(true);
-//   };
-
-//   const handleLogoutConfirm = () => {
-//     localStorage.removeItem("token");
-//     localStorage.removeItem("studentId");
-//     localStorage.removeItem("forgotPasswordEmail");
-//     toast.success("Logged out successfully");
-//     router.push("/");
-//     setShowLogoutConfirmation(false);
-//   };
-
-//   const handleLogoutCancel = () => {
-//     setShowLogoutConfirmation(false);
-//   };
-
-//   const navItems = [
-//     { name: "Dashboard", icon: "dashboard.png", href: "/dashboard" },
-//     {
-//       name: "Fees Status",
-//       icon: "account_balance_wallet.png",
-//       href: "/fees-status",
-//     },
-//     { name: "Leaves", icon: "calendar.png", href: "/leaves" },
-//     { name: "Notices", icon: "filter_frames.png", href: "/notices" },
-//     { name: "Complaints", icon: "chat_bubble.png", href: "/complaints" },
-//   ];
-
-//   const getLinkClass = (href) =>
-//     `flex items-center gap-2 sm:gap-3 px-3 sm:px-4 md:px-6 py-2 sm:py-3 transition-all duration-200 rounded-l-full text-xs sm:text-sm md:text-base
-//      ${
-//        pathname === href
-//          ? "bg-white text-black font-bold shadow ml-1 sm:ml-2"
-//          : "hover:underline text-black"
-//      }`;
-
-//   return (
-//     <div className="bg-[#BEC5AD]">
-//       {/* Hamburger menu (Mobile) */}
-//       <button
-//         className="md:hidden fixed top-2 left-2 z-50 p-2 bg-[#A4B494] rounded-md shadow text-black"
-//         onClick={() => setSidebarOpen(true)}
-//         aria-label="Open sidebar"
-//       >
-//         <Menu size={24} />
-//       </button>
-
-//       {/* Sidebar Panel */}
-//       <aside
-//         className={`fixed top-0 left-0 z-40 w-56 sm:w-48 md:w-60 h-full bg-[#A4B494] py-6 sm:py-8 md:pl-5 sm:pl-0 flex flex-col justify-between
-//         rounded-tr-3xl shadow transform transition-transform duration-300
-//         ${
-//           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-//         } md:translate-x-0 md:static`}
-//       >
-//         {/* Close Button (Mobile Only) */}
-//         <button
-//           className="md:hidden absolute top-4 right-4 p-2 text-black"
-//           onClick={() => setSidebarOpen(false)}
-//           aria-label="Close sidebar"
-//         >
-//           <X size={24} />
-//         </button>
-
-//         <div>
-//           {/* Logo */}
-//           <div className="flex justify-start mb-4 sm:mb-6 px-3 sm:px-4 md:ml-8.5 ml-2">
-//             <div className="w-16 sm:w-20 md:w-24 h-16 sm:h-20 md:h-24 rounded-full overflow-hidden border-2 border-white shadow">
-//               <img
-//                 src="/student/logo.png"
-//                 alt="Logo"
-//                 className="w-full h-full object-cover"
-//               />
-//             </div>
-//           </div>
-
-//           {/* Nav Links */}
-//           <ul className="space-y-1 text-sm sm:text-base md:text-base font-semibold">
-//             {navItems.map(({ name, icon, href }) => (
-//               <li key={name}>
-//                 <Link href={href}>
-//                   <div className={getLinkClass(href)}>
-//                     <Image
-//                       src={`/student/icons/${icon}`}
-//                       alt={`${name} icon`}
-//                       width={18}
-//                       height={18}
-//                     />
-//                     <span className="hidden sm:inline">{name}</span>
-//                     <span className="sm:hidden text-xs">
-//                       {name.split(" ")[0]}
-//                     </span>
-//                   </div>
-//                 </Link>
-//               </li>
-//             ))}
-//           </ul>
-//         </div>
-
-//         {/* Logout */}
-//         <div className="mt-0">
-//           <hr className="border-t border-black my-3 mr-4" />
-//           <div className="flex justify-start mb-1 px-3 sm:px-4 md:ml-8.5 ml-2">
-//             <button
-//               onClick={handleLogoutClick}
-//               className="flex items-center gap-2 text-black text-xs sm:text-sm hover:underline font-bold cursor-pointer"
-//             >
-//               <Image
-//                 src="/icons/logout.png"
-//                 alt="Logout"
-//                 width={18}
-//                 height={18}
-//               />
-//               <span className="hidden sm:inline">Logout</span>
-//               <span className="sm:hidden">Out</span>
-//             </button>
-//           </div>
-//         </div>
-//       </aside>
-
-//       {/* Dark Overlay (Mobile only) */}
-//       {sidebarOpen && (
-//         <div
-//           className="fixed inset-0 bg-black opacity-30 z-30 md:hidden"
-//           onClick={() => setSidebarOpen(false)}
-//           aria-hidden="true"
-//         />
-//       )}
-
-//       {/* Logout Confirmation Modal */}
-//       {showLogoutConfirmation && (
-//         <div className="fixed inset-0 backdrop-blur bg-opacity-50 flex items-center justify-center z-50">
-//           <div className="bg-white rounded-lg p-4 sm:p-6 max-w-sm mx-4 shadow-xl">
-//             <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">
-//               Confirm Logout
-//             </h3>
-//             <p className="text-sm sm:text-base text-gray-600 mb-6">
-//               Are you sure you want to logout?
-//             </p>
-//             <div className="flex gap-3 justify-end">
-//               <button
-//                 onClick={handleLogoutCancel}
-//                 className="px-3 sm:px-4 py-2 text-xs sm:text-sm text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors cursor-pointer"
-//               >
-//                 Cancel
-//               </button>
-//               <button
-//                 onClick={handleLogoutConfirm}
-//                 className="px-3 sm:px-4 py-2 text-xs sm:text-sm bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors cursor-pointer"
-//               >
-//                 Logout
-//               </button>
-//             </div>
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// }
-
-
 "use client";
+
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
+import { 
+  LayoutDashboard, 
+  CalendarCheck, 
+  Wallet, 
+  FileSpreadsheet, 
+  Bell, 
+  MessageSquare, 
+  LogOut, 
+  X, 
+  Menu,
+  UserCircle
+} from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import { toast } from "react-hot-toast";
+import logoImg from "../../../public/logo.png";
 
-export default function Sidebar() {
+export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
   const router = useRouter();
   const pathname = usePathname();
-
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
-  const [active, setActive] = useState("");
 
-  // current page active
   useEffect(() => {
-    setActive(pathname);
     setSidebarOpen(false);
   }, [pathname]);
-
-  const handleLogoutClick = () => {
-    setShowLogoutConfirmation(true);
-  };
 
   const handleLogoutConfirm = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("studentId");
-    localStorage.removeItem("forgotPasswordEmail");
-
-    toast.success("Logged out successfully");
+    localStorage.removeItem("studentInfo");
+    toast.success("Signed out safely");
     router.push("/");
-    setShowLogoutConfirmation(false);
-  };
-
-  const handleLogoutCancel = () => {
-    setShowLogoutConfirmation(false);
   };
 
   const navItems = [
-    { name: "Dashboard", icon: "dashboard.png", href: "/dashboard" },
-    { name: "Attendance", icon: "calendar.png", href: "/attendance" },
-    { name: "Fees Status", icon: "account_balance_wallet.png", href: "/fees-status" },
-    { name: "Leaves", icon: "calendar.png", href: "/leaves" },
-    { name: "Notices", icon: "filter_frames.png", href: "/notices" },
-    { name: "Complaints", icon: "chat_bubble.png", href: "/complaints" },
+    { name: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
+    { name: "Attendance", icon: CalendarCheck, href: "/attendance" },
+    { name: "Fees Status", icon: Wallet, href: "/fees-status" },
+    { name: "Leaves", icon: FileSpreadsheet, href: "/leaves" },
+    { name: "Notices", icon: Bell, href: "/notices" },
+    { name: "Complaints", icon: MessageSquare, href: "/complaints" },
+    { name: "My Profile", icon: UserCircle, href: "/profile" },
   ];
 
-  // const getLinkClass = (href) =>
-  //   `flex items-center gap-2 sm:gap-3 px-3 sm:px-4 md:px-6 py-2 sm:py-3 transition-all duration-200 rounded-l-full text-xs sm:text-sm md:text-base
-  //    ${
-  //      active === href
-  //        ? "bg-white text-black font-bold shadow ml-1 sm:ml-2"
-  //        : "hover:bg-white/40 text-black"
-  //    }`;
-
-  const getLinkClass = (href) =>
-  `flex items-center gap-2 sm:gap-3 px-3 sm:px-4 md:px-6 py-2 sm:py-3 transition-all duration-200 rounded-l-full text-xs sm:text-sm md:text-base
-   ${
-     pathname.startsWith(href)
-       ? "bg-white text-black font-bold shadow ml-1 sm:ml-2"
-       : "hover:bg-white/40 text-black"
-   }`;
-
   return (
-    <div className="bg-[#BEC5AD]">
-
-      {/* Mobile Menu Button */}
-      <button
-        className="md:hidden fixed top-2 left-2 z-50 p-2 bg-[#A4B494] rounded-md shadow text-black"
-        onClick={() => setSidebarOpen(true)}
-      >
-        <Menu size={24} />
-      </button>
-
-      {/* Sidebar */}
-      {/* <aside
-        className={`fixed top-0 left-0 z-40 w-56 sm:w-48 md:w-60 h-full bg-[#A4B494] py-6 sm:py-8 md:pl-5 sm:pl-0 flex flex-col justify-between
-        rounded-tr-3xl shadow transform transition-transform duration-300
-        ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0 md:static`}
-      > */}
-
-      <aside
-className={`fixed top-0 left-0 z-40 w-56 sm:w-48 md:w-60 h-screen bg-[#A4B494]
-py-6 sm:py-8 md:pl-5 sm:pl-0 flex flex-col justify-between
-rounded-tr-3xl shadow transform transition-transform duration-300
-${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
->
-
-        {/* Close Button */}
-        <button
-          className="md:hidden absolute top-4 right-4 p-2 text-black"
-          onClick={() => setSidebarOpen(false)}
-        >
-          <X size={24} />
-        </button>
-
-        <div>
-
-          {/* Logo */}
-          <div className="flex justify-start mb-4 sm:mb-6 px-3 sm:px-4 md:ml-8.5 ml-2">
-            <div className="w-16 sm:w-20 md:w-24 h-16 sm:h-20 md:h-24 rounded-full overflow-hidden border-2 border-white shadow">
-              <img
-                src="/student/logo.png"
-                alt="Logo"
-                className="w-full h-full object-cover"
-              />
-            </div>
-          </div>
-
-          {/* Navigation */}
-          <ul className="space-y-1 text-sm sm:text-base font-semibold">
-            {navItems.map(({ name, icon, href }) => (
-              <li key={name}>
-                <Link href={href}>
-                  <div
-                    className={getLinkClass(href)}
-                    onClick={() => {
-                      setActive(href);
-                      setSidebarOpen(false);
-                    }}
-                  >
-                    <Image
-                      src={`/student/icons/${icon}`}
-                      alt={name}
-                      width={18}
-                      height={18}
-                    />
-                    <span className="hidden sm:inline">{name}</span>
-                    <span className="sm:hidden text-xs">
-                      {name.split(" ")[0]}
-                    </span>
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Logout */}
-        <div>
-          <hr className="border-t border-black my-3 mr-4" />
-
-          <div className="flex justify-start mb-1 px-3 sm:px-4 md:ml-8.5 ml-2">
-            <button
-              onClick={handleLogoutClick}
-              className="flex items-center gap-2 text-black text-xs sm:text-sm font-bold hover:underline"
-            >
-              <Image
-                src="/student/icons/logout.png"
-                alt="Logout"
-                width={18}
-                height={18}
-              />
-              <span className="hidden sm:inline">Logout</span>
-              <span className="sm:hidden">Out</span>
-            </button>
-          </div>
-        </div>
-      </aside>
-
-      {/* Mobile Overlay */}
+    <>
+      {/* ── Mobile Overlay ── */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black opacity-30 z-30 md:hidden"
+          className="fixed inset-0 bg-[#1A1F16]/40 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* Logout Modal */}
+      {/* ── Sidebar Container ── */}
+      <aside
+        className={`fixed top-0 left-0 z-50 h-screen w-72 bg-[#F8FAF5] border-r border-[#7A8B5E]/10 transition-transform duration-500 ease-in-out lg:translate-x-0 ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="flex flex-col h-full p-8">
+          
+          {/* Logo Section */}
+          <div className="flex items-center gap-4 mb-12 px-2">
+            <div className="bg-[#7A8B5E] p-2.5 rounded-2xl shadow-lg shadow-[#7A8B5E]/20">
+              <Image 
+                src={logoImg} 
+                alt="KGF Logo" 
+                width={40}
+                height={40}
+                className="object-contain"
+                priority
+              />
+            </div>
+            <div>
+              <h1 className="text-lg font-black text-[#1A1F16] tracking-tighter leading-none uppercase italic">KGF <span className="text-[#7A8B5E]">Portal</span></h1>
+              <p className="text-[10px] font-black text-[#7A8B5E] uppercase tracking-widest mt-1 opacity-60">Student Access</p>
+            </div>
+          </div>
+
+          {/* Navigation Links */}
+          <nav className="flex-1 space-y-2">
+            {navItems.map((item) => {
+              const isActive = pathname === item.href;
+              const Icon = item.icon;
+              
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`group flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 ${
+                    isActive 
+                      ? "bg-[#7A8B5E] text-white shadow-xl shadow-[#7A8B5E]/20" 
+                      : "text-[#1A1F16]/60 hover:bg-[#7A8B5E]/5 hover:text-[#7A8B5E]"
+                  }`}
+                >
+                  <Icon size={20} className={isActive ? "animate-pulse" : ""} />
+                  <span className={`text-xs font-black uppercase tracking-widest ${isActive ? "opacity-100" : "opacity-80"}`}>
+                    {item.name}
+                  </span>
+                  {isActive && (
+                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white animate-ping"></div>
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* Bottom Section */}
+          <div className="mt-auto space-y-4 pt-8 border-t border-[#7A8B5E]/10">
+            <button
+              onClick={() => setShowLogoutConfirmation(true)}
+              className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-[#6B7280] hover:bg-red-50 hover:text-red-600 transition-all duration-300 group"
+            >
+              <LogOut size={20} className="group-hover:-translate-x-1 transition-transform" />
+              <span className="text-xs font-black uppercase tracking-widest">Sign Out</span>
+            </button>
+            
+            <div className="bg-[#7A8B5E]/5 rounded-3xl p-5 border border-[#7A8B5E]/10">
+              <p className="text-[10px] font-black text-[#7A8B5E] uppercase tracking-widest mb-1">Support</p>
+              <p className="text-[11px] font-bold text-[#1A1F16]/60 leading-relaxed">
+                Need help? Contact the warden or admin office.
+              </p>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      {/* ── Logout Modal ── */}
       {showLogoutConfirmation && (
-        <div className="fixed inset-0 backdrop-blur flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-4 sm:p-6 max-w-sm mx-4 shadow-xl">
-
-            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">
-              Confirm Logout
-            </h3>
-
-            <p className="text-sm sm:text-base text-gray-600 mb-6">
-              Are you sure you want to logout?
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#1A1F16]/60 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="bg-white rounded-[40px] p-10 max-w-sm w-full shadow-2xl border border-[#7A8B5E]/10 text-center animate-in zoom-in-95 duration-300">
+            <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6 text-red-500">
+              <LogOut size={32} />
+            </div>
+            <h3 className="text-2xl font-black text-[#1A1F16] mb-3 uppercase italic">Sign Out?</h3>
+            <p className="text-[#6B7280] font-bold text-sm mb-8 leading-relaxed">
+              Are you sure you want to end your current session?
             </p>
-
-            <div className="flex gap-3 justify-end">
+            <div className="flex gap-3">
               <button
-                onClick={handleLogoutCancel}
-                className="px-3 sm:px-4 py-2 text-xs sm:text-sm text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200"
+                onClick={() => setShowLogoutConfirmation(false)}
+                className="flex-1 px-6 py-4 rounded-2xl bg-[#F8FAF5] text-[#1A1F16] font-black text-[10px] uppercase tracking-widest hover:bg-gray-100 transition-all"
               >
                 Cancel
               </button>
-
               <button
                 onClick={handleLogoutConfirm}
-                className="px-3 sm:px-4 py-2 text-xs sm:text-sm bg-red-500 text-white rounded-md hover:bg-red-600"
+                className="flex-1 px-6 py-4 rounded-2xl bg-red-500 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-red-500/20 hover:bg-red-600 transition-all"
               >
-                Logout
+                Yes, Exit
               </button>
             </div>
-
           </div>
         </div>
       )}
-
-    </div>
+    </>
   );
 }

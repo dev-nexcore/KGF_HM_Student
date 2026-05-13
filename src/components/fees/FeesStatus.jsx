@@ -1,8 +1,21 @@
 'use client';
+
 import React, { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import PaymentModal from './PaymentModal';
-import { toast } from 'react-hot-toast';
+import { toast, Toaster } from 'react-hot-toast';
+import { 
+  CreditCard, 
+  History, 
+  Calendar, 
+  ArrowRight, 
+  Download, 
+  CheckCircle, 
+  AlertCircle,
+  TrendingUp,
+  Receipt,
+  Search
+} from 'lucide-react';
 
 export default function FeesStatus() {
   const [showModal, setShowModal] = useState(false);
@@ -11,205 +24,254 @@ export default function FeesStatus() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [studentProfile, setStudentProfile] = useState(null);
-  const [ready, setReady] = useState(false);
   const [selectedFeeAmount, setSelectedFeeAmount] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const profileRes = await api.get('/profile');
+      setStudentProfile(profileRes.data);
+
+      const feesRes = await api.get('/feeStatus');
+      const allFees = feesRes.data.fees || [];
+      
+      setCurrentFees(allFees.filter(f => f.status !== 'paid'));
+      setPaymentHistory(allFees.filter(f => f.status === 'paid'));
+      
+    } catch (err) {
+      setError('System restricted: Unable to fetch ledger');
+      toast.error('Ledger sync failed');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    setReady(true);
+    fetchData();
   }, []);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        // 1. Fetch Profile to get Email
-        const profileRes = await api.get('/profile');
-        setStudentProfile(profileRes.data);
-console.log(profileRes.data)
-        // 2. Fetch Fees Status
-        const feesRes = await api.get('/feeStatus');
-        const allFees = feesRes.data.fees || [];
-        
-        // Filter into Current (unpaid/overdue) and History (paid)
-        const current = allFees.filter(f => f.status !== 'paid');
-        const history = allFees.filter(f => f.status === 'paid');
-        
-        setCurrentFees(current);
-        setPaymentHistory(history);
-        
-      } catch (err) {
-        console.error("Error fetching fee data:", err);
-        setError('Failed to fetch fee status. Please try again later.');
-        toast.error('Could not load fee data');
-      } finally {
-        setLoading(false);
-      }
-    };
+  const exportCSV = () => {
+    const headers = ["Date", "Fee Type", "Amount", "Reference", "Status"];
+    const rows = paymentHistory.map(item => [
+      new Date(item.updatedAt || item.dueDate).toLocaleDateString(),
+      item.feeType,
+      item.amount,
+      studentProfile?.email || "N/A",
+      "PAID"
+    ]);
 
-    if (ready) {
-      fetchData();
-    }
-  }, [ready]);
+    const csvContent = "data:text/csv;charset=utf-8," 
+      + headers.join(",") + "\n"
+      + rows.map(e => e.join(",")).join("\n");
 
-  if (!ready) return null;
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `KGF_Receipts_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const filteredHistory = paymentHistory.filter(item => 
+    item.feeType.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (item.updatedAt && new Date(item.updatedAt).toLocaleDateString().includes(searchTerm))
+  );
 
   return (
-    <div className="w-full min-h-screen bg-white pt-2 pb-6 sm:pb-10 sm:px-2.5 dark:bg-white overflow-hidden">
-      <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-black border-l-4 border-[#4F8CCF] pl-2 mb-4 sm:mb-6">
-        Fees Status
-      </h2>
-
-      {/* Current Fees Status Card */}
-      <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none overflow-hidden w-full max-w-2xl min-h-[400px] mb-6 sm:mb-8">
-        <div className="bg-[#A4B494] px-6 sm:px-8 py-4 sm:py-5">
-          <h3 className="text-lg sm:text-xl font-bold text-black">Current Fees Status</h3>
+    <div className="space-y-10 pb-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <Toaster position="top-right" />
+      
+      {/* ── Page Header ── */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-1.5 h-6 bg-[#7A8B5E] rounded-full"></div>
+            <h2 className="text-2xl font-black text-[#1A1F16] tracking-tight uppercase italic">Financial Ledger</h2>
+          </div>
+          <p className="text-xs font-bold text-[#6B7280] uppercase tracking-widest">Monitor dues and transaction history</p>
         </div>
-
-        {loading ? (
-          <div className="flex items-center justify-center h-80 text-gray-600">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#A4B494]"></div>
-            <span className="ml-3">Loading fees...</span>
-          </div>
-        ) : error ? (
-          <div className="flex items-center justify-center h-80 text-red-600 px-6 text-center">{error}</div>
-        ) : currentFees.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-80 text-gray-500">
-            <p className="text-lg font-medium">All dues cleared!</p>
-            <p className="text-sm">No pending fees at the moment.</p>
-          </div>
-        ) : (
-          currentFees.map((fee, idx) => (
-            <div key={idx} className="flex flex-col h-80 px-6 sm:px-8 py-6 sm:py-8">
-              <div className="flex-1 flex flex-col justify-center space-y-8 text-lg">
-                <div className="flex justify-between">
-                  <span className="font-semibold text-black">Fee Type:</span>
-                  <span className="font-medium text-black">{fee.feeType}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-semibold text-black">Due Date:</span>
-                  <span className="font-medium text-black">
-                    {new Date(fee.dueDate).toLocaleDateString('en-IN', {
-                      day: '2-digit',
-                      month: 'short',
-                      year: 'numeric'
-                    })}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-semibold text-black">Amount:</span>
-                  <span className="font-medium text-black text-xl font-bold">₹ {fee.amount?.toLocaleString('en-IN')}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-semibold text-black">Status:</span>
-                  <span className={`font-bold px-3 py-1 rounded-full text-xs uppercase tracking-wider ${
-                    fee.status === 'overdue' ? 'bg-red-100 text-red-700' :
-                    fee.status === 'unpaid' ? 'bg-yellow-100 text-yellow-700' :
-                    'bg-green-100 text-green-700'
-                  }`}>
-                    {fee.status}
-                  </span>
-                </div>
-              </div>
-              <div className="flex justify-center pb-2">
-                <button
-                  onClick={() => {
-                    setSelectedFeeAmount(fee.amount);
-                    setShowModal(true);
-                  }}
-                  className="bg-[#A4B494] hover:bg-[#8fa082] px-12 py-3 rounded-xl text-black font-bold shadow-lg transition-all active:scale-95"
-                >
-                  Pay Now
-                </button>
-              </div>
+        
+        <div className="flex gap-4">
+          <div className="bg-white rounded-[32px] px-8 py-4 shadow-2xl shadow-[#7A8B5E]/5 border border-[#7A8B5E]/5 flex items-center gap-6">
+            <div className="w-10 h-10 rounded-xl bg-green-50 text-green-600 flex items-center justify-center">
+              <TrendingUp size={20} />
             </div>
-          ))
-        )}
+            <div>
+              <p className="text-[9px] font-black text-[#6B7280] uppercase tracking-widest">Total Paid</p>
+              <p className="text-lg font-black text-[#1A1F16]">₹{paymentHistory.reduce((acc, curr) => acc + (curr.amount || 0), 0).toLocaleString()}</p>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Payment History Table */}
-      <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.1)] w-full max-w-7xl overflow-hidden">
-        <div className="p-5 sm:p-8">
-          <h3 className="text-lg sm:text-xl font-bold mb-6 text-black flex items-center gap-2">
-            Payment History
-          </h3>
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-10">
+        
+        {/* ── Pending Dues Card ── */}
+        <div className="xl:col-span-5">
+          <div className="bg-white rounded-[40px] shadow-2xl shadow-[#7A8B5E]/5 border border-[#7A8B5E]/5 overflow-hidden">
+            <div className="bg-[#1A1F16] p-8 text-white flex justify-between items-center">
+              <h3 className="text-sm font-black uppercase tracking-[0.2em] flex items-center gap-3 italic">
+                <CreditCard size={18} className="text-[#7A8B5E]" /> Outstanding Dues
+              </h3>
+              <div className="flex gap-1">
+                <div className="w-1 h-1 rounded-full bg-[#7A8B5E]"></div>
+                <div className="w-1 h-1 rounded-full bg-[#7A8B5E]/50"></div>
+                <div className="w-1 h-1 rounded-full bg-[#7A8B5E]/20"></div>
+              </div>
+            </div>
 
-          {/* Desktop Table View */}
-          <div className="hidden sm:block overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-gray-50 border-b border-gray-100">
-                  <th className="text-left p-4 font-bold text-gray-600">Date</th>
-                  <th className="text-left p-4 font-bold text-gray-600">Fee Type</th>
-                  <th className="text-left p-4 font-bold text-gray-600">Amount (₹)</th>
-                  <th className="text-left p-4 font-bold text-gray-600">Reference</th>
-                  <th className="text-left p-4 font-bold text-gray-600">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paymentHistory.length === 0 ? (
-                  <tr>
-                    <td colSpan="5" className="text-center p-10 text-gray-400">No payment records found</td>
+            <div className="p-10">
+              {loading ? (
+                <div className="py-20 flex flex-col items-center justify-center opacity-40">
+                  <div className="w-10 h-10 border-4 border-[#7A8B5E] border-t-transparent rounded-full animate-spin mb-4"></div>
+                  <p className="text-[10px] font-black uppercase tracking-widest">Querying database...</p>
+                </div>
+              ) : currentFees.length === 0 ? (
+                <div className="py-20 text-center">
+                  <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600 shadow-lg shadow-green-500/10">
+                    <CheckCircle size={32} />
+                  </div>
+                  <h4 className="text-xl font-black text-[#1A1F16] uppercase italic mb-2">Account Balanced</h4>
+                  <p className="text-xs font-bold text-[#6B7280] uppercase tracking-widest">All current dues are settled</p>
+                </div>
+              ) : (
+                <div className="space-y-8">
+                  {currentFees.map((fee, idx) => (
+                    <div key={idx} className="bg-[#F8FAF5]/50 rounded-[32px] p-8 border border-[#7A8B5E]/5 relative group">
+                      <div className="absolute top-8 right-8">
+                        <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${
+                          fee.status === 'overdue' ? 'bg-red-50 text-red-600 border-red-100' : 'bg-amber-50 text-amber-600 border-amber-100'
+                        }`}>
+                          {fee.status}
+                        </span>
+                      </div>
+
+                      <div className="space-y-6">
+                        <div>
+                          <p className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest mb-1">Billing Period</p>
+                          <h4 className="text-lg font-black text-[#1A1F16] uppercase italic">{fee.feeType}</h4>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-6 pt-4 border-t border-[#7A8B5E]/5">
+                          <div>
+                            <p className="text-[9px] font-black text-[#6B7280] uppercase tracking-widest mb-1">Due Date</p>
+                            <div className="flex items-center gap-2 text-sm font-black text-[#1A1F16]">
+                              <Calendar size={14} className="text-[#7A8B5E]" />
+                              {new Date(fee.dueDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                            </div>
+                          </div>
+                          <div>
+                            <p className="text-[9px] font-black text-[#6B7280] uppercase tracking-widest mb-1">Amount</p>
+                            <p className="text-2xl font-black text-[#1A1F16]">₹{fee.amount?.toLocaleString()}</p>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => {
+                            setSelectedFeeAmount(fee.amount);
+                            setShowModal(true);
+                          }}
+                          className="w-full bg-[#7A8B5E] text-white py-5 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-xl shadow-[#7A8B5E]/20 flex items-center justify-center gap-3 hover:bg-[#6A7B4E] transition-all transform hover:scale-[1.02] active:scale-[0.98]"
+                        >
+                          Initialize Payment <ArrowRight size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* ── Payment History ── */}
+        <div className="xl:col-span-7 space-y-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4">
+            <h3 className="text-sm font-black text-[#6B7280] uppercase tracking-[0.2em] flex items-center gap-3 italic">
+              <History size={18} className="text-[#7A8B5E]" /> Transaction Vault
+            </h3>
+            
+            <div className="flex gap-3 w-full sm:w-auto">
+              <div className="relative flex-1 sm:w-64">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#7A8B5E] opacity-50" size={14} />
+                <input 
+                  type="text" 
+                  placeholder="Filter history..."
+                  className="w-full pl-10 pr-4 py-3 rounded-2xl bg-white border border-[#7A8B5E]/10 outline-none text-[10px] font-black uppercase tracking-widest transition-all"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <button 
+                onClick={exportCSV}
+                className="p-3 bg-white rounded-2xl border border-[#7A8B5E]/10 text-[#7A8B5E] hover:bg-[#7A8B5E] hover:text-white transition-all shadow-sm"
+              >
+                <Download size={18} />
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-[40px] shadow-2xl shadow-[#7A8B5E]/5 border border-[#7A8B5E]/5 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-[#F8FAF5]/50 border-b border-[#7A8B5E]/5">
+                    <th className="px-8 py-6 text-left text-[10px] font-black text-[#6B7280] uppercase tracking-[0.2em]">Settled Date</th>
+                    <th className="px-8 py-6 text-left text-[10px] font-black text-[#6B7280] uppercase tracking-[0.2em]">Transaction</th>
+                    <th className="px-8 py-6 text-left text-[10px] font-black text-[#6B7280] uppercase tracking-[0.2em]">Amount</th>
+                    <th className="px-8 py-6 text-left text-[10px] font-black text-[#6B7280] uppercase tracking-[0.2em]">Action</th>
                   </tr>
-                ) : (
-                  paymentHistory.map((item, idx) => (
-                    <tr key={idx} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                      <td className="p-4 text-gray-700 font-medium">
-                        {new Date(item.updatedAt || item.dueDate).toLocaleDateString('en-IN')}
+                </thead>
+                <tbody className="divide-y divide-[#7A8B5E]/5">
+                  {filteredHistory.map((item, idx) => (
+                    <tr key={idx} className="group hover:bg-[#F8FAF5]/30 transition-all">
+                      <td className="px-8 py-6">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-xl bg-green-50 text-green-600 flex items-center justify-center shadow-sm">
+                            <Receipt size={18} />
+                          </div>
+                          <div>
+                            <p className="text-sm font-black text-[#1A1F16]">
+                              {new Date(item.updatedAt || item.dueDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                            </p>
+                            <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest opacity-60">Verified</p>
+                          </div>
+                        </div>
                       </td>
-                      <td className="p-4 text-gray-700">{item.feeType}</td>
-                      <td className="p-4 text-gray-900 font-bold">₹{item.amount?.toLocaleString('en-IN')}</td>
-                      <td className="p-4 text-gray-500 text-sm">{studentProfile?.email}</td>
-                      <td className="p-4">
-                        <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold uppercase">
-                          Paid
+                      <td className="px-8 py-6">
+                        <h4 className="text-sm font-black text-[#1A1F16] uppercase italic mb-1">{item.feeType}</h4>
+                        <p className="text-[9px] font-bold text-[#6B7280] uppercase tracking-widest truncate max-w-[150px]">ID: {item._id?.slice(-8).toUpperCase()}</p>
+                      </td>
+                      <td className="px-8 py-6 text-sm font-black text-[#1A1F16]">₹{item.amount?.toLocaleString()}</td>
+                      <td className="px-8 py-6">
+                        <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-green-50 text-green-600 border border-green-100">
+                          <CheckCircle size={10} /> Paid
                         </span>
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Mobile Cards View */}
-          <div className="sm:hidden space-y-4">
-            {paymentHistory.length === 0 ? (
-              <p className="text-center py-10 text-gray-400">No payment records found</p>
-            ) : (
-              paymentHistory.map((item, idx) => (
-                <div key={idx} className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">Date</p>
-                      <p className="text-sm font-bold text-gray-900">{new Date(item.updatedAt || item.dueDate).toLocaleDateString('en-IN')}</p>
-                    </div>
-                    <span className="bg-green-100 text-green-700 px-2 py-1 rounded-lg text-[10px] font-bold uppercase">
-                      Paid
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-xs text-gray-500">Type</p>
-                      <p className="text-sm font-medium">{item.feeType}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500">Amount</p>
-                      <p className="text-sm font-black text-gray-900">₹{item.amount?.toLocaleString('en-IN')}</p>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
+                  ))}
+                  {filteredHistory.length === 0 && (
+                    <tr>
+                      <td colSpan="4" className="px-8 py-20 text-center">
+                        <p className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest opacity-40 italic">No historical records found</p>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Payment Modal */}
       <PaymentModal
         isOpen={showModal}
         onClose={() => {
           setShowModal(false);
           setSelectedFeeAmount(null);
+          fetchData();
         }}
         amount={selectedFeeAmount}
       />

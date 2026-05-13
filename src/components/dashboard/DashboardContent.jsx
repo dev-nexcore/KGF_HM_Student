@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState, useEffect, useRef } from "react";
 import { Pie } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
@@ -7,16 +8,23 @@ import { toast, Toaster } from "react-hot-toast";
 import Link from "next/link";
 import NoticePopup from "../notices/NoticePopup";
 import { 
-  FiCoffee, 
-  FiAlertCircle, 
-  FiFileText, 
-  FiUser, 
-  FiClock, 
-  FiCheckCircle, 
-  FiInfo,
-  FiArrowRight
-} from "react-icons/fi";
-
+  Coffee, 
+  AlertCircle, 
+  FileText, 
+  User, 
+  Clock, 
+  CheckCircle, 
+  Info,
+  ArrowRight,
+  MapPin,
+  Camera,
+  Calendar,
+  Home,
+  CreditCard,
+  Bell,
+  ArrowUpRight,
+  Wallet
+} from "lucide-react";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -33,13 +41,9 @@ export default function DashboardContent() {
   const [fees, setFees] = useState([]);
   const [latestLeave, setLatestLeave] = useState(null);
   const [inspection, setInspection] = useState(null);
-  const [attendanceData, setAttendanceData] = useState({
-    present: 0,
-    absent: 0,
-  });
+  const [attendanceData, setAttendanceData] = useState({ present: 0, absent: 0 });
   const [totalDays, setTotalDays] = useState(0);
   const [selectedRange, setSelectedRange] = useState("day");
-  const [barcodeId, setBarcodeId] = useState("");
   const [bedAllotment, setBedAllotment] = useState("");
   const [floor, setFloor] = useState("");
   const [isWithinRange, setIsWithinRange] = useState(false);
@@ -49,12 +53,9 @@ export default function DashboardContent() {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
 
-  // Notice Popup States
   const [latestNotice, setLatestNotice] = useState(null);
   const [showNoticePopup, setShowNoticePopup] = useState(false);
   const [recentNotices, setRecentNotices] = useState([]);
-
-  // New States
   const [complaints, setComplaints] = useState([]);
 
   function getDistanceFromHostel(lat, lng) {
@@ -62,11 +63,7 @@ export default function DashboardContent() {
     const R = 6371;
     const dLat = toRad(lat - HOSTEL_LAT);
     const dLng = toRad(lng - HOSTEL_LNG);
-    const a =
-      Math.sin(dLat / 2) ** 2 +
-      Math.cos(toRad(HOSTEL_LAT)) *
-        Math.cos(toRad(lat)) *
-        Math.sin(dLng / 2) ** 2;
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(HOSTEL_LAT)) * Math.cos(toRad(lat)) * Math.sin(dLng / 2) ** 2;
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }
@@ -86,15 +83,12 @@ export default function DashboardContent() {
 
   useEffect(() => {
     if (selfieModalOpen) {
-      navigator.mediaDevices
-        .getUserMedia({ video: true })
+      navigator.mediaDevices.getUserMedia({ video: true })
         .then((stream) => {
           streamRef.current = stream;
-          if (videoRef.current) {
-            videoRef.current.srcObject = stream;
-          }
+          if (videoRef.current) videoRef.current.srcObject = stream;
         })
-        .catch((err) => {
+        .catch(() => {
           toast.error("Camera access denied.");
           setSelfieModalOpen(false);
         });
@@ -108,11 +102,6 @@ export default function DashboardContent() {
     }
   }
 
-  function handleCancelSelfie() {
-    stopCamera();
-    setSelfieModalOpen(false);
-  }
-
   async function handleCaptureSelfie() {
     const video = videoRef.current;
     if (!video) return;
@@ -120,24 +109,14 @@ export default function DashboardContent() {
     const canvas = document.createElement("canvas");
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-
     const ctx = canvas.getContext("2d");
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
     const selfieDataURL = canvas.toDataURL("image/jpeg");
 
     stopCamera();
     setSelfieModalOpen(false);
 
-    if (!/^data:image\/jpeg;base64,[a-zA-Z0-9+/=]+$/.test(selfieDataURL)) {
-      toast.error("Selfie capture failed.");
-      return;
-    }
-
-    if (!isWithinRange) {
-      toast.error("You are not near the hostel!");
-      return;
-    }
+    if (!isWithinRange) return toast.error("You are not near the hostel!");
 
     try {
       setLoading(true);
@@ -148,40 +127,12 @@ export default function DashboardContent() {
 
       if (res.status === 200) {
         const newStatus = isCheckIn ? "Checked In" : "Checked Out";
-        const dateField = isCheckIn
-          ? res.data.checkInDate
-          : res.data.checkOutDate;
-
         setCheckStatus(newStatus);
-        setCheckTime(
-          dateField ||
-            new Date().toLocaleString("en-US", {
-              timeZone: "Asia/Kolkata",
-              hour12: true,
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-              second: "2-digit",
-            })
-        );
-
-        toast.success(`${newStatus} successfully`);
-
-        if (isCheckIn) {
-          setAttendanceData((prev) => ({
-            ...prev,
-            present: prev.present + 1,
-            absent: prev.absent - 1,
-          }));
-        }
-      } else {
-        toast.error("Failed to record entry");
+        setCheckTime(new Date().toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit' }));
+        toast.success(`${newStatus} recorded!`);
       }
     } catch (err) {
-      console.error("Error:", err);
-      toast.error("Server error during check-in/out");
+      toast.error("Failed to record entry");
     } finally {
       setLoading(false);
     }
@@ -189,601 +140,258 @@ export default function DashboardContent() {
 
   useEffect(() => {
     const id = localStorage.getItem("studentId");
-    setStudentId(id);
+    if (id) setStudentId(id);
   }, []);
 
-  // Check for new notices - ONLY SHOW ONCE PER LOGIN SESSION
   useEffect(() => {
     if (!studentId) return;
-
-    let isMounted = true;
-
-    const checkForNewNotice = async () => {
-      try {
-        // Check if notice was already shown in this session
-        const noticeShownThisSession = sessionStorage.getItem(
-          `noticeShown_${studentId}`
-        );
-
-        if (noticeShownThisSession === "true") {
-          console.log("Notice already shown in this session");
-          return; // Don't show again in same session
+    api.get(`/notices`).then(res => {
+      if (res.data.notices && res.data.notices.length > 0) {
+        const sorted = [...res.data.notices].sort((a, b) => new Date(b.issueDate) - new Date(a.issueDate));
+        setRecentNotices(sorted.slice(0, 3));
+        const newest = sorted[0];
+        if (localStorage.getItem(`lastReadNotice_${studentId}`) !== (newest._id || newest.id)) {
+          setLatestNotice(newest);
+          setShowNoticePopup(true);
         }
-
-        const res = await api.get(`/notices`);
-
-        if (!isMounted) return;
-
-        if (res.data.notices && res.data.notices.length > 0) {
-          // Sort by issueDate descending (latest first)
-          const sortedNotices = [...res.data.notices].sort(
-            (a, b) => new Date(b.issueDate) - new Date(a.issueDate)
-          );
-
-          setRecentNotices(sortedNotices.slice(0, 3));
-          const newestNotice = sortedNotices[0];
-
-          // Check if student has permanently marked this notice as read
-          const lastReadNoticeId = localStorage.getItem(
-            `lastReadNotice_${studentId}`
-          );
-
-          // Show popup only if it's a new notice AND not shown this session
-          if (lastReadNoticeId !== (newestNotice._id || newestNotice.id)) {
-            setLatestNotice(newestNotice);
-            setShowNoticePopup(true);
-
-            // Mark that we've shown a notice in this session
-            sessionStorage.setItem(`noticeShown_${studentId}`, "true");
-          }
-        }
-      } catch (err) {
-        console.error("Error fetching latest notice:", err);
       }
-    };
+    });
 
-    // Delay for better UX
-    const timer = setTimeout(checkForNewNotice, 1000);
+    api.get(`/attendanceSummary/${studentId}?range=${selectedRange}`).then(res => {
+      setAttendanceData({ present: res.data.present ?? 0, absent: res.data.absent ?? 0 });
+      setTotalDays((res.data.present ?? 0) + (res.data.absent ?? 0));
+    });
 
-    return () => {
-      isMounted = false;
-      clearTimeout(timer);
-    };
-  }, [studentId]);
+    api.get(`/profile/${studentId}`).then(res => {
+      setCheckStatus(res.data.checkStatus || "Pending");
+      setCheckTime(res.data.checkTime || "--:--");
+      setRoomNo(res.data.roomNo);
+      setBedAllotment(res.data.bedAllotment || "N/A");
+      setFloor(res.data.floor || "N/A");
+    });
 
-  // Handle marking notice as read - PERMANENT
-  const handleMarkNoticeAsRead = () => {
-    if (latestNotice && studentId) {
-      // Save to localStorage - persists even after logout
-      localStorage.setItem(
-        `lastReadNotice_${studentId}`,
-        latestNotice._id || latestNotice.id
-      );
-
-      // Also mark in sessionStorage that we've shown it
-      sessionStorage.setItem(`noticeShown_${studentId}`, "true");
-    }
-
-    // Close the popup
-    setShowNoticePopup(false);
-  };
-
-  useEffect(() => {
-    if (!studentId) return;
-
-    api
-      .get(`/attendanceSummary/${studentId}?range=${selectedRange}`)
-      .then((res) => {
-        if (res.data) {
-          setAttendanceData({
-            present: res.data.present ?? 0,
-            absent: res.data.absent ?? 0,
-          });
-          setTotalDays((res.data.present ?? 0) + (res.data.absent ?? 0));
-        }
-      })
-      .catch((err) => {
-        console.error("Failed to fetch attendance summary", err);
-      });
+    api.get(`/feeStatus`).then(res => setFees(res.data.fees || []));
+    api.get(`/complaints`).then(res => setComplaints(res.data.complaints?.slice(0, 2) || []));
+    api.get("/inspectionSchedule").then(res => setInspection(res.data?.date ? res.data : null));
   }, [studentId, selectedRange]);
 
   const chartData = {
     labels: ["Present", "Absent"],
-    datasets: [
-      {
-        data: [attendanceData.present ?? 0, attendanceData.absent ?? 0],
-        backgroundColor: ["#4F8DCF", "#FF0000"],
-        borderWidth: 0,
-      },
-    ],
+    datasets: [{
+      data: [attendanceData.present, attendanceData.absent],
+      backgroundColor: ["#7A8B5E", "#E30007"],
+      borderWidth: 0,
+      hoverOffset: 4
+    }]
   };
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      setLoading(true);
-      try {
-        const token = localStorage.getItem("token");
-        const decoded = JSON.parse(atob(token.split(".")[1]));
-        const studentId = decoded.studentId;
-
-        const res = await api.get(`/profile/${studentId}`);
-        if (res.status === 200) {
-          const data = res.data;
-          setCheckStatus(data.checkStatus || "Pending Check-in");
-          setCheckTime(data.checkTime || "--:--:--");
-          setRoomNo(data.roomNo);
-          setStudentId(data.studentId);
-          setBarcodeId(data.barcodeId || "N/A");
-          setBedAllotment(data.bedAllotment || "N/A");
-          setFloor(data.floor || "N/A");
-        }
-      } catch (err) {
-        console.error("Failed to fetch student profile:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProfile();
-  }, []);
-
-  useEffect(() => {
-    const fetchFeesStatus = async () => {
-      try {
-        const res = await api.get(`/feeStatus`);
-        if (res.status === 200 && res.data.fees) {
-          setFees(res.data.fees);
-        }
-      } catch (error) {
-        console.error("Failed to fetch fees:", error);
-      }
-    };
-
-    if (studentId) {
-      fetchFeesStatus();
-    }
-  }, [studentId]);
-
-  useEffect(() => {
-    const fetchLeaveStatus = async () => {
-      try {
-        const res = await api.get(`/leaves`);
-        if (res.status === 200 && res.data.leaves.length > 0) {
-          setLatestLeave(res.data.leaves[0]);
-        }
-      } catch (error) {
-        console.error("Failed to fetch leave history:", error);
-      }
-    };
-
-    if (studentId) {
-      fetchLeaveStatus();
-    }
-  }, [studentId]);
-
-  useEffect(() => {
-    const fetchComplaints = async () => {
-      try {
-        const res = await api.get(`/complaints`);
-        if (res.status === 200 && res.data.complaints) {
-          setComplaints(res.data.complaints.slice(0, 2));
-        }
-      } catch (err) {
-        console.error("Error fetching complaints:", err);
-      }
-    };
-
-    if (studentId) {
-      fetchComplaints();
-    }
-  }, [studentId]);
-
-  useEffect(() => {
-    const fetchInspection = async () => {
-      try {
-        const res = await api.get("/inspectionSchedule");
-
-        if (res.status === 204 || !res.data?.date) {
-          setInspection(null);
-        } else {
-          setInspection(res.data);
-        }
-      } catch (err) {
-        console.error("Error fetching inspection:", err);
-        setInspection(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchInspection();
-  }, []);
-
   return (
-    <main className="bg-[#ffffff] px-6 sm:px-8 lg:px-2.5 py-2 min-h-screen font-sans">
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <Toaster position="top-right" />
-
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-black border-l-4 border-[#4F8DCF] pl-2">
-          Overview
-        </h2>
-        <div className="text-sm text-gray-500 font-medium">
-          Last login: {new Date().toLocaleDateString('en-IN')}
-        </div>
+      
+      {/* ── Quick Action Tiles ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <QuickAction href="/leaves" label="Gate Pass" sub="Apply Leave" icon={<FileText />} color="bg-blue-50 text-blue-600" />
+        <QuickAction href="/complaints" label="Report" sub="Support Desk" icon={<AlertCircle />} color="bg-amber-50 text-amber-600" />
+        <QuickAction href="/fees-status" label="Payments" sub="Fee Records" icon={<CreditCard />} color="bg-emerald-50 text-emerald-600" />
+        <QuickAction href="/profile" label="Identity" sub="My Records" icon={<User />} color="bg-purple-50 text-purple-600" />
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8">
-        <Link href="/leaves" className="flex flex-col md:flex-row items-center gap-2 md:gap-3 bg-white p-3 md:p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all active:scale-95">
-          <div className="p-2 md:p-3 bg-blue-50 rounded-lg text-blue-600 text-lg md:text-xl">
-            <FiFileText />
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        {/* ── Check-In/Out Premium Card ── */}
+        <div className="lg:col-span-7 bg-white rounded-[40px] shadow-2xl shadow-[#7A8B5E]/5 border border-[#7A8B5E]/5 overflow-hidden flex flex-col md:flex-row">
+          <div className="w-full md:w-1/2 p-10 flex flex-col justify-between border-b md:border-b-0 md:border-r border-[#7A8B5E]/5">
+            <div>
+              <div className="flex items-center gap-2 mb-6">
+                <div className="w-2 h-2 rounded-full bg-[#7A8B5E] animate-pulse"></div>
+                <h3 className="text-[10px] font-black text-[#7A8B5E] uppercase tracking-[0.2em]">Gate Security</h3>
+              </div>
+              <h2 className="text-3xl font-black text-[#1A1F16] tracking-tight uppercase italic mb-8 leading-none">Attendance <br />Terminal</h2>
+            </div>
+
+            <div className="space-y-4">
+              <div className="bg-[#F8FAF5] p-5 rounded-3xl flex items-center justify-between">
+                <span className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest">Current Status</span>
+                <span className={`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+                  checkStatus === "Checked In" ? "bg-green-50 text-green-600 border-green-100" : "bg-amber-50 text-amber-600 border-amber-100"
+                }`}>
+                  {checkStatus}
+                </span>
+              </div>
+              <div className="bg-[#F8FAF5] p-5 rounded-3xl flex items-center justify-between">
+                <span className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest">Last Entry</span>
+                <span className="text-sm font-black text-[#1A1F16]">{checkTime}</span>
+              </div>
+            </div>
           </div>
-          <div className="text-center md:text-left">
-            <p className="text-xs md:text-sm font-bold text-gray-800">Apply Leave</p>
-            <p className="hidden md:block text-[10px] md:text-xs text-gray-500">Gate pass/Leave</p>
+
+          <div className="w-full md:w-1/2 p-10 bg-[#F8FAF5]/50 flex flex-col items-center justify-center text-center">
+            <div className="mb-8 relative group">
+              <div className="absolute inset-0 bg-[#7A8B5E]/10 rounded-full scale-150 blur-2xl group-hover:scale-125 transition-transform"></div>
+              <div className={`w-20 h-20 rounded-[28px] ${isWithinRange ? 'bg-[#7A8B5E]' : 'bg-gray-200'} flex items-center justify-center text-white shadow-xl shadow-[#7A8B5E]/20 relative z-10 transition-colors`}>
+                {isWithinRange ? <MapPin size={32} /> : <AlertCircle size={32} />}
+              </div>
+            </div>
+            
+            <h4 className="text-sm font-black text-[#1A1F16] uppercase tracking-widest mb-2">Location Verified</h4>
+            <p className="text-[11px] font-bold text-[#6B7280] mb-8 leading-relaxed">
+              {isWithinRange 
+                ? "You are within the hostel boundary. Please capture a selfie to record entry."
+                : "Security terminal locked. Please be within 300m of the hostel gate."}
+            </p>
+
+            <button 
+              onClick={() => { setIsCheckIn(checkStatus !== "Checked In"); setSelfieModalOpen(true); }}
+              disabled={!isWithinRange || loading}
+              className="w-full bg-[#1A1F16] text-white py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-black/20 flex items-center justify-center gap-3 hover:bg-[#2A3324] transition-all disabled:opacity-20"
+            >
+              <Camera size={16} /> Open Terminal
+            </button>
           </div>
-        </Link>
-        <Link href="/complaints" className="flex flex-col md:flex-row items-center gap-2 md:gap-3 bg-white p-3 md:p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all active:scale-95">
-          <div className="p-2 md:p-3 bg-orange-50 rounded-lg text-orange-600 text-lg md:text-xl">
-            <FiAlertCircle />
+        </div>
+
+        {/* ── Attendance Summary ── */}
+        <Link href="/attendance" className="lg:col-span-5 bg-white rounded-[40px] p-10 shadow-2xl shadow-[#7A8B5E]/5 border border-[#7A8B5E]/5 flex flex-col justify-between group hover:border-[#7A8B5E]/20 transition-all">
+          <div className="flex justify-between items-start mb-8">
+            <div>
+              <h3 className="text-[10px] font-black text-[#7A8B5E] uppercase tracking-[0.2em] mb-1">Performance</h3>
+              <h2 className="text-2xl font-black text-[#1A1F16] tracking-tight uppercase italic">Monthly Stat</h2>
+            </div>
+            <div className="p-3 bg-[#F8FAF5] rounded-2xl text-[#7A8B5E] group-hover:bg-[#7A8B5E] group-hover:text-white transition-all">
+              <ArrowUpRight size={20} />
+            </div>
           </div>
-          <div className="text-center md:text-left">
-            <p className="text-xs md:text-sm font-bold text-gray-800">Complaint</p>
-            <p className="hidden md:block text-[10px] md:text-xs text-gray-500">Maintenance</p>
-          </div>
-        </Link>
-        <Link href="/fees-status" className="flex flex-col md:flex-row items-center gap-2 md:gap-3 bg-white p-3 md:p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all active:scale-95">
-          <div className="p-2 md:p-3 bg-green-50 rounded-lg text-green-600 text-lg md:text-xl">
-            <FiCheckCircle />
-          </div>
-          <div className="text-center md:text-left">
-            <p className="text-xs md:text-sm font-bold text-gray-800">Fee Payment</p>
-            <p className="hidden md:block text-[10px] md:text-xs text-gray-500">Dues & Alerts</p>
-          </div>
-        </Link>
-        <Link href="/profile" className="flex flex-col md:flex-row items-center gap-2 md:gap-3 bg-white p-3 md:p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all active:scale-95">
-          <div className="p-2 md:p-3 bg-purple-50 rounded-lg text-purple-600 text-lg md:text-xl">
-            <FiUser />
-          </div>
-          <div className="text-center md:text-left">
-            <p className="text-xs md:text-sm font-bold text-gray-800">My Profile</p>
-            <p className="hidden md:block text-[10px] md:text-xs text-gray-500">ID & Records</p>
+
+          <div className="flex items-center gap-8">
+            <div className="w-32 h-32 relative">
+              <Pie data={chartData} options={{ cutout: "75%", plugins: { legend: { display: false } } }} />
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-xl font-black text-[#1A1F16] leading-none">{totalDays}</span>
+                <span className="text-[8px] font-black text-[#6B7280] uppercase tracking-widest mt-1">Total</span>
+              </div>
+            </div>
+            <div className="flex-1 space-y-4">
+              <StatIndicator label="Present" val={attendanceData.present} color="bg-[#7A8B5E]" />
+              <StatIndicator label="Absent" val={attendanceData.absent} color="bg-[#E30007]" />
+              <div className="pt-2 flex items-center gap-2 text-[10px] font-black text-[#7A8B5E] uppercase tracking-widest opacity-60">
+                <Clock size={12} /> View Details
+              </div>
+            </div>
           </div>
         </Link>
       </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        
+        {/* ── Accomodation Detail ── */}
+        <CardContainer title="Residence Info" icon={<Home />}>
+          <div className="space-y-4 pt-4">
+            <InfoRow label="Room Number" val={`Room ${roomNo}`} />
+            <InfoRow label="Floor Level" val={`Floor ${floor}`} />
+            <InfoRow label="Bed Position" val={bedAllotment} />
+          </div>
+        </CardContainer>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Check-in / Out Card */}
-        <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full">
-          <div className="bg-[#AAB491] px-6 py-3 rounded-t-lg">
-            <h2 className="text-lg font-semibold text-black text-center">
-              Check-in /Out Status
-            </h2>
-          </div>
-          <div className="p-8 pt-10 space-y-7 min-h-[280px]">
-            <div className="flex justify-center items-center gap-3 text-base font-semibold text-black">
-              <span>Status:</span>
-              <span
-                className={`${
-                  checkStatus === "Checked In"
-                    ? "text-green-600"
-                    : checkStatus === "Checked Out"
-                    ? "text-blue-600"
-                    : "text-[#FF7700]"
-                }`}
-              >
-                {checkStatus}
-              </span>
-            </div>
-            <div className="flex justify-center items-center gap-3 text-base font-semibold text-black">
-              <span>Time:</span>
-              <span>{checkTime}</span>
-            </div>
-            <div className="pt-8 flex justify-center">
-            </div>
-          </div>
-        </div>
-
-        {/* Selfie Capture Modal */}
-        {selfieModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md">
-              <h2 className="text-lg font-bold text-center mb-4">
-                Capture Your Selfie
-              </h2>
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                className="w-full rounded mb-4"
-              />
-              <div className="flex justify-between">
-                <button
-                  onClick={handleCancelSelfie}
-                  disabled={loading}
-                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleCaptureSelfie}
-                  disabled={loading}
-                  className="px-4 py-2 bg-[#AAB491] text-black font-semibold rounded hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Capture
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Attendance Summary */}
-        <Link href="/attendance" className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full min-h-[300px] hover:shadow-xl transition-shadow group">
-          <div className="bg-[#AAB491] px-6 py-3 rounded-t-lg flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-black">
-              Attendance Summary
-            </h2>
-            <FiArrowRight className="text-black opacity-0 group-hover:opacity-100 transition-opacity" />
-          </div>
-          <div className="p-7 flex flex-col sm:flex-row items-center gap-5">
-            <div className="flex flex-col gap-6 text-sm font-semibold">
-              <div className="flex items-center gap-3 relative group/tip">
-                <span className="w-4 h-4 rounded-full bg-[#1853A1]"></span>
-                <span className="text-black font-medium">Present</span>
-                <div className="absolute left-28 top-1 opacity-0 group-hover/tip:opacity-100 transition-opacity duration-200">
-                  <div className="relative bg-gray-900 text-white text-xs px-3 py-1 rounded-md shadow-md">
-                    {attendanceData.present ?? 0} day
-                    {attendanceData.present === 1 ? "" : "s"}
-                    <div className="absolute left-[-6px] top-1/2 -translate-y-1/2 w-0 h-0 border-t-6 border-t-transparent border-b-6 border-b-transparent border-r-6 border-r-gray-900"></div>
-                  </div>
+        {/* ── Fee Alerts ── */}
+        <CardContainer title="Financials" icon={<Wallet />}>
+          <div className="space-y-4 pt-4">
+            {fees.slice(0, 3).map((fee, i) => (
+              <div key={i} className="flex items-center justify-between p-3 bg-[#F8FAF5] rounded-2xl">
+                <div className="flex items-center gap-3">
+                  <div className={`w-1.5 h-6 rounded-full ${fee.status === 'paid' ? 'bg-green-400' : 'bg-amber-400'}`}></div>
+                  <span className="text-[10px] font-black text-[#1A1F16] uppercase tracking-tight">{fee.feeType}</span>
                 </div>
+                <span className="text-xs font-black text-[#1A1F16]">₹{fee.amount}</span>
               </div>
+            ))}
+            {fees.length === 0 && <p className="text-[10px] font-bold text-[#6B7280] italic">No active fee cycles.</p>}
+          </div>
+        </CardContainer>
 
-              <div className="flex items-center gap-3 relative group/tip">
-                <span className="w-4 h-4 rounded-full bg-[#E30007]"></span>
-                <span className="text-black font-medium">Absent</span>
-                <div className="absolute left-28 top-1 opacity-0 group-hover/tip:opacity-100 transition-opacity duration-200">
-                  <div className="relative bg-gray-900 text-white text-xs px-3 py-1 rounded-md shadow-md">
-                    {attendanceData.absent ?? 0} day
-                    {attendanceData.absent === 1 ? "" : "s"}
-                    <div className="absolute left-[-6px] top-1/2 -translate-y-1/2 w-0 h-0 border-t-6 border-t-transparent border-b-6 border-b-transparent border-r-6 border-r-gray-900"></div>
-                  </div>
-                </div>
+        {/* ── Complaints & Notices ── */}
+        <CardContainer title="Bulletin Board" icon={<Bell />}>
+          <div className="space-y-3 pt-4">
+            {recentNotices.map((n, i) => (
+              <div key={i} className="border-l-2 border-[#7A8B5E]/20 pl-4 py-1">
+                <h4 className="text-[10px] font-black text-[#1A1F16] uppercase tracking-tight truncate">{n.title}</h4>
+                <p className="text-[9px] font-bold text-[#6B7280] truncate">{n.description}</p>
               </div>
-              
-              <div className="mt-2 text-[10px] text-blue-600 font-bold flex items-center gap-1">
-                <FiClock /> Click to view detailed logs
-              </div>
-            </div>
-
-            <div className="flex-1 flex justify-center items-center">
-              <div className="relative w-36 h-36">
-                <Pie
-                  data={chartData}
-                  options={{
-                    cutout: "50%",
-                    plugins: { legend: { display: false } },
-                  }}
-                />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <p className="text-base text-gray-500">Total</p>
-                    <p className="text-xl font-bold text-black">
-                      {totalDays ?? "-"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            ))}
+            <Link href="/notices" className="flex items-center gap-2 text-[10px] font-black text-[#7A8B5E] uppercase tracking-widest mt-4">
+              Explore All <ArrowRight size={12} />
+            </Link>
           </div>
-        </Link>
-
-        {/* Room Inspection Schedule */}
-        <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full min-h-[300px]">
-          <div className="bg-[#AAB491] px-6 py-3 rounded-t-lg">
-            <h2 className="text-lg font-semibold text-black">
-              Room Inspection Schedule
-            </h2>
-          </div>
-          <div className="p-7 flex flex-col gap-5 text-base font-semibold text-black">
-            {loading ? (
-              <div>Loading...</div>
-            ) : inspection ? (
-              <>
-                <div className="flex justify-between">
-                  <span>Next Inspection:</span>
-                  <span>
-                    {inspection.date
-                      ? new Date(inspection.date).toLocaleDateString("en-IN", {
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        })
-                      : "-"}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Time:</span>
-                  <span>
-                    {inspection.date
-                      ? new Date(inspection.date).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })
-                      : "-"}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Status:</span>
-                  <span className="text-[#4F8DCF] font-semibold">
-                    {inspection.status || "-"}
-                  </span>
-                </div>
-              </>
-            ) : (
-              <div className="text-base text-black">
-                No upcoming inspections found
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Bed Allotment */}
-        <Link
-          href="/profile"
-          passHref
-          className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full min-h-[300px]"
-        >
-          <div className="bg-[#AAB491] px-6 py-3 rounded-t-lg">
-            <h2 className="text-lg font-semibold text-black">Bed Allotment</h2>
-          </div>
-          <div className="p-7 flex flex-col gap-5 text-base font-semibold text-black">
-            <div className="flex justify-between">
-              <span>Room no:</span>
-              <span>Room {roomNo}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Floor:</span>
-              <span>Floor {floor}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>BedNo:</span>
-              <span>{bedAllotment}</span>
-            </div>
-          </div>
-        </Link>
-
-        {/* Fee Alerts */}
-        <Link
-          href="/fees-status"
-          passHref
-          className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full min-h-[300px]"
-        >
-          <div className="bg-[#AAB491] px-6 py-3 rounded-t-lg">
-            <h2 className="text-lg font-semibold text-black">Fee Alerts</h2>
-          </div>
-          <div className="p-7 flex flex-col gap-5 text-base font-semibold text-black">
-            {fees.length > 0 ? (
-              fees.map((fee, index) => (
-                <div key={index} className="flex flex-col gap-3">
-                  <div className="flex justify-between">
-                    <span>{fee.feeType} Fee:</span>
-                    <span
-                      className={
-                        fee.status === "paid"
-                          ? "text-green-600"
-                          : fee.status === "unpaid"
-                          ? "text-yellow-600"
-                          : "text-red-600"
-                      }
-                    >
-                      {fee.status.charAt(0).toUpperCase() + fee.status.slice(1)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Due Date:</span>
-                    <span>
-                      {new Date(fee.dueDate).toLocaleDateString("en-IN")}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Amount:</span>
-                    <span>₹ {fee.amount}</span>
-                  </div>
-                  {index < fees.length - 1 && (
-                    <hr className="border-gray-300" />
-                  )}
-                </div>
-              ))
-            ) : (
-              <div className="text-base">No fees found</div>
-            )}
-          </div>
-        </Link>
-
-
-        {/* Complaint Status Card */}
-        <Link
-          href="/complaints"
-          passHref
-          className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full min-h-[300px]"
-        >
-          <div className="bg-[#AAB491] px-6 py-3 rounded-t-lg flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-black flex items-center gap-2">
-              <FiAlertCircle /> Active Complaints
-            </h2>
-            <FiArrowRight className="text-black" />
-          </div>
-          <div className="p-6">
-            {complaints.length > 0 ? (
-              <div className="space-y-4">
-                {complaints.map((comp, idx) => (
-                  <div key={idx} className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                    <div className="flex justify-between items-start mb-1">
-                      <span className="text-sm font-bold text-gray-800 truncate max-w-[70%]">{comp.subject}</span>
-                      <span className={`text-[10px] uppercase px-2 py-0.5 rounded-full font-bold ${
-                        comp.status === 'Resolved' ? 'bg-green-100 text-green-700' : 
-                        comp.status === 'In Progress' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700'
-                      }`}>
-                        {comp.status}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1 text-[11px] text-gray-500">
-                      <FiClock /> {new Date(comp.filedDate || comp.createdAt).toLocaleDateString()}
-                    </div>
-                  </div>
-                ))}
-                <p className="text-center text-xs text-[#4F8DCF] font-semibold mt-2">View all complaints</p>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-10 text-gray-400">
-                <FiCheckCircle size={40} className="mb-2 opacity-20" />
-                <p className="text-sm">No active complaints</p>
-              </div>
-            )}
-          </div>
-        </Link>
-
-        {/* Recent Notices Card */}
-        <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full min-h-[300px]">
-          <div className="bg-[#AAB491] px-6 py-3 rounded-t-lg">
-            <h2 className="text-lg font-semibold text-black flex items-center gap-2">
-              <FiInfo /> Recent Notices
-            </h2>
-          </div>
-          <div className="p-6">
-            {recentNotices.length > 0 ? (
-              <div className="space-y-4">
-                {recentNotices.map((notice, idx) => (
-                  <div key={idx} className="border-l-4 border-blue-400 pl-3 py-1">
-                    <h4 className="text-sm font-bold text-gray-800 line-clamp-1">{notice.title}</h4>
-                    <p className="text-xs text-gray-500 line-clamp-1">{notice.description}</p>
-                    <span className="text-[10px] text-gray-400 font-medium">
-                      {new Date(notice.issueDate).toLocaleDateString()}
-                    </span>
-                  </div>
-                ))}
-                <Link href="/notices" className="block text-center text-xs text-[#4F8DCF] font-semibold mt-2">
-                  View all notices
-                </Link>
-              </div>
-            ) : (
-              <div className="text-center py-10 text-gray-400">
-                <p className="text-sm">No recent notices</p>
-              </div>
-            )}
-          </div>
-        </div>
+        </CardContainer>
       </div>
 
-      {/* Notice Popup */}
-      {showNoticePopup && (
-        <NoticePopup
-          notice={latestNotice}
-          onMarkAsRead={handleMarkNoticeAsRead}
-        />
+      {/* Selfie Modal */}
+      {selfieModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#1A1F16]/60 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="bg-white rounded-[40px] p-8 max-w-md w-full shadow-2xl border border-[#7A8B5E]/10 animate-in zoom-in-95 duration-300">
+            <h3 className="text-xl font-black text-[#1A1F16] mb-6 text-center uppercase italic">Identity Verification</h3>
+            <div className="relative aspect-video bg-black rounded-3xl overflow-hidden mb-8 border-4 border-[#F8FAF5] shadow-inner">
+              <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover scale-x-[-1]" />
+              <div className="absolute inset-0 border-2 border-dashed border-white/30 rounded-[inherit] m-4 pointer-events-none"></div>
+            </div>
+            <div className="flex gap-4">
+              <button onClick={() => { stopCamera(); setSelfieModalOpen(false); }} className="flex-1 py-4 rounded-2xl bg-[#F8FAF5] text-[#1A1F16] font-black text-[10px] uppercase tracking-widest transition-all">Cancel</button>
+              <button onClick={handleCaptureSelfie} className="flex-1 py-4 rounded-2xl bg-[#7A8B5E] text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-[#7A8B5E]/20 transition-all">Capture</button>
+            </div>
+          </div>
+        </div>
       )}
-    </main>
+
+      {showNoticePopup && <NoticePopup notice={latestNotice} onMarkAsRead={() => { localStorage.setItem(`lastReadNotice_${studentId}`, latestNotice._id); setShowNoticePopup(false); }} />}
+    </div>
+  );
+}
+
+function QuickAction({ href, label, sub, icon, color }) {
+  return (
+    <Link href={href} className="bg-white p-6 rounded-[32px] shadow-2xl shadow-[#7A8B5E]/5 border border-[#7A8B5E]/5 flex flex-col items-center gap-4 transition-all hover:scale-[1.03] active:scale-[0.97] group">
+      <div className={`w-14 h-14 rounded-2xl ${color} flex items-center justify-center transition-transform group-hover:rotate-6`}>
+        {React.cloneElement(icon, { size: 24 })}
+      </div>
+      <div className="text-center">
+        <p className="text-[10px] font-black text-[#1A1F16] uppercase tracking-[0.1em]">{label}</p>
+        <p className="text-[9px] font-bold text-[#6B7280] uppercase tracking-widest opacity-60 mt-1">{sub}</p>
+      </div>
+    </Link>
+  );
+}
+
+function StatIndicator({ label, val, color }) {
+  return (
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-3">
+        <div className={`w-2.5 h-2.5 rounded-full ${color}`}></div>
+        <span className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest">{label}</span>
+      </div>
+      <span className="text-sm font-black text-[#1A1F16]">{val}</span>
+    </div>
+  );
+}
+
+function CardContainer({ title, icon, children }) {
+  return (
+    <div className="bg-white rounded-[40px] p-8 shadow-2xl shadow-[#7A8B5E]/5 border border-[#7A8B5E]/5 flex flex-col">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 rounded-xl bg-[#F8FAF5] text-[#7A8B5E] flex items-center justify-center shadow-sm">
+          {React.cloneElement(icon, { size: 18 })}
+        </div>
+        <h3 className="text-xs font-black text-[#1A1F16] uppercase tracking-[0.2em]">{title}</h3>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function InfoRow({ label, val }) {
+  return (
+    <div className="flex items-center justify-between py-1 border-b border-[#7A8B5E]/5 last:border-0">
+      <span className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest">{label}</span>
+      <span className="text-[11px] font-black text-[#1A1F16] uppercase tracking-tight">{val}</span>
+    </div>
   );
 }

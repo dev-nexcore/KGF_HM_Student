@@ -1,146 +1,129 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import api from "@/lib/api";
+import api, { API_URL } from "@/lib/api";
+import { Bell, Menu, Search, User, Compass } from "lucide-react";
 
-export default function Navbar() {
+export default function Navbar({ setSidebarOpen }) {
   const [studentName, setStudentName] = useState("...");
-  const [studentProfile, setStudentProfile] = useState("null");
-  const [hasUnseen, setHasUnseen] = useState(false);
-  const [showDropdown, setShowDropdown] = useState(false);
+  const [studentProfile, setStudentProfile] = useState(null);
   const [notifications, setNotifications] = useState([]);
-  const [studentId, setStudentId] = useState(null);
-  const pathname = usePathname();
+  const [showNotifDropdown, setShowNotifDropdown] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const id = localStorage.getItem("studentId");
-      setStudentId(id);
-    }
-  }, []);
-
-  useEffect(() => {
-    const fetchStudentName = async () => {
+    const fetchStudentData = async () => {
       try {
         const token = localStorage.getItem("token");
+        if (!token) return;
         const decoded = JSON.parse(atob(token.split(".")[1]));
         const studentId = decoded.studentId;
 
         const res = await api.get(`/profile/${studentId}`);
         setStudentName(res.data.firstName || "Student");
-        setStudentProfile(res.data.profileImage);
+        
+        let profileImg = res.data.profileImage;
+        if (profileImg && !profileImg.startsWith('http')) {
+          profileImg = `${API_URL}${profileImg}`;
+        }
+        setStudentProfile(profileImg);
       } catch (err) {
-        console.error("Failed to fetch student name:", err);
-        setStudentName("Student");
-        setStudentProfile(null);
+        console.error("Failed to fetch student data:", err);
       }
     };
 
-    fetchStudentName();
+    fetchStudentData();
   }, []);
 
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        const res = await api.get("/notifications");
-        setNotifications(res.data.notifications);
-      } catch (err) {
-        console.error("🔴 Notification fetch error:", err);
-      }
-    };
-
-    fetchNotifications();
-  }, []);
-
-  const markAsSeen = async (type, id) => {
-    try {
-      await api.post("/notifications/mark-seen", { type });
-      setHasUnseen(false);
-      setNotifications((prev) => prev.filter((notif) => notif._id !== id));
-    } catch (err) {
-      console.error("Failed to mark notifications as seen:", err);
-    }
+  const getPageTitle = () => {
+    const path = pathname.split('/').pop();
+    if (!path || path === 'dashboard') return 'Overview';
+    return path.charAt(0).toUpperCase() + path.slice(1);
   };
 
   return (
-    <nav className="flex items-center justify-between px-3 sm:px-4 md:px-6 py-4 bg-[#BEC5AD] h-20 min-h-[80px]">
-      {/* Left Text */}
-      <div className="pl-2 sm:pl-4 md:pl-6 lg:pl-0 flex-1 min-w-0">
-        <h2 className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold text-gray-800 truncate">
-          Welcome Back, {studentName}
-        </h2>
-        <p className="text-xs sm:text-xs md:text-sm text-gray-600 truncate">
-          - have a great day
-        </p>
+    <nav className="sticky top-0 z-30 w-full bg-[#F8FAF5]/80 backdrop-blur-xl border-b border-[#7A8B5E]/5 px-4 sm:px-8 py-4 flex items-center justify-between">
+      
+      {/* ── Left Section: Mobile Toggle & Page Title ── */}
+      <div className="flex items-center gap-4">
+        <button 
+          onClick={() => setSidebarOpen(true)}
+          className="lg:hidden p-2.5 rounded-xl bg-white border border-[#7A8B5E]/10 text-[#7A8B5E] shadow-sm active:scale-95 transition-transform"
+        >
+          <Menu size={20} />
+        </button>
+        
+        <div className="hidden sm:block">
+          <div className="flex items-center gap-2 mb-0.5">
+            <Compass size={14} className="text-[#7A8B5E]" />
+            <span className="text-[10px] font-black text-[#7A8B5E] uppercase tracking-[0.2em] opacity-60">University System</span>
+          </div>
+          <h2 className="text-xl font-black text-[#1A1F16] tracking-tight uppercase italic">{getPageTitle()}</h2>
+        </div>
       </div>
 
-      {/* Right Icons aligned on same line */}
-      <div className="flex items-center gap-2 sm:gap-3 md:gap-4 flex-shrink-0">
+      {/* ── Center Section: Search (Desktop) ── */}
+      <div className="hidden md:flex flex-1 max-w-md mx-8 relative group">
+        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#7A8B5E] opacity-50 group-focus-within:opacity-100 transition-opacity">
+          <Search size={16} />
+        </div>
+        <input 
+          type="text" 
+          placeholder="Search records, notices..."
+          className="w-full pl-12 pr-6 py-3 rounded-2xl bg-[#7A8B5E]/5 border border-transparent focus:border-[#7A8B5E]/20 focus:bg-white outline-none text-xs font-bold transition-all"
+        />
+      </div>
+
+      {/* ── Right Section: Actions & Profile ── */}
+      <div className="flex items-center gap-3 sm:gap-6">
+        
+        {/* Notifications */}
         <div className="relative">
-          <button
-            onClick={() => setShowDropdown((prev) => !prev)}
-            className="relative"
-            aria-label="Notifications"
+          <button 
+            onClick={() => setShowNotifDropdown(!showNotifDropdown)}
+            className="p-3 rounded-2xl bg-white border border-[#7A8B5E]/10 text-[#7A8B5E] shadow-sm hover:shadow-md transition-all relative"
           >
-            <Image
-              src="/student/icons/notifications.png"
-              alt="Notifications"
-              width={22}
-              height={22}
-              className="cursor-pointer"
-            />
-            {hasUnseen && (
-              <span className="absolute top-0 right-0 inline-block w-2.5 h-2.5 bg-red-500 rounded-full"></span>
+            <Bell size={20} />
+            {notifications.length > 0 && (
+              <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-[#C5A059] border-2 border-white rounded-full"></span>
             )}
           </button>
-
-          {showDropdown && (
-            <div className="absolute right-0 mt-2 w-screen sm:w-80 md:w-96 max-h-80 sm:max-h-96 overflow-y-auto bg-white border border-gray-300 rounded-md shadow-md z-50 -mx-3 sm:mx-0">
-              {notifications.length > 0 ? (
-                notifications.map((notif, i) => (
-                  <Link
-                    href={notif.link}
-                    key={notif._id || i}
-                    className="block px-3 sm:px-4 py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-100 border-b"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      markAsSeen(notif.type, notif._id);
-                      setShowDropdown(false);
-                      router.push(notif.link);
-                    }}
-                  >
-                    {notif.message}
-                  </Link>
-                ))
-              ) : (
-                <div className="px-3 sm:px-4 py-2 text-xs sm:text-sm text-gray-500">
-                  No notifications
-                </div>
-              )}
+          
+          {showNotifDropdown && (
+            <div className="absolute right-0 mt-4 w-80 bg-white rounded-[32px] shadow-2xl border border-[#7A8B5E]/10 p-6 animate-in slide-in-from-top-2 duration-300">
+              <h4 className="text-xs font-black text-[#1A1F16] uppercase tracking-widest mb-4">Latest Alerts</h4>
+              <div className="space-y-4">
+                <p className="text-[11px] font-bold text-[#6B7280] italic">No new notifications today.</p>
+              </div>
             </div>
           )}
         </div>
-        <Link href="/profile" aria-label="Go to profile">
-          {studentProfile ? (
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden bg-white border border-gray-300 cursor-pointer">
-              <Image
-                src={
-                  studentProfile && studentProfile !== "null"
-                    ? studentProfile
-                    : "/default-icon.jpg"
-                }
-                alt="Profile"
-                width={40}
-                height={40}
+
+        {/* User Profile */}
+        <Link href="/profile" className="flex items-center gap-4 group">
+          <div className="hidden sm:block text-right">
+            <p className="text-[10px] font-black text-[#7A8B5E] uppercase tracking-widest leading-none mb-1">Active</p>
+            <p className="text-sm font-black text-[#1A1F16] tracking-tight">{studentName}</p>
+          </div>
+          <div className="w-12 h-12 rounded-2xl border-2 border-white shadow-lg shadow-[#7A8B5E]/20 overflow-hidden bg-[#7A8B5E]/10 transition-transform group-hover:scale-105">
+            {studentProfile ? (
+              <Image 
+                src={studentProfile} 
+                alt="Profile" 
+                width={48} 
+                height={48} 
                 className="w-full h-full object-cover"
               />
-            </div>
-          ) : (
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white border border-gray-300 cursor-pointer" />
-          )}
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-[#7A8B5E]">
+                <User size={24} />
+              </div>
+            )}
+          </div>
         </Link>
       </div>
     </nav>

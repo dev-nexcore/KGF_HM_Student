@@ -1,57 +1,21 @@
-// 'use client';
-// import React from 'react';
-// import Navbar from '@/components/layout/navbar';
-// import Sidebar from '@/components/layout/sidebar';
-// import NoticesPage from '@/components/notices/NoticesPage';
-
-// export default function Notices() {
-//   return (
-//     <div className="flex h-screen bg-white">
-//       {/* Sidebar */}
-//       <Sidebar />
-
-//       {/* Main Content */}
-//       <div className="flex flex-col flex-1">
-//         {/* Navbar */}
-//         <Navbar />
-
-//         {/* Page Content */}
-//         <main className="p-4 overflow-y-auto">
-//           <NoticesPage />
-//         </main>
-//       </div>
-//     </div>
-//   );
-// }
-
-
-
 'use client';
-import React from 'react';
+import React, { useState } from 'react';
 import Navbar from '@/components/layout/navbar';
 import Sidebar from '@/components/layout/sidebar';
 import NoticesPage from '@/components/notices/NoticesPage';
 
 export default function Notices() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
-    <div className="flex min-h-screen bg-white">
-
-      {/* Sidebar */}
-      <Sidebar />
-
-      {/* Main Content */}
-      <div className="flex flex-col flex-1 md:ml-55">
-
-        {/* Navbar */}
-        <Navbar />
-
-        {/* Page Content */}
-        <main className="flex-1 p-4 overflow-y-auto">
+    <div className="flex min-h-screen bg-[#F8FAF5]">
+      <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+      <div className="flex flex-col flex-1 lg:ml-72 transition-all duration-500">
+        <Navbar setSidebarOpen={setSidebarOpen} />
+        <main className="flex-1 p-4 sm:p-8 lg:p-12 overflow-y-auto">
           <NoticesPage />
         </main>
-
       </div>
-
     </div>
   );
 }

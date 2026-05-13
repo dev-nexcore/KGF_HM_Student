@@ -1,7 +1,16 @@
 'use client';
 
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import api from '@/lib/api';
+import { 
+  Bell, 
+  Calendar, 
+  ArrowRight, 
+  Info, 
+  AlertCircle,
+  Clock,
+  Pin
+} from 'lucide-react';
 
 const NoticePage = () => {
   const [allNotices, setAllNotices] = useState([]);
@@ -10,25 +19,6 @@ const NoticePage = () => {
   const [showMoreAvailable, setShowMoreAvailable] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const containerRef = useRef(null);
-  const [screenHeight, setScreenHeight] = useState(0);
-
-  // Estimate notice height (including margins and padding)
-  const ESTIMATED_NOTICE_HEIGHT = 180; // Adjust based on your typical notice size
-  const HEADER_HEIGHT = 100; // Approximate header height
-  const BUFFER_NOTICES = 1; // Extra notices to ensure screen is filled
-
-  useEffect(() => {
-    setScreenHeight(window.innerHeight);
-
-    const handleResize = () => {
-      setScreenHeight(window.innerHeight);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
   useEffect(() => {
     const id = localStorage.getItem('studentId');
     setStudentId(id);
@@ -36,104 +26,127 @@ const NoticePage = () => {
 
   useEffect(() => {
     if (!studentId) return;
-
     const fetchNotices = async () => {
       setIsLoading(true);
       try {
         const res = await api.get(`/notices`);
-        setAllNotices(res.data.notices);
+        const sorted = (res.data.notices || []).sort((a, b) => new Date(b.issueDate) - new Date(a.issueDate));
+        setAllNotices(sorted);
+        setDisplayedNotices(sorted.slice(0, 5));
+        setShowMoreAvailable(sorted.length > 5);
       } catch (err) {
-        console.error('Error fetching notices:', err);
+        console.error('Fetch failed');
       } finally {
         setIsLoading(false);
       }
     };
-
     fetchNotices();
   }, [studentId]);
 
-  // Calculate how many notices fit in screen height
-  const calculateInitialNoticesCount = useCallback(() => {
-    if (screenHeight === 0) return 3; // Default fallback
-
-    const availableHeight = screenHeight - HEADER_HEIGHT;
-    const noticesCount = Math.floor(availableHeight / ESTIMATED_NOTICE_HEIGHT) + BUFFER_NOTICES;
-
-    return Math.max(3, noticesCount); // Minimum 3 notices
-  }, [screenHeight]);
-
-  // Initialize displayed notices when allNotices or screenHeight changes
-  useEffect(() => {
-    if (allNotices.length === 0) return;
-
-    const initialCount = calculateInitialNoticesCount();
-    const initialNotices = allNotices.slice(0, initialCount);
-
-    setDisplayedNotices(initialNotices);
-    setShowMoreAvailable(allNotices.length > initialCount);
-  }, [allNotices, calculateInitialNoticesCount]);
-
   const handleShowMore = () => {
     const currentCount = displayedNotices.length;
-    const additionalCount = Math.max(3, Math.floor(calculateInitialNoticesCount() / 2)); // Load half of initial amount
-    const newCount = currentCount + additionalCount;
-
-    const newDisplayedNotices = allNotices.slice(0, newCount);
-    setDisplayedNotices(newDisplayedNotices);
-    setShowMoreAvailable(allNotices.length > newCount);
+    const nextBatch = allNotices.slice(0, currentCount + 5);
+    setDisplayedNotices(nextBatch);
+    setShowMoreAvailable(allNotices.length > nextBatch.length);
   };
 
+  if (isLoading && displayedNotices.length === 0) return (
+    <div className="flex flex-col items-center justify-center py-20 animate-pulse">
+      <div className="w-12 h-12 border-4 border-[#7A8B5E] border-t-transparent rounded-full animate-spin mb-4"></div>
+      <p className="text-[10px] font-black text-[#7A8B5E] uppercase tracking-widest">Accessing Bulletin...</p>
+    </div>
+  );
+
   return (
-    <div
-      ref={containerRef}
-      className="bg-white text-black p-4 sm:p-6 md:p-8 overflow-hidden min-h-screen"
-    >
-      <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-black border-l-4 border-[#4F8CCF] pl-2 mb-4 sm:mb-6">
-        Notices
-      </h2>
+    <div className="space-y-10 pb-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      
+      {/* ── Page Header ── */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-1.5 h-6 bg-[#7A8B5E] rounded-full"></div>
+            <h2 className="text-2xl font-black text-[#1A1F16] tracking-tight uppercase italic">Official Bulletin</h2>
+          </div>
+          <p className="text-xs font-bold text-[#6B7280] uppercase tracking-widest">Critical announcements & hostel updates</p>
+        </div>
+      </div>
 
-      {isLoading && displayedNotices.length === 0 ? (
-        <p className="text-gray-600">Loading notices...</p>
-      ) : displayedNotices.length === 0 ? (
-        <p className="text-gray-600">No current notices</p>
-      ) : (
-        <>
-          {displayedNotices.map((notice, index) => (
-            <div key={index} className="mb-6 sm:mb-8">
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 sm:mb-1 gap-1 sm:gap-0">
-                <h2 className="text-base sm:text-lg font-bold">{notice.title}</h2>
-                <p className="text-xs sm:text-sm font-semibold text-gray-700">
-                  {new Date(notice.issueDate).toLocaleDateString()}
-                </p>
+      <div className="grid grid-cols-1 gap-8 max-w-4xl">
+        {displayedNotices.length === 0 ? (
+          <div className="bg-white rounded-[40px] p-20 text-center border border-[#7A8B5E]/5 shadow-2xl shadow-[#7A8B5E]/5">
+            <Info className="mx-auto text-[#7A8B5E] opacity-20 mb-4" size={48} />
+            <p className="text-[10px] font-black text-[#6B7280] uppercase tracking-[0.2em]">The bulletin board is currently empty</p>
+          </div>
+        ) : (
+          displayedNotices.map((notice, idx) => (
+            <div key={idx} className="bg-white rounded-[40px] shadow-2xl shadow-[#7A8B5E]/5 border border-[#7A8B5E]/5 group hover:border-[#7A8B5E]/20 transition-all overflow-hidden animate-in fade-in slide-in-from-right-4 duration-500" style={{ animationDelay: `${idx * 100}ms` }}>
+              <div className="flex flex-col md:flex-row">
+                
+                {/* ── Visual Date Side ── */}
+                <div className="md:w-48 bg-[#F8FAF5] p-8 flex flex-col justify-center items-center text-center border-b md:border-b-0 md:border-r border-[#7A8B5E]/5">
+                  <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-[#7A8B5E] shadow-sm mb-4">
+                    <Calendar size={20} />
+                  </div>
+                  <p className="text-2xl font-black text-[#1A1F16] leading-none uppercase italic">
+                    {new Date(notice.issueDate).toLocaleDateString('en-GB', { day: '2-digit' })}
+                  </p>
+                  <p className="text-[10px] font-black text-[#7A8B5E] uppercase tracking-widest mt-1">
+                    {new Date(notice.issueDate).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}
+                  </p>
+                </div>
+
+                {/* ── Content Side ── */}
+                <div className="flex-1 p-8 md:p-10 relative">
+                  {idx === 0 && (
+                    <div className="absolute top-8 right-8 text-[#C5A059] opacity-40">
+                      <Pin size={20} className="rotate-45" />
+                    </div>
+                  )}
+                  
+                  <div className="mb-6">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-2 h-2 rounded-full bg-[#7A8B5E] animate-pulse"></div>
+                      <span className="text-[8px] font-black text-[#7A8B5E] uppercase tracking-[0.2em]">Verified Announcement</span>
+                    </div>
+                    <h3 className="text-xl font-black text-[#1A1F16] uppercase italic tracking-tight leading-tight group-hover:text-[#7A8B5E] transition-colors">{notice.title}</h3>
+                  </div>
+
+                  <div className="space-y-4">
+                    <p className="text-sm font-bold text-[#6B7280] leading-relaxed italic whitespace-pre-line">
+                      {notice.message}
+                    </p>
+                  </div>
+
+                  <div className="mt-8 pt-6 border-t border-[#7A8B5E]/5 flex items-center justify-between">
+                    <div className="flex items-center gap-3 text-[10px] font-black text-[#6B7280] uppercase tracking-widest opacity-60">
+                      <Clock size={12} /> Issued {new Date(notice.issueDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                    <div className="flex -space-x-2">
+                      <div className="w-6 h-6 rounded-full bg-[#7A8B5E]/10 border-2 border-white"></div>
+                      <div className="w-6 h-6 rounded-full bg-[#C5A059]/10 border-2 border-white"></div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none rounded-md p-3 sm:p-4 md:p-5">
-                <p className="text-sm sm:text-base leading-relaxed whitespace-pre-line">
-                  {notice.message}
-                </p>
-              </div>
             </div>
-          ))}
+          ))
+        )}
 
-          {showMoreAvailable && (
-            <div className="flex justify-center mt-6 sm:mt-8">
-              <button
-                onClick={handleShowMore}
-                className="bg-[#4F8CCF] hover:bg-[#3a6ba3] text-white font-semibold py-2 px-6 rounded-md transition-colors duration-200 shadow-md cursor-pointer"
-              >
-                Show More
-              </button>
-            </div>
-          )}
-
-          {!showMoreAvailable && allNotices.length > 0 && (
-            <div className="flex justify-center mt-6 sm:mt-8">
-              <p className="text-gray-500 text-sm">
-                Showing all {allNotices.length} notice{allNotices.length !== 1 ? 's' : ''}
-              </p>
-            </div>
-          )}
-        </>
-      )}
+        {showMoreAvailable ? (
+          <div className="flex justify-center pt-8">
+            <button
+              onClick={handleShowMore}
+              className="px-10 py-5 bg-[#1A1F16] text-white rounded-[24px] font-black text-[10px] uppercase tracking-[0.3em] shadow-2xl shadow-black/20 hover:bg-[#2A3324] transition-all transform hover:scale-105 active:scale-95 flex items-center gap-4"
+            >
+              Load Previous <ArrowRight size={16} />
+            </button>
+          </div>
+        ) : allNotices.length > 5 ? (
+          <div className="text-center pt-10">
+            <p className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest opacity-40 italic">End of transmission dossier</p>
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 };

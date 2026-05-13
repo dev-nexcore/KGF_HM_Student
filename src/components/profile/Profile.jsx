@@ -1,7 +1,27 @@
 'use client';
-import api from '@/lib/api';
-import React, { useEffect, useState, useRef } from 'react';
-import { FiEdit, FiUpload, FiTrash2, FiUser, FiMail, FiPhone, FiHome, FiHash, FiMapPin, FiCalendar, FiAlertCircle, FiFileText, FiExternalLink } from 'react-icons/fi';
+
+import api, { API_URL } from '@/lib/api';
+import React, { useEffect, useState } from 'react';
+import { 
+  User, 
+  Mail, 
+  Phone, 
+  MapPin, 
+  Calendar, 
+  ShieldAlert, 
+  FileText, 
+  ExternalLink, 
+  Edit3, 
+  Camera, 
+  Trash2, 
+  Layout,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  Hash,
+  Home,
+  Upload
+} from 'lucide-react';
 import { toast, Toaster } from "react-hot-toast";
 import Image from 'next/image';
 
@@ -9,11 +29,7 @@ export default function Profile() {
   const [profile, setProfile] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    attendance: '--',
-    dues: '--',
-    complaints: '--'
-  });
+  const [stats, setStats] = useState({ attendance: '--', dues: '--', complaints: '--' });
 
   const [formData, setFormData] = useState({
     studentName: '',
@@ -25,18 +41,15 @@ export default function Profile() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // 1. Fetch Profile
         const res = await api.get(`/profile`);
         const data = res.data;
         setProfile(data);
-        console.log(data)
         setFormData({
           studentName: `${data.firstName} ${data.lastName}`.trim(),
           email: data.email || '',
           contactNumber: data.contactNumber || '',
         });
 
-        // 2. Fetch Stats in parallel
         const [feesRes, complaintsRes] = await Promise.all([
           api.get('/feeStatus'),
           api.get('/complaints')
@@ -47,50 +60,30 @@ export default function Profile() {
         const activeComplaints = complaintsRes.data.complaints?.filter(c => c.status !== 'resolved') || [];
 
         setStats({
-          attendance: '94%', // Fallback or fetched
-          dues: `₹${totalDues.toLocaleString('en-IN')}`,
+          attendance: '94%',
+          dues: `₹${totalDues.toLocaleString()}`,
           complaints: activeComplaints.length
         });
 
       } catch (err) {
-        console.error('Failed to fetch profile data:', err);
+        console.error('Data fetch failed');
       } finally {
         setLoading(false);
       }
     };
-
     fetchData();
   }, []);
-
-  const handleInputChange = (e) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
-  };
 
   const handleUpdate = async () => {
     try {
       const [firstName, ...rest] = formData.studentName.split(" ");
       const lastName = rest.join(" ") || "";
-
-      await api.put(`/profile`, {
-        firstName,
-        lastName,
-        email: formData.email,
-        contactNumber: formData.contactNumber,
-      });
-
-      setProfile(prev => ({
-        ...prev,
-        firstName,
-        lastName,
-        email: formData.email,
-        contactNumber: formData.contactNumber,
-      }));
-
+      await api.put(`/profile`, { firstName, lastName, email: formData.email, contactNumber: formData.contactNumber });
+      setProfile(prev => ({ ...prev, firstName, lastName, email: formData.email, contactNumber: formData.contactNumber }));
       setShowModal(false);
-      toast.success("Profile updated successfully!");
+      toast.success("Identity updated");
     } catch (err) {
-      console.error('Failed to update profile:', err);
-      toast.error("Failed to update profile");
+      toast.error("Update failed");
     }
   };
 
@@ -98,225 +91,221 @@ export default function Profile() {
     const studentId = localStorage.getItem("studentId");
     const file = e.target.files[0];
     if (!file || !studentId) return;
-
     const uploadData = new FormData();
     uploadData.append("profileImage", file);
-
     try {
-      toast.loading("Uploading image...", { id: 'upload' });
+      toast.loading("Syncing photo...", { id: 'upload' });
       const res = await api.post(`/upload-profile-image/${studentId}`, uploadData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-
       setProfile(prev => ({ ...prev, profileImage: res.data.imageUrl }));
-      toast.success("Image updated", { id: 'upload' });
+      toast.success("Photo updated", { id: 'upload' });
     } catch (err) {
-      console.error('Image upload failed:', err);
       toast.error("Upload failed", { id: 'upload' });
     }
   };
 
-  const handleImageDelete = async () => {
+  const handleDocumentUpload = async (e, docType) => {
     const studentId = localStorage.getItem("studentId");
-    if (!studentId) return;
+    const file = e.target.files[0];
+    if (!file || !studentId) return;
+
+    const uploadData = new FormData();
+    uploadData.append("document", file);
+    uploadData.append("documentType", docType);
 
     try {
-      await api.delete(`/delete-profile-image/${studentId}`);
-      setProfile(prev => ({ ...prev, profileImage: null }));
-      toast.success("Image removed");
+      toast.loading(`Uploading ${docType}...`, { id: 'doc-upload' });
+      const res = await api.post(`/upload-document/${studentId}`, uploadData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      
+      // Update local profile state
+      setProfile(prev => ({
+        ...prev,
+        documents: {
+          ...prev.documents,
+          [docType]: res.data.url
+        }
+      }));
+      
+      toast.success("Document uploaded successfully", { id: 'doc-upload' });
     } catch (err) {
-      console.error('Image delete failed:', err);
-      toast.error("Failed to remove image");
+      console.error(err);
+      toast.error("Upload failed. Please try again.", { id: 'doc-upload' });
     }
   };
 
   if (loading) return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh]">
-      <div className="w-12 h-12 border-4 border-[#BEC5AD] border-t-transparent rounded-full animate-spin"></div>
-      <p className="mt-4 text-gray-500 font-medium">Loading your profile...</p>
+    <div className="flex flex-col items-center justify-center min-h-[60vh] animate-pulse">
+      <div className="w-12 h-12 border-4 border-[#7A8B5E] border-t-transparent rounded-full animate-spin mb-4"></div>
+      <p className="text-[10px] font-black text-[#7A8B5E] uppercase tracking-widest">Compiling Profile...</p>
     </div>
   );
 
-  if (!profile) return null;
-
   return (
-    <div className="min-h-screen bg-[#FDFDFD] pb-12">
+    <div className="space-y-12 pb-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <Toaster position="top-right" />
       
-      {/* Header Spacer */}
-      <div className="h-10"></div>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        
+        {/* ── Left Sidebar: Identity Card ── */}
+        <div className="lg:col-span-4 space-y-6">
+          <div className="bg-[#7A8B5E] rounded-[48px] p-10 flex flex-col items-center text-center shadow-2xl shadow-[#7A8B5E]/20 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+            
+            <div className="relative group">
+              <div className="w-44 h-44 rounded-[40px] overflow-hidden border-4 border-white/30 shadow-2xl transition-all duration-500 group-hover:scale-[1.02] bg-white/20 backdrop-blur-sm">
+                {profile.profileImage ? (
+                  <Image 
+                    src={profile.profileImage.startsWith('http') ? profile.profileImage : `${API_URL}${profile.profileImage}`} 
+                    alt="Profile" width={200} height={200} className="w-full h-full object-cover" 
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-white text-5xl opacity-40"><User /></div>
+                )}
+              </div>
+              <label className="absolute -bottom-2 -right-2 w-12 h-12 bg-white text-[#7A8B5E] rounded-2xl flex items-center justify-center shadow-xl cursor-pointer hover:scale-110 active:scale-95 transition-all">
+                <Camera size={20} />
+                <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+              </label>
+            </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        {/* Page Title */}
-        <div className="flex items-center gap-3 mb-10">
-          <div className="w-1.5 h-8 bg-[#4F8CCF] rounded-full"></div>
-          <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">Student Profile</h1>
+            <div className="mt-8 relative z-10">
+              <h2 className="text-3xl font-black text-white leading-none uppercase italic tracking-tight">
+                {profile.firstName} <br /> <span className="opacity-80 font-serif lowercase italic normal-case">{profile.lastName}</span>
+              </h2>
+              <div className="mt-4 inline-flex items-center gap-2 px-4 py-1.5 bg-black/20 backdrop-blur-md rounded-full text-[10px] font-black text-white uppercase tracking-widest border border-white/10">
+                <Hash size={10} /> {profile.studentId}
+              </div>
+            </div>
+
+            <div className="mt-10 w-full grid grid-cols-2 gap-4">
+              <div className="bg-white/10 backdrop-blur-md rounded-3xl p-5 border border-white/10">
+                <p className="text-[8px] font-black uppercase text-white/60 mb-1 tracking-widest">Wing/Room</p>
+                <p className="text-lg font-black text-white uppercase">{profile.roomNo || 'N/A'}</p>
+              </div>
+              <div className="bg-white/10 backdrop-blur-md rounded-3xl p-5 border border-white/10">
+                <p className="text-[8px] font-black uppercase text-white/60 mb-1 tracking-widest">Bed Allot</p>
+                <p className="text-lg font-black text-white uppercase">{profile.bedAllotment || 'N/A'}</p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowModal(true)}
+              className="mt-8 w-full bg-[#1A1F16] text-white px-6 py-5 rounded-[24px] font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-black transition-all flex items-center justify-center gap-3"
+            >
+              <Edit3 size={16} /> Modify Profile
+            </button>
+          </div>
+          
+          <div className="bg-white rounded-[40px] p-8 border border-[#7A8B5E]/5 shadow-2xl shadow-[#7A8B5E]/5">
+            <h4 className="text-[10px] font-black text-[#7A8B5E] uppercase tracking-[0.2em] mb-6 flex items-center gap-2 italic">
+              <ShieldAlert size={14} /> Emergency SOS
+            </h4>
+            <div className="space-y-6">
+              <InfoRow label="Guardian" val={profile.emergencyContactName} icon={<User size={14} />} />
+              <InfoRow label="Secure Line" val={profile.emergencyContactNumber} icon={<Phone size={14} />} />
+            </div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* ── Right Content: Personal Archive ── */}
+        <div className="lg:col-span-8 space-y-10">
           
-          {/* Left Column: Profile Card */}
-          <div className="lg:col-span-4">
-            <div className="bg-[#BEC5AD] rounded-[2.5rem] p-8 sm:p-10 flex flex-col items-center text-center shadow-xl shadow-[#BEC5AD]/20 sticky top-6">
-              <div className="relative group">
-                <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-[3rem] overflow-hidden border-4 border-white shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]">
-                  {profile.profileImage ? (
-                    <Image
-                      src={profile.profileImage}
-                      alt="Profile"
-                      width={200}
-                      height={200}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-white/50 flex items-center justify-center text-white text-5xl">
-                      <FiUser />
-                    </div>
-                  )}
-                </div>
+          {/* Quick Stats Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
+            <StatCard label="Attendance" value={stats.attendance} icon={<CheckCircle />} color="text-emerald-600" bg="bg-emerald-50" />
+            <StatCard label="Outstanding" value={stats.dues} icon={<AlertCircle />} color="text-amber-600" bg="bg-amber-50" />
+            <StatCard label="Active Cases" value={stats.complaints} icon={<Clock />} color="text-blue-600" bg="bg-blue-50" />
+          </div>
 
-                {/* Photo Actions Overlay */}
-                <div className="absolute -bottom-2 -right-2 flex gap-2">
-                  <label className="w-10 h-10 bg-white text-[#4F8CCF] rounded-2xl flex items-center justify-center shadow-lg cursor-pointer hover:bg-gray-50 transition-all hover:scale-110 active:scale-95">
-                    <FiUpload />
-                    <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-                  </label>
-                  {profile.profileImage && (
-                    <button 
-                      onClick={handleImageDelete}
-                      className="w-10 h-10 bg-red-500 text-white rounded-2xl flex items-center justify-center shadow-lg hover:bg-red-600 transition-all hover:scale-110 active:scale-95"
-                    >
-                      <FiTrash2 />
-                    </button>
-                  )}
-                </div>
+          {/* Detailed Info */}
+          <div className="bg-white rounded-[48px] p-10 border border-[#7A8B5E]/5 shadow-2xl shadow-[#7A8B5E]/5">
+            <div className="flex items-center justify-between mb-10">
+              <h3 className="text-sm font-black text-[#1A1F16] uppercase tracking-[0.2em] flex items-center gap-3 italic">
+                <Layout size={18} className="text-[#7A8B5E]" /> Personal Dossier
+              </h3>
+              <div className="flex gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#7A8B5E]"></div>
+                <div className="w-1.5 h-1.5 rounded-full bg-[#7A8B5E]/30"></div>
               </div>
-
-              <div className="mt-8">
-                <h2 className="text-2xl font-black text-black leading-tight">
-                  {profile.firstName} {profile.lastName}
-                </h2>
-                <div className="mt-3 inline-block px-4 py-1.5 bg-white/30 backdrop-blur-md rounded-full text-xs font-black text-black uppercase tracking-widest">
-                  ID: {profile.studentId}
-                </div>
-              </div>
-
-              <div className="mt-10 w-full grid grid-cols-2 gap-4">
-                <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
-                  <p className="text-[10px] font-black uppercase text-black/60 mb-1">Room</p>
-                  <p className="text-lg font-bold text-black">{profile.roomNo || 'N/A'}</p>
-                </div>
-                <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
-                  <p className="text-[10px] font-black uppercase text-black/60 mb-1">Bed</p>
-                  <p className="text-lg font-bold text-black">{profile.bedAllotment || 'N/A'}</p>
-                </div>
-              </div>
-
-              <button
-                onClick={() => setShowModal(true)}
-                className="mt-8 w-full bg-black text-white px-6 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-gray-900 transition-all active:scale-95 shadow-lg"
-              >
-                <FiEdit /> Edit Details
-              </button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12">
+              <InfoItem icon={<Mail />} label="Primary Email" value={profile.email} />
+              <InfoItem icon={<Phone />} label="Mobile Contact" value={profile.contactNumber} />
+              <InfoItem icon={<Calendar />} label="Enrolment Date" value={new Date(profile.admissionDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })} />
+              <InfoItem icon={<MapPin />} label="Residential Floor" value={profile.floor || 'N/A'} />
+              <InfoItem icon={<Home />} label="Hostel Block" value="KGF Premium Wings" />
+              <InfoItem icon={<User />} label="Category" value={profile.category || 'Standard'} />
             </div>
           </div>
 
-          {/* Right Column: Details & Stats */}
-          <div className="lg:col-span-8 space-y-8">
-            
-            {/* Stats Overview */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              <StatCard label="Attendance" value={stats.attendance} color="text-blue-600" bg="bg-blue-50/50" />
-              <StatCard label="Total Dues" value={stats.dues} color="text-red-600" bg="bg-red-50/50" />
-              <StatCard label="Complaints" value={stats.complaints} color="text-orange-600" bg="bg-orange-50/50" />
-            </div>
-
-            {/* Information Grid */}
-            <div className="bg-white rounded-[2.5rem] p-8 sm:p-10 border border-gray-100 shadow-sm">
-              <h3 className="text-lg font-black text-gray-900 mb-8 flex items-center gap-3 uppercase tracking-wider">
-                <FiUser className="text-[#4F8CCF]" />
-                Personal Information
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
-                <InfoItem icon={<FiMail />} label="Email Address" value={profile.email} />
-                <InfoItem icon={<FiPhone />} label="Phone Number" value={profile.contactNumber} />
-                <InfoItem icon={<FiCalendar />} label="Admission Date" value={new Date(profile.admissionDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' })} />
-                <InfoItem icon={<FiMapPin />} label="Floor Level" value={profile.floor || 'N/A'} />
-              </div>
-            </div>
-
-            {/* Emergency Contact */}
-            <div className="bg-red-50/50 border border-red-100 rounded-[2rem] p-8">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-red-500 shadow-sm">
-                  <FiAlertCircle className="text-2xl" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-black text-red-900 leading-none">Emergency Contact</h3>
-                  <p className="text-xs text-red-600 mt-1">Hostel security fallback info</p>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-8">
-                <div>
-                  <p className="text-[10px] font-black uppercase text-red-400 mb-1 tracking-widest">Name</p>
-                  <p className="text-lg font-bold text-red-900">{profile.emergencyContactName || 'Not Set'}</p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-black uppercase text-red-400 mb-1 tracking-widest">Mobile Number</p>
-                  <p className="text-lg font-bold text-red-900">{profile.emergencyContactNumber || 'Not Set'}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Academic Documents */}
-            <div className="bg-white rounded-[2.5rem] p-8 sm:p-10 border border-gray-100 shadow-sm">
-              <h3 className="text-lg font-black text-gray-900 mb-8 flex items-center gap-3 uppercase tracking-wider">
-                <FiFileText className="text-[#4F8CCF]" />
-                Verification Documents
-              </h3>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <DocumentItem 
-                  label="Aadhar Card" 
-                  url={profile.documents?.aadharCard} 
-                />
-                <DocumentItem 
-                  label="PAN Card" 
-                  url={profile.documents?.panCard} 
-                />
-                <DocumentItem 
-                  label="College ID Card" 
-                  url={profile.documents?.studentIdCard} 
-                />
-                <DocumentItem 
-                  label="Admission Fees Receipt" 
-                  url={profile.documents?.feesReceipt} 
-                />
-              </div>
+          {/* Verification Docs */}
+          <div className="space-y-6">
+            <h3 className="text-sm font-black text-[#6B7280] uppercase tracking-[0.2em] px-4 italic flex items-center gap-2">
+              <FileText size={16} className="text-[#7A8B5E]" /> Compliance Documents
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <DocumentLink 
+                label="Identity Proof (Aadhar)" 
+                exists={!!profile.documents?.aadharCard} 
+                docType="aadharCard"
+                onUpload={(e) => handleDocumentUpload(e, 'aadharCard')}
+                onOpen={() => handleOpen('aadharCard')}
+              />
+              <DocumentLink 
+                label="Tax Identification (PAN)" 
+                exists={!!profile.documents?.panCard} 
+                docType="panCard"
+                onUpload={(e) => handleDocumentUpload(e, 'panCard')}
+                onOpen={() => handleOpen('panCard')}
+              />
+              <DocumentLink 
+                label="University ID Card" 
+                exists={!!profile.documents?.studentIdCard} 
+                docType="studentIdCard"
+                onUpload={(e) => handleDocumentUpload(e, 'studentIdCard')}
+                onOpen={() => handleOpen('studentIdCard')}
+              />
+              <DocumentLink 
+                label="Billing Receipt" 
+                exists={!!profile.documents?.feesReceipt} 
+                docType="feesReceipt"
+                onUpload={(e) => handleDocumentUpload(e, 'feesReceipt')}
+                onOpen={() => handleOpen('feesReceipt')}
+              />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Edit Modal */}
+      {/* Edit Identity Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowModal(false)}></div>
-          <div className="bg-white rounded-[2.5rem] w-full max-w-lg p-8 sm:p-10 relative animate-in fade-in zoom-in duration-300">
-            <h2 className="text-2xl font-black text-gray-900 mb-2">Edit Profile</h2>
-            <p className="text-gray-500 mb-8">Update your contact details below.</p>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#1A1F16]/60 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="bg-white rounded-[48px] w-full max-w-lg p-10 shadow-2xl border border-[#7A8B5E]/10 animate-in zoom-in-95 duration-300">
+            <h2 className="text-2xl font-black text-[#1A1F16] mb-2 uppercase italic tracking-tight">Modify Identity</h2>
+            <p className="text-[11px] font-bold text-[#6B7280] uppercase tracking-widest mb-10">Update your verified contact profile</p>
 
             <div className="space-y-6">
-              <InputGroup label="Full Name" name="studentName" value={formData.studentName} onChange={handleInputChange} icon={<FiUser />} />
-              <InputGroup label="Email" name="email" value={formData.email} onChange={handleInputChange} type="email" icon={<FiMail />} />
-              <InputGroup label="Phone" name="contactNumber" value={formData.contactNumber} onChange={handleInputChange} icon={<FiPhone />} />
+              <div className="space-y-2">
+                <label className="text-[9px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Full Legal Name</label>
+                <input value={formData.studentName} onChange={(e) => setFormData(prev => ({ ...prev, studentName: e.target.value }))} className="w-full px-6 py-4 rounded-2xl bg-[#F8FAF5] border-2 border-transparent focus:border-[#7A8B5E]/20 outline-none font-bold text-sm text-[#1A1F16] transition-all" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[9px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Secure Email</label>
+                <input value={formData.email} onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))} className="w-full px-6 py-4 rounded-2xl bg-[#F8FAF5] border-2 border-transparent focus:border-[#7A8B5E]/20 outline-none font-bold text-sm text-[#1A1F16] transition-all" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[9px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Contact Line</label>
+                <input value={formData.contactNumber} onChange={(e) => setFormData(prev => ({ ...prev, contactNumber: e.target.value }))} className="w-full px-6 py-4 rounded-2xl bg-[#F8FAF5] border-2 border-transparent focus:border-[#7A8B5E]/20 outline-none font-bold text-sm text-[#1A1F16] transition-all" />
+              </div>
             </div>
 
-            <div className="flex gap-4 mt-10">
-              <button onClick={() => setShowModal(false)} className="flex-1 px-6 py-4 rounded-2xl bg-gray-100 text-gray-600 font-bold hover:bg-gray-200 transition-colors">Cancel</button>
-              <button onClick={handleUpdate} className="flex-1 px-6 py-4 rounded-2xl bg-[#BEC5AD] text-black font-bold hover:bg-[#aeb898] transition-all shadow-lg">Save Changes</button>
+            <div className="flex gap-4 mt-12">
+              <button onClick={() => setShowModal(false)} className="flex-1 py-5 rounded-2xl bg-[#F8FAF5] text-[#1A1F16] font-black text-[10px] uppercase tracking-widest transition-all">Cancel</button>
+              <button onClick={handleUpdate} className="flex-1 py-5 rounded-2xl bg-[#7A8B5E] text-white font-black text-[10px] uppercase tracking-widest shadow-xl shadow-[#7A8B5E]/20 transition-all">Synchronize</button>
             </div>
           </div>
         </div>
@@ -325,71 +314,78 @@ export default function Profile() {
   );
 }
 
-function DocumentItem({ label, url }) {
+function StatCard({ label, value, icon, color, bg }) {
   return (
-    <div className="flex items-center justify-between p-5 bg-gray-50 rounded-2xl border border-gray-100 hover:border-[#BEC5AD]/50 transition-all group">
-      <div className="flex items-center gap-4">
-        <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-[#4F8CCF] shadow-sm">
-          <FiFileText />
-        </div>
-        <div>
-          <p className="text-[10px] font-black uppercase text-gray-400 mb-0.5 tracking-wider">{label}</p>
-          <p className="text-xs font-bold text-gray-700">{url ? 'Document Uploaded' : 'Not Uploaded'}</p>
-        </div>
+    <div className={`${bg} rounded-[32px] p-8 flex flex-col items-center justify-center text-center shadow-sm border border-white/40 group hover:scale-105 transition-all`}>
+      <div className={`w-12 h-12 rounded-xl bg-white flex items-center justify-center ${color} mb-4 shadow-sm group-hover:rotate-6 transition-transform`}>
+        {React.cloneElement(icon, { size: 20 })}
       </div>
-      
-      {url && (
-        <a 
-          href={url} 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="w-8 h-8 bg-white text-gray-400 rounded-lg flex items-center justify-center hover:text-[#4F8CCF] hover:shadow-md transition-all active:scale-90"
-        >
-          <FiExternalLink />
-        </a>
-      )}
-    </div>
-  );
-}
-
-function StatCard({ label, value, color, bg }) {
-  return (
-    <div className={`${bg} rounded-[2rem] p-6 border border-white flex flex-col items-center justify-center text-center shadow-sm`}>
-      <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">{label}</p>
-      <p className={`text-2xl font-black ${color}`}>{value}</p>
+      <p className="text-[8px] font-black uppercase tracking-[0.2em] text-[#6B7280] mb-1">{label}</p>
+      <p className={`text-xl font-black ${color} tracking-tight`}>{value}</p>
     </div>
   );
 }
 
 function InfoItem({ icon, label, value }) {
   return (
-    <div className="flex items-start gap-4">
-      <div className="mt-1 flex items-center justify-center w-10 h-10 rounded-xl bg-gray-50 text-[#4F8CCF]">
-        {icon}
+    <div className="flex items-start gap-5">
+      <div className="mt-1 flex items-center justify-center w-12 h-12 rounded-2xl bg-[#F8FAF5] text-[#7A8B5E] border border-[#7A8B5E]/5">
+        {React.cloneElement(icon, { size: 20 })}
       </div>
       <div>
-        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">{label}</p>
-        <p className="text-sm font-bold text-gray-800 break-all">{value || 'N/A'}</p>
+        <p className="text-[9px] font-black uppercase tracking-widest text-[#6B7280] mb-1">{label}</p>
+        <p className="text-sm font-black text-[#1A1F16] tracking-tight">{value || 'N/A'}</p>
       </div>
     </div>
   );
 }
 
-function InputGroup({ label, name, value, onChange, icon, type = "text" }) {
+function InfoRow({ label, val, icon }) {
   return (
-    <div>
-      <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">{label}</label>
-      <div className="relative">
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-          {icon}
+    <div className="flex items-center justify-between py-2">
+      <div className="flex items-center gap-3 text-[#7A8B5E]">
+        {icon}
+        <span className="text-[9px] font-black uppercase tracking-widest opacity-60">{label}</span>
+      </div>
+      <span className="text-xs font-black text-[#1A1F16] tracking-tight">{val || 'N/A'}</span>
+    </div>
+  );
+}
+
+function DocumentLink({ label, exists, docType, onUpload }) {
+  const handleOpen = () => {
+    if (exists) {
+      const token = localStorage.getItem('studentToken');
+      window.open(`${API_URL}/student-document/${docType}?token=${token}`, '_blank');
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-between p-6 bg-white rounded-[32px] border border-[#7A8B5E]/5 shadow-sm group hover:border-[#7A8B5E]/20 transition-all">
+      <div className="flex items-center gap-4">
+        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${exists ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-50 text-gray-300'}`}>
+          <FileText size={18} />
         </div>
-        <input
-          type={type}
-          name={name}
-          value={value}
-          onChange={onChange}
-          className="w-full bg-gray-50 border-2 border-transparent rounded-2xl pl-12 pr-4 py-4 text-sm font-bold text-gray-800 focus:border-[#BEC5AD] transition-all outline-none"
-        />
+        <div>
+          <p className="text-[9px] font-black uppercase text-[#6B7280] mb-0.5 tracking-widest">{label}</p>
+          <p className="text-[10px] font-black text-[#1A1F16] uppercase tracking-tight">{exists ? 'Verified Archive' : 'Pending Upload'}</p>
+        </div>
+      </div>
+      <div className="flex gap-2">
+        {exists ? (
+          <button 
+            onClick={handleOpen}
+            className="p-2.5 bg-[#F8FAF5] text-[#7A8B5E] rounded-xl hover:bg-[#7A8B5E] hover:text-white transition-all shadow-sm"
+            title="Open Document"
+          >
+            <ExternalLink size={14} />
+          </button>
+        ) : (
+          <label className="p-2.5 bg-[#7A8B5E]/5 text-[#7A8B5E] rounded-xl hover:bg-[#7A8B5E] hover:text-white transition-all cursor-pointer shadow-sm">
+            <Upload size={14} />
+            <input type="file" onChange={onUpload} className="hidden" accept=".pdf,.jpg,.jpeg,.png" />
+          </label>
+        )}
       </div>
     </div>
   );

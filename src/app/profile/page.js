@@ -8,19 +8,13 @@ export default function ProfilePage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen">
-       {/* Sidebar */}
-               <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-         
-               {/* Main Content */}
-               <div className="flex flex-col flex-1 md:ml-55 ">
-                 {/* Navbar */}
-                 <Navbar />
-
-        {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10 bg-[#ffffff]">
+    <div className="flex min-h-screen bg-[#F8FAF5]">
+      <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+      <div className="flex flex-col flex-1 lg:ml-72 transition-all duration-500">
+        <Navbar setSidebarOpen={setSidebarOpen} />
+        <main className="flex-1 p-4 sm:p-8 lg:p-12 overflow-y-auto">
           <Profile />
-        </div>
+        </main>
       </div>
     </div>
   );
