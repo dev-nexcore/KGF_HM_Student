@@ -85,7 +85,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
           {/* Navigation Links */}
           <nav className="flex-1 space-y-2">
             {navItems.map((item) => {
-              const isActive = pathname === item.href;
+              const isActive = pathname.replace(/\/$/, "") === item.href.replace(/\/$/, "");
               const Icon = item.icon;
               
               return (
