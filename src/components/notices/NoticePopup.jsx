@@ -1,22 +1,15 @@
-'use client';
+// components/NoticePopup.jsx
+"use client";
 
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { 
-  Bell, 
-  X, 
-  ArrowRight, 
-  Calendar, 
-  ChevronRight,
-  Info,
-  Clock
-} from "lucide-react";
 
 const NoticePopup = ({ notice, onMarkAsRead }) => {
   const router = useRouter();
 
   if (!notice) return null;
 
+  // Prevent body scroll when modal is open
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => {
@@ -24,18 +17,30 @@ const NoticePopup = ({ notice, onMarkAsRead }) => {
     };
   }, []);
 
+  // Close on Escape key press
   useEffect(() => {
     const handleEscape = (e) => {
-      if (e.key === "Escape") onMarkAsRead();
+      if (e.key === "Escape") {
+        onMarkAsRead();
+      }
     };
     window.addEventListener("keydown", handleEscape);
     return () => window.removeEventListener("keydown", handleEscape);
   }, [onMarkAsRead]);
 
+  // Handle backdrop click - mark as read
   const handleBackdropClick = (e) => {
-    if (e.target === e.currentTarget) onMarkAsRead();
+    if (e.target === e.currentTarget) {
+      onMarkAsRead();
+    }
   };
 
+  // Handle "Got It" button - mark as read
+  const handleMarkAsRead = () => {
+    onMarkAsRead();
+  };
+
+  // Handle "View All" button - mark as read + redirect
   const handleViewAll = () => {
     onMarkAsRead();
     router.push("/notices");
@@ -44,85 +49,81 @@ const NoticePopup = ({ notice, onMarkAsRead }) => {
   return (
     <div
       onClick={handleBackdropClick}
-      className="fixed inset-0 bg-[#1A1F16]/60 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-in fade-in duration-300"
+      className="fixed inset-0 backdrop-blur bg-opacity-50 flex items-center justify-center z-50 p-4"
+      style={{ animation: "fadeIn 0.2s ease-out" }}
     >
       <div
-        className="bg-white rounded-[48px] shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-500 border border-[#7A8B5E]/10"
+        className="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4"
+        style={{ animation: "slideUp 0.3s ease-out" }}
       >
-        {/* ── Premium Header ── */}
-        <div className="bg-[#1A1F16] p-10 text-white relative">
-          <button 
-            onClick={onMarkAsRead}
-            className="absolute top-8 right-8 text-white/40 hover:text-white transition-all hover:rotate-90"
+        {/* Header */}
+        <div className="bg-[#BEC5AD] px-6 py-4 rounded-t-lg flex justify-between items-center">
+          <h2 className="text-lg font-bold text-black flex items-center gap-2">
+            <span className="text-2xl">📢</span>
+            New Notice
+          </h2>
+          <button
+            onClick={handleMarkAsRead}
+            className="text-black hover:text-gray-700 text-2xl font-bold transition-colors duration-200"
+            aria-label="Close notice"
           >
-            <X size={20} />
+            ×
           </button>
-          
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-1.5 h-6 bg-[#7A8B5E] rounded-full"></div>
-            <h2 className="text-2xl font-black text-white tracking-tight uppercase italic leading-none">Bulletin</h2>
-          </div>
-          <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">New Resident Communiqué</p>
-          
-          <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-[#7A8B5E]/10 rounded-full blur-3xl"></div>
         </div>
 
-        {/* ── Content Body ── */}
-        <div className="p-10 pt-12">
-          {/* Metadata Section */}
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-2 bg-[#F8FAF5] px-4 py-2 rounded-full border border-[#7A8B5E]/5">
-              <Calendar size={12} className="text-[#7A8B5E]" />
-              <span className="text-[10px] font-black text-[#7A8B5E] uppercase tracking-widest">
-                {new Date(notice.issueDate).toLocaleDateString("en-GB", {
-                  day: "2-digit",
-                  month: "short",
-                  year: "numeric",
-                })}
-              </span>
-            </div>
-            <div className="flex items-center gap-2 text-[10px] font-black text-[#6B7280] uppercase tracking-widest opacity-40">
-              <Clock size={12} /> Priority Alert
-            </div>
+        {/* Content */}
+        <div className="p-6 max-h-[60vh] overflow-y-auto">
+          {/* Date Badge */}
+          <div className="flex justify-end mb-3">
+            <span className="text-xs font-semibold text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
+              {new Date(notice.issueDate).toLocaleDateString("en-IN", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}
+            </span>
           </div>
 
-          {/* Title Area */}
-          <h3 className="text-2xl font-black text-[#1A1F16] mb-6 leading-tight uppercase italic tracking-tight">
+          {/* Title */}
+          <h3 className="text-xl font-bold text-gray-900 mb-4 leading-tight">
             {notice.title}
           </h3>
 
-          {/* Message Container */}
-          <div className="relative group mb-10">
-            <div className="absolute -left-10 top-0 bottom-0 w-1 bg-[#7A8B5E] rounded-full opacity-20"></div>
-            <div className="bg-[#F8FAF5] rounded-[32px] p-8 border border-[#7A8B5E]/5 relative">
-              <div className="absolute top-4 right-6 opacity-5">
-                <Info size={40} />
-              </div>
-              <p className="text-sm font-bold text-[#6B7280] leading-relaxed whitespace-pre-line italic">
-                {notice.message}
-              </p>
-            </div>
+          {/* Message */}
+          <div className="bg-gray-50 rounded-lg p-4 border-l-4 border-[#BEC5AD]">
+            <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">
+              {notice.message}
+            </p>
           </div>
+        </div>
 
-          {/* ── Action Footer ── */}
-          <div className="flex gap-4">
-            <button
-              onClick={onMarkAsRead}
-              className="flex-1 px-8 py-5 rounded-[24px] bg-[#F8FAF5] text-[#1A1F16] font-black text-[10px] uppercase tracking-widest hover:bg-gray-100 transition-all active:scale-95"
+        {/* Footer */}
+        <div className="flex gap-3 justify-end px-6 pb-6">
+          <button
+            onClick={handleMarkAsRead}
+            className="px-4 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors cursor-pointer"
+          >
+            Mark as read
+          </button>
+          <button
+            onClick={handleViewAll}
+            className="px-4 py-2 bg-[#BEC5AD] text-black font-semibold rounded-md hover:bg-[#a9b29d] transition-colors flex items-center gap-2 cursor-pointer"
+          >
+            View All
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              Acknowledge
-            </button>
-            <button
-              onClick={handleViewAll}
-              className="flex-1 px-8 py-5 bg-[#1A1F16] text-white rounded-[24px] font-black text-[10px] uppercase tracking-[0.2em] shadow-2xl shadow-black/20 hover:bg-[#2A3324] transition-all transform hover:scale-[1.03] active:scale-95 flex items-center justify-center gap-3"
-            >
-              Dossier <ChevronRight size={16} />
-            </button>
-          </div>
-          
-          <div className="text-center mt-8">
-            <p className="text-[8px] font-black text-[#6B7280] uppercase tracking-[0.3em] opacity-30">KGF Official Transmission</p>
-          </div>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </button>
         </div>
       </div>
     </div>
