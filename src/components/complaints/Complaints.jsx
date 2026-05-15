@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
 import toast from "react-hot-toast";
-import { FiUpload, FiX, FiFile, FiImage, FiVideo, FiEye } from "react-icons/fi";
+import { FiUpload, FiX, FiFile, FiImage, FiVideo, FiEye, FiSearch, FiFilter, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 
 export default function Complaints() {
   const [complaintType, setComplaintType] = useState("");
@@ -20,6 +20,35 @@ export default function Complaints() {
   const [maintenanceItems, setMaintenanceItems] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
+
+  // Search, Filter and Pagination states
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // Filter complaints based on search and status
+  const filteredComplaints = complaints.filter((complaint) => {
+    const matchesSearch = 
+      complaint.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      complaint.complaintType?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      complaint.otherComplaintType?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesStatus = statusFilter === "all" || complaint.status === statusFilter;
+    
+    return matchesSearch && matchesStatus;
+  });
+
+  // Reset page when filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter]);
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredComplaints.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredComplaints.slice(indexOfFirstItem, indexOfLastItem);
 
   const maintenanceOptions = [
     "Electrical Issues",
@@ -478,129 +507,125 @@ export default function Complaints() {
       </div>
 
       {/* Complaint History */}
-      <div className="bg-white rounded-lg sm:rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.25)] px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 md:py-6 lg:py-8 w-full">
-        <h3 className="text-xs sm:text-sm md:text-base lg:text-lg font-semibold mb-3 sm:mb-4 md:mb-6 text-gray-800">
-          Complaint History
-        </h3>
+      <div className="bg-white rounded-lg sm:rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.25)] px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 md:py-6 lg:py-8 w-full mt-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold text-gray-800 flex items-center gap-2">
+            <FiFile className="text-blue-600" />
+            Complaint History
+          </h3>
+
+          <div className="flex flex-col sm:flex-row gap-3">
+            {/* Search Bar */}
+            <div className="relative group flex-1 sm:w-64">
+              <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-500 transition-colors" />
+              <input
+                type="text"
+                placeholder="Search subject or type..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm text-black placeholder:text-gray-500 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium"
+              />
+            </div>
+
+            {/* Status Filter */}
+            <div className="relative flex-shrink-0">
+              <FiFilter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="pl-10 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm text-black font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none cursor-pointer"
+              >
+                <option value="all" className="text-black">All Status</option>
+                <option value="pending" className="text-black">Open Tickets</option>
+                <option value="in progress" className="text-black">Inprocess Tickets</option>
+                <option value="resolved" className="text-black">Resolved Section</option>
+                <option value="rejected" className="text-black">Rejected</option>
+              </select>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                  <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Desktop Table View */}
         <div className="hidden lg:block overflow-x-auto">
           <table className="w-full text-xs sm:text-sm text-gray-800 min-w-full">
-            <thead className="bg-gray-200 text-center">
-              <tr>
-                <th className="p-2 sm:p-3 font-semibold text-xs sm:text-sm">
-                  Complaint Type
-                </th>
-                <th className="p-2 sm:p-3 font-semibold text-xs sm:text-sm">
-                  Subject
-                </th>
-                <th className="p-2 sm:p-3 font-semibold text-xs sm:text-sm">
-                  Filed Date
-                </th>
-                <th className="p-2 sm:p-3 font-semibold text-xs sm:text-sm">
-                  Description
-                </th>
-                <th className="p-2 sm:p-3 font-semibold text-xs sm:text-sm">
-                  Attachments
-                </th>
-                <th className="p-2 sm:p-3 font-semibold text-xs sm:text-sm">
-                  Status
-                </th>
-                <th className="p-2 sm:p-3 font-semibold text-xs sm:text-sm">
-                  Action
-                </th>
+            <thead className="bg-gray-50 text-center">
+              <tr className="border-b border-gray-200">
+                <th className="p-4 font-bold text-xs uppercase tracking-wider text-gray-500">Sr. No.</th>
+                <th className="p-4 font-bold text-xs uppercase tracking-wider text-gray-500">Complaint Type</th>
+                <th className="p-4 font-bold text-xs uppercase tracking-wider text-gray-500">Subject</th>
+                <th className="p-4 font-bold text-xs uppercase tracking-wider text-gray-500">Filed Date</th>
+                <th className="p-4 font-bold text-xs uppercase tracking-wider text-gray-500">Attachments</th>
+                <th className="p-4 font-bold text-xs uppercase tracking-wider text-gray-500">Status</th>
+                <th className="p-4 font-bold text-xs uppercase tracking-wider text-gray-500">Action</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td
-                    colSpan="7"
-                    className="text-center py-4 sm:py-6 text-gray-500 text-xs sm:text-sm"
-                  >
-                    Loading...
+                  <td colSpan="7" className="text-center py-12 text-gray-400 text-sm">
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="w-8 h-8 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
+                      Loading history...
+                    </div>
                   </td>
                 </tr>
-              ) : complaints.length === 0 ? (
+              ) : currentItems.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan="7"
-                    className="text-center py-4 sm:py-6 text-gray-500 text-xs sm:text-sm"
-                  >
+                  <td colSpan="7" className="text-center py-12 text-gray-400 text-sm">
                     No complaints found.
                   </td>
                 </tr>
               ) : (
-                complaints.map((complaint, index) => (
-                  <tr
-                    key={index}
-                    className="bg-white border-b border-gray-100 hover:bg-gray-50"
-                  >
-                    <td className="p-2 sm:p-3 text-xs sm:text-sm font-medium text-center">
-                      {complaint.complaintType === "Others" &&
-                      complaint.otherComplaintType
-                        ? `Other (${complaint.otherComplaintType})`
-                        : complaint.complaintType}
-                      {complaint.complaintType === "Maintenance issue" &&
-                        complaint.floorNumber && (
-                          <div className="text-xs text-gray-500 mt-1">
-                            Floor: {complaint.floorNumber}
-                          </div>
-                        )}
+                currentItems.map((complaint, index) => (
+                  <tr key={index} className="bg-white border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                    <td className="p-4 text-xs font-bold text-gray-900 text-center">
+                      {String(indexOfFirstItem + index + 1).padStart(2, '0')}
                     </td>
-                    <td className="p-2 sm:p-3 text-xs sm:text-sm text-center">
+                    <td className="p-4 text-sm text-center">
+                      <div className="font-semibold text-gray-900">
+                        {complaint.complaintType === "Others" && complaint.otherComplaintType
+                          ? `Other (${complaint.otherComplaintType})`
+                          : complaint.complaintType}
+                      </div>
+                    </td>
+                    <td className="p-4 text-sm text-center font-medium text-gray-700">
                       {complaint.subject}
                     </td>
-                    <td className="p-2 sm:p-3 text-xs sm:text-sm text-center">
+                    <td className="p-4 text-sm text-center text-gray-500">
                       {formatDate(complaint.createdAt)}
                     </td>
-                    <td className="p-2 sm:p-3 text-xs sm:text-sm max-w-xs truncate text-center">
-                      {complaint.description}
-                      {complaint.maintenanceItems &&
-                        complaint.maintenanceItems.length > 0 && (
-                          <div className="text-xs text-gray-500 mt-1">
-                            Items: {complaint.maintenanceItems.join(", ")}
-                          </div>
-                        )}
-                    </td>
-                    <td className="p-2 sm:p-3 text-xs sm:text-sm text-center">
+                    <td className="p-4 text-center">
                       {complaint.hasAttachments ? (
-                        <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                        <span className="inline-flex items-center px-2.5 py-1 bg-blue-50 text-blue-700 text-[10px] font-bold rounded-lg border border-blue-100">
                           <FiFile className="w-3 h-3 mr-1" />
-                          {complaint.attachmentCount} file
-                          {complaint.attachmentCount > 1 ? "s" : ""}
+                          {complaint.attachmentCount} FILE(S)
                         </span>
                       ) : (
-                        <span className="text-gray-400">No files</span>
+                        <span className="text-gray-300 text-[10px] font-bold uppercase">No files</span>
                       )}
                     </td>
                     <td className="p-2 sm:p-3 text-center">
-                      <span
-                        className={`px-2 py-1 rounded-md text-xs font-medium whitespace-nowrap ${getStatusClasses(
-                          complaint.status
-                        )}`}
-                      >
-                        {complaint.status === "pending"
-                          ? "Open Ticket"
-                          : complaint.status === "in progress"
-                          ? "Inprocess Ticket"
-                          : complaint.status === "resolved"
-                          ? "Resolved Section"
-                          : complaint.status === "rejected"
-                          ? "Rejected"
-                          : "Open Ticket"}
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${getStatusClasses(complaint.status)}`}>
+                        {complaint.status === "pending" ? "Open Ticket" : 
+                         complaint.status === "in progress" ? "Inprocess Ticket" : 
+                         complaint.status === "resolved" ? "Resolved Section" : 
+                         complaint.status === "rejected" ? "Rejected" : "Open Ticket"}
                       </span>
                     </td>
-                    <td className="p-2 sm:p-3 text-center">
+                    <td className="p-4 text-center">
                       <button
                         onClick={() => {
                           setSelectedComplaint(complaint);
                           setShowModal(true);
                         }}
-                        className="p-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition-all duration-200 group flex items-center justify-center mx-auto border border-blue-100"
-                        title="View Details"
+                        className="p-2 bg-white hover:bg-blue-50 text-blue-600 rounded-xl transition-all duration-200 group flex items-center justify-center mx-auto border border-gray-200 hover:border-blue-200 shadow-sm"
                       >
-                        <FiEye size={18} className="group-hover:scale-110 transition-transform" />
+                        <FiEye size={18} />
                       </button>
                     </td>
                   </tr>
@@ -610,129 +635,126 @@ export default function Complaints() {
           </table>
         </div>
 
-        {/* Mobile/Tablet Cards View */}
-        <div className="lg:hidden space-y-2 sm:space-y-3 md:space-y-4">
-          {loading ? (
-            <div className="text-center py-4 sm:py-6 text-gray-500 text-xs sm:text-sm">
-              Loading...
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 px-2 pb-6 border-b border-gray-100">
+            <div className="text-xs sm:text-sm text-gray-500 font-medium">
+              Showing <span className="text-gray-900">{indexOfFirstItem + 1}</span> to{" "}
+              <span className="text-gray-900">
+                {Math.min(indexOfLastItem, filteredComplaints.length)}
+              </span>{" "}
+              of <span className="text-gray-900">{filteredComplaints.length}</span> complaints
             </div>
-          ) : complaints.length === 0 ? (
-            <div className="text-center py-4 sm:py-6 text-gray-500 text-xs sm:text-sm">
+
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="p-2 border border-gray-200 rounded-xl hover:bg-gray-50 disabled:opacity-50 disabled:hover:bg-white transition-colors text-black"
+              >
+                <FiChevronLeft size={16} />
+              </button>
+              
+              <div className="flex items-center gap-1 mx-2">
+                {[...Array(totalPages)].map((_, i) => {
+                  const pageNumber = i + 1;
+                  if (pageNumber === 1 || pageNumber === totalPages || (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)) {
+                    return (
+                      <button
+                        key={pageNumber}
+                        onClick={() => setCurrentPage(pageNumber)}
+                        className={`w-8 h-8 rounded-xl text-xs font-bold transition-all ${
+                          currentPage === pageNumber
+                            ? "bg-blue-600 text-white shadow-md shadow-blue-200"
+                            : "hover:bg-blue-50 text-gray-600"
+                        }`}
+                      >
+                        {pageNumber}
+                      </button>
+                    );
+                  } else if (pageNumber === currentPage - 2 || pageNumber === currentPage + 2) {
+                    return <span key={pageNumber} className="text-gray-400 text-xs">...</span>;
+                  }
+                  return null;
+                })}
+              </div>
+
+              <button
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="p-2 border border-gray-200 rounded-xl hover:bg-gray-50 disabled:opacity-50 disabled:hover:bg-white transition-colors text-black"
+              >
+                <FiChevronRight size={16} />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Mobile/Tablet Cards View */}
+        <div className="lg:hidden space-y-2 sm:space-y-3 md:space-y-4 mt-6">
+          {loading ? (
+            <div className="text-center py-12 text-gray-400 text-sm">
+               <div className="w-8 h-8 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin mx-auto mb-2"></div>
+               Loading history...
+            </div>
+          ) : currentItems.length === 0 ? (
+            <div className="text-center py-12 text-gray-400 text-sm">
               No complaints found.
             </div>
           ) : (
-            complaints.map((complaint, index) => (
-              <div
-                key={index}
-                className="bg-gray-50 rounded-lg p-2.5 sm:p-3 md:p-4 border border-gray-200"
-              >
-                <div className="space-y-1.5 sm:space-y-2">
-                  <div className="flex justify-between items-start gap-2">
-                    <span className="text-xs sm:text-xs md:text-sm font-semibold text-gray-600 flex-shrink-0">
-                      Complaint Type:
+            currentItems.map((complaint, index) => (
+              <div key={index} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-all">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center pb-2 border-b border-gray-50">
+                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                      #{String(indexOfFirstItem + index + 1).padStart(2, '0')}
                     </span>
-                    <span className="text-xs sm:text-xs md:text-sm font-medium text-gray-800 text-right flex-1">
-                      {complaint.complaintType === "Others" &&
-                      complaint.otherComplaintType
-                        ? `Other (${complaint.otherComplaintType})`
-                        : complaint.complaintType}
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${getStatusClasses(complaint.status)}`}>
+                      {complaint.status === "pending" ? "Open Ticket" : 
+                       complaint.status === "in progress" ? "Inprocess Ticket" : 
+                       complaint.status === "resolved" ? "Resolved Section" : 
+                       complaint.status === "rejected" ? "Rejected" : "Open Ticket"}
                     </span>
                   </div>
 
-                  {complaint.complaintType === "Maintenance issue" &&
-                    complaint.floorNumber && (
-                      <div className="flex justify-between items-start gap-2">
-                        <span className="text-xs sm:text-xs md:text-sm font-semibold text-gray-600 flex-shrink-0">
-                          Floor:
-                        </span>
-                        <span className="text-xs sm:text-xs md:text-sm text-gray-800">
-                          {complaint.floorNumber}
-                        </span>
-                      </div>
-                    )}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Type</span>
+                      <p className="text-xs font-bold text-gray-900">
+                        {complaint.complaintType === "Others" && complaint.otherComplaintType
+                          ? `Other (${complaint.otherComplaintType})`
+                          : complaint.complaintType}
+                      </p>
+                    </div>
+                    <div className="space-y-1 text-right">
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Date</span>
+                      <p className="text-xs text-gray-500">{formatDate(complaint.createdAt)}</p>
+                    </div>
+                  </div>
 
-                  {complaint.maintenanceItems &&
-                    complaint.maintenanceItems.length > 0 && (
-                      <div className="flex justify-between items-start gap-2">
-                        <span className="text-xs sm:text-xs md:text-sm font-semibold text-gray-600 flex-shrink-0">
-                          Items:
-                        </span>
-                        <span className="text-xs sm:text-xs md:text-sm text-gray-800 text-right flex-1 break-words">
-                          {complaint.maintenanceItems.join(", ")}
-                        </span>
-                      </div>
-                    )}
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Subject</span>
+                    <p className="text-sm font-semibold text-gray-800 break-words">{complaint.subject}</p>
+                  </div>
 
-                  <div className="flex justify-between items-start gap-2">
-                    <span className="text-xs sm:text-xs md:text-sm font-semibold text-gray-600 flex-shrink-0">
-                      Subject:
-                    </span>
-                    <span className="text-xs sm:text-xs md:text-sm text-gray-800 text-right flex-1 break-words">
-                      {complaint.subject}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-start gap-2">
-                    <span className="text-xs sm:text-xs md:text-sm font-semibold text-gray-600 flex-shrink-0">
-                      Date:
-                    </span>
-                    <span className="text-xs sm:text-xs md:text-sm text-gray-800 flex-shrink-0">
-                      {formatDate(complaint.createdAt)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-start gap-2">
-                    <span className="text-xs sm:text-xs md:text-sm font-semibold text-gray-600 flex-shrink-0">
-                      Description:
-                    </span>
-                    <span className="text-xs sm:text-xs md:text-sm text-gray-800 text-right flex-1 break-words">
-                      {complaint.description}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center gap-2">
-                    <span className="text-xs sm:text-xs md:text-sm font-semibold text-gray-600 flex-shrink-0">
-                      Attachments:
-                    </span>
+                  <div className="flex items-center justify-between pt-2">
                     {complaint.hasAttachments ? (
-                      <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full flex-shrink-0">
+                      <span className="inline-flex items-center px-2 py-0.5 bg-blue-50 text-blue-700 text-[10px] font-bold rounded-lg border border-blue-100">
                         <FiFile className="w-3 h-3 mr-1" />
-                        {complaint.attachmentCount} file
-                        {complaint.attachmentCount > 1 ? "s" : ""}
+                        {complaint.attachmentCount} FILE(S)
                       </span>
                     ) : (
-                      <span className="text-gray-400 text-xs flex-shrink-0">
-                        No files
-                      </span>
+                      <span className="text-gray-300 text-[10px] font-bold uppercase">No files</span>
                     )}
-                  </div>
-                  <div className="flex justify-between items-center gap-2">
-                    <span className="text-xs sm:text-xs md:text-sm font-semibold text-gray-600 flex-shrink-0">
-                      Status:
-                    </span>
-                    <span
-                      className={`px-2 py-1 rounded-md text-xs font-medium flex-shrink-0 ${getStatusClasses(
-                        complaint.status
-                      )}`}
-                    >
-                      {complaint.status === "pending"
-                        ? "Open Ticket"
-                        : complaint.status === "in progress"
-                        ? "Inprocess Ticket"
-                        : complaint.status === "resolved"
-                        ? "Resolved Section"
-                        : complaint.status === "rejected"
-                        ? "Rejected"
-                        : "Open Ticket"}
-                    </span>
-                  </div>
-                  <div className="flex justify-end pt-2">
+
                     <button
                       onClick={() => {
                         setSelectedComplaint(complaint);
                         setShowModal(true);
                       }}
-                      className="w-full flex items-center justify-center gap-2 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl font-bold text-xs transition-all border border-blue-100"
+                      className="flex items-center gap-1.5 text-blue-600 font-bold text-xs hover:text-blue-700 transition-colors px-3 py-1.5 bg-blue-50/50 rounded-xl"
                     >
-                      <FiEye size={16} />
-                      View Full Details
+                      <FiEye size={14} /> VIEW DETAILS
                     </button>
                   </div>
                 </div>
@@ -766,7 +788,7 @@ export default function Complaints() {
 
               <div>
                 <label className="text-xs font-bold text-gray-500 uppercase">Subject</label>
-                <p className="text-gray-800">{selectedComplaint.subject}</p>
+                <p className="text-gray-800 break-all">{selectedComplaint.subject}</p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -782,7 +804,7 @@ export default function Complaints() {
 
               <div>
                 <label className="text-xs font-bold text-gray-500 uppercase">Description</label>
-                <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 text-gray-700 text-sm whitespace-pre-wrap">
+                <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 text-gray-700 text-sm whitespace-pre-wrap break-all">
                   {selectedComplaint.description}
                 </div>
               </div>
@@ -822,7 +844,7 @@ export default function Complaints() {
                   <label className="text-xs font-bold text-red-600 uppercase flex items-center gap-1">
                     <FiX size={14} /> Rejection Reason
                   </label>
-                  <p className="text-red-800 text-sm font-medium mt-1">
+                  <p className="text-red-800 text-sm font-medium mt-1 break-all">
                     {selectedComplaint.adminNotes || "No reason provided by administrator."}
                   </p>
                 </div>
