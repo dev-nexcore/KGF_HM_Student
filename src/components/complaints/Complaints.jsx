@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
 import toast from "react-hot-toast";
-import { FiUpload, FiX, FiFile, FiImage, FiVideo } from "react-icons/fi";
+import { FiUpload, FiX, FiFile, FiImage, FiVideo, FiEye } from "react-icons/fi";
 
 export default function Complaints() {
   const [complaintType, setComplaintType] = useState("");
@@ -18,6 +18,8 @@ export default function Complaints() {
   // Maintenance-specific fields
   const [floorNumber, setFloorNumber] = useState("");
   const [maintenanceItems, setMaintenanceItems] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedComplaint, setSelectedComplaint] = useState(null);
 
   const maintenanceOptions = [
     "Electrical Issues",
@@ -257,10 +259,10 @@ export default function Complaints() {
   };
 
   const getStatusClasses = (status) => {
-    if (status === "Approved" || status === "Resolved")
-      return "bg-green-500 text-white";
-    if (status === "Rejected") return "bg-red-500 text-white";
-    if (status === "Pending") return "bg-[#4F8DCF] text-white";
+    if (status === "pending") return "bg-orange-500 text-white";
+    if (status === "in progress") return "bg-purple-500 text-white";
+    if (status === "resolved") return "bg-green-500 text-white";
+    if (status === "rejected") return "bg-red-500 text-white";
     return "bg-[#4F8DCF] text-white";
   };
 
@@ -504,13 +506,16 @@ export default function Complaints() {
                 <th className="p-2 sm:p-3 font-semibold text-xs sm:text-sm">
                   Status
                 </th>
+                <th className="p-2 sm:p-3 font-semibold text-xs sm:text-sm">
+                  Action
+                </th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
                   <td
-                    colSpan="6"
+                    colSpan="7"
                     className="text-center py-4 sm:py-6 text-gray-500 text-xs sm:text-sm"
                   >
                     Loading...
@@ -519,7 +524,7 @@ export default function Complaints() {
               ) : complaints.length === 0 ? (
                 <tr>
                   <td
-                    colSpan="6"
+                    colSpan="7"
                     className="text-center py-4 sm:py-6 text-gray-500 text-xs sm:text-sm"
                   >
                     No complaints found.
@@ -575,16 +580,28 @@ export default function Complaints() {
                           complaint.status
                         )}`}
                       >
-                        {complaint.status
-                          ? complaint.status
-                              .split(" ")
-                              .map(
-                                (word) =>
-                                  word.charAt(0).toUpperCase() + word.slice(1)
-                              )
-                              .join(" ")
-                          : "Pending"}
+                        {complaint.status === "pending"
+                          ? "Open Ticket"
+                          : complaint.status === "in progress"
+                          ? "Inprocess Ticket"
+                          : complaint.status === "resolved"
+                          ? "Resolved Section"
+                          : complaint.status === "rejected"
+                          ? "Rejected"
+                          : "Open Ticket"}
                       </span>
+                    </td>
+                    <td className="p-2 sm:p-3 text-center">
+                      <button
+                        onClick={() => {
+                          setSelectedComplaint(complaint);
+                          setShowModal(true);
+                        }}
+                        className="p-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition-all duration-200 group flex items-center justify-center mx-auto border border-blue-100"
+                        title="View Details"
+                      >
+                        <FiEye size={18} className="group-hover:scale-110 transition-transform" />
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -695,11 +712,28 @@ export default function Complaints() {
                         complaint.status
                       )}`}
                     >
-                      {complaint.status
-                        ? complaint.status.charAt(0).toUpperCase() +
-                          complaint.status.slice(1)
-                        : "Pending"}
+                      {complaint.status === "pending"
+                        ? "Open Ticket"
+                        : complaint.status === "in progress"
+                        ? "Inprocess Ticket"
+                        : complaint.status === "resolved"
+                        ? "Resolved Section"
+                        : complaint.status === "rejected"
+                        ? "Rejected"
+                        : "Open Ticket"}
                     </span>
+                  </div>
+                  <div className="flex justify-end pt-2">
+                    <button
+                      onClick={() => {
+                        setSelectedComplaint(complaint);
+                        setShowModal(true);
+                      }}
+                      className="w-full flex items-center justify-center gap-2 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl font-bold text-xs transition-all border border-blue-100"
+                    >
+                      <FiEye size={16} />
+                      View Full Details
+                    </button>
                   </div>
                 </div>
               </div>
@@ -707,6 +741,106 @@ export default function Complaints() {
           )}
         </div>
       </div>
+
+      {/* Complaint Detail Modal */}
+      {showModal && selectedComplaint && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-opacity-50 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
+            {/* Modal Header */}
+            <div className="bg-[#4F8DCF] px-6 py-4 flex justify-between items-center">
+              <h3 className="text-white font-bold text-lg">Complaint Details</h3>
+              <button
+                onClick={() => setShowModal(false)}
+                className="text-white hover:bg-white/20 p-1 rounded-full transition-colors"
+              >
+                <FiX size={24} />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+              <div>
+                <label className="text-xs font-bold text-gray-500 uppercase">Ticket ID</label>
+                <p className="text-gray-800 font-medium">#{String(selectedComplaint._id).slice(-4).toUpperCase()}</p>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-gray-500 uppercase">Subject</label>
+                <p className="text-gray-800">{selectedComplaint.subject}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase">Type</label>
+                  <p className="text-gray-800">{selectedComplaint.displayType || selectedComplaint.complaintType}</p>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase">Filed Date</label>
+                  <p className="text-gray-800">{new Date(selectedComplaint.createdAt).toLocaleDateString("en-IN")}</p>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-gray-500 uppercase">Description</label>
+                <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 text-gray-700 text-sm whitespace-pre-wrap">
+                  {selectedComplaint.description}
+                </div>
+              </div>
+
+              {selectedComplaint.maintenanceItems?.length > 0 && (
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase">Maintenance Items</label>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {selectedComplaint.maintenanceItems.map((item, idx) => (
+                      <span key={idx} className="bg-blue-50 text-blue-700 text-[10px] px-2 py-0.5 rounded-full border border-blue-100">
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="pt-4 border-t border-gray-100">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-gray-500 uppercase">Current Status</label>
+                  <span className={`px-2 py-1 rounded-md text-xs font-bold ${getStatusClasses(selectedComplaint.status)}`}>
+                    {selectedComplaint.status === "pending"
+                      ? "Open Ticket"
+                      : selectedComplaint.status === "in progress"
+                      ? "Inprocess Ticket"
+                      : selectedComplaint.status === "resolved"
+                      ? "Resolved Section"
+                      : selectedComplaint.status === "rejected"
+                      ? "Rejected"
+                      : "Open Ticket"}
+                  </span>
+                </div>
+              </div>
+
+              {selectedComplaint.status === "rejected" && (
+                <div className="bg-red-50 p-4 rounded-lg border border-red-100 animate-in slide-in-from-top-2 duration-300">
+                  <label className="text-xs font-bold text-red-600 uppercase flex items-center gap-1">
+                    <FiX size={14} /> Rejection Reason
+                  </label>
+                  <p className="text-red-800 text-sm font-medium mt-1">
+                    {selectedComplaint.adminNotes || "No reason provided by administrator."}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="bg-gray-50 px-6 py-4 flex justify-end">
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-bold transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
