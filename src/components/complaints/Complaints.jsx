@@ -20,6 +20,7 @@ export default function Complaints() {
   const [maintenanceItems, setMaintenanceItems] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
+  const [attachmentModal, setAttachmentModal] = useState({ show: false, url: '', type: '', filename: '' });
 
   // Search, Filter and Pagination states
   const [searchTerm, setSearchTerm] = useState("");
@@ -285,6 +286,47 @@ export default function Complaints() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const viewAttachment = async (complaintId, attachmentId, filename, mimeType) => {
+    try {
+      if (!complaintId || !attachmentId) {
+        toast.error("Invalid attachment data");
+        return;
+      }
+
+      console.log(`Viewing attachment: ${attachmentId} for complaint: ${complaintId}`);
+      
+      const response = await api.get(
+        `/complaint/${complaintId}/attachment/${attachmentId}`,
+        {
+          responseType: 'blob'
+        }
+      );
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      let type = 'document';
+      
+      if (mimeType?.startsWith('image/')) type = 'image';
+      else if (mimeType?.startsWith('video/')) type = 'video';
+      
+      setAttachmentModal({
+        show: true,
+        url,
+        type,
+        filename: filename || 'attachment'
+      });
+    } catch (error) {
+      console.error("Failed to fetch attachment:", error);
+      toast.error("Failed to load the attachment. Please try again later.");
+    }
+  };
+
+  const closeAttachmentModal = () => {
+    if (attachmentModal.url) {
+      window.URL.revokeObjectURL(attachmentModal.url);
+    }
+    setAttachmentModal({ show: false, url: '', type: '', filename: '' });
   };
 
   const getStatusClasses = (status) => {
@@ -849,6 +891,38 @@ export default function Complaints() {
                   </p>
                 </div>
               )}
+
+              {selectedComplaint.attachments && selectedComplaint.attachments.length > 0 && (
+                <div className="pt-4 border-t border-gray-100">
+                  <label className="text-xs font-bold text-gray-500 uppercase block mb-3">
+                    Attachments ({selectedComplaint.attachments.length})
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {selectedComplaint.attachments.map((attachment, idx) => (
+                      <div key={idx} className="border rounded-xl p-3 hover:bg-gray-50 transition-all flex flex-col gap-2 shadow-sm">
+                        <div className="flex items-center gap-2">
+                          {attachment.mimeType?.startsWith('image/') ? (
+                            <FiImage className="text-blue-500 shrink-0" />
+                          ) : attachment.mimeType?.startsWith('video/') ? (
+                            <FiVideo className="text-purple-500 shrink-0" />
+                          ) : (
+                            <FiFile className="text-gray-500 shrink-0" />
+                          )}
+                          <span className="text-xs font-medium text-gray-700 truncate flex-1" title={attachment.originalName}>
+                            {attachment.originalName || attachment.filename}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => viewAttachment(selectedComplaint._id, attachment._id, attachment.originalName, attachment.mimeType)}
+                          className="w-full bg-blue-500 hover:bg-blue-600 text-white py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1"
+                        >
+                          <FiEye size={14} /> Open File
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Modal Footer */}
@@ -859,6 +933,56 @@ export default function Complaints() {
               >
                 Close
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Attachment Viewer Modal */}
+      {attachmentModal.show && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl animate-in zoom-in duration-200 border border-gray-100">
+            <div className="bg-gray-900 px-4 py-3 flex justify-between items-center">
+              <h3 className="text-white font-bold text-sm truncate pr-4">{attachmentModal.filename}</h3>
+              <button
+                onClick={closeAttachmentModal}
+                className="text-white hover:bg-white/20 p-1.5 rounded-full transition-colors"
+              >
+                <FiX size={20} />
+              </button>
+            </div>
+            
+            <div className="p-4 bg-gray-100 h-[calc(90vh-100px)] flex items-center justify-center overflow-auto">
+              {attachmentModal.type === 'image' && (
+                <img
+                  src={attachmentModal.url}
+                  alt={attachmentModal.filename}
+                  className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
+                />
+              )}
+              {attachmentModal.type === 'video' && (
+                <video
+                  src={attachmentModal.url}
+                  controls
+                  autoPlay
+                  className="max-w-full max-h-full rounded-lg shadow-lg"
+                >
+                  Your browser does not support the video tag.
+                </video>
+              )}
+              {attachmentModal.type === 'document' && (
+                <div className="text-center p-12 bg-white rounded-2xl shadow-sm border border-gray-100">
+                  <FiFile className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                  <p className="text-gray-900 font-bold mb-2">Preview Not Available</p>
+                  <p className="text-gray-500 text-sm mb-6">This file type cannot be previewed in the browser.</p>
+                  <a
+                    href={attachmentModal.url}
+                    download={attachmentModal.filename}
+                    className="inline-flex items-center gap-2 bg-blue-500 text-white px-6 py-2.5 rounded-xl hover:bg-blue-600 transition-all font-bold shadow-md shadow-blue-200"
+                  >
+                    <FiUpload className="rotate-180" size={18} /> Download File
+                  </a>
+                </div>
+              )}
             </div>
           </div>
         </div>
