@@ -454,7 +454,7 @@ export default function LeavesPage() {
 
       {/* View Modal */}
       {viewModalOpen && selectedLeave && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-blur backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="bg-[#4F8CCF] text-white px-6 py-4 rounded-t-lg flex justify-between items-center">
               <h3 className="text-xl font-semibold">Leave Details</h3>
@@ -530,7 +530,7 @@ export default function LeavesPage() {
 
       {/* Edit Modal */}
       {editModalOpen && editingLeave && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="bg-[#A4B494] text-white px-6 py-4 rounded-t-lg flex justify-between items-center">
               <h3 className="text-xl font-semibold">Edit Leave</h3>
