@@ -171,18 +171,7 @@ export default function AttendanceLog() {
             </div>
           </div>
           
-          <button 
-            onClick={() => startAttendance(currentStatus === 'OUT' ? 'IN' : 'OUT')}
-            disabled={markingAttendance}
-            className={`w-full md:w-auto px-10 py-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg transition-all active:scale-95 flex items-center justify-center gap-3 ${
-              currentStatus === 'OUT' 
-              ? 'bg-[#4F8CCF] text-white hover:bg-[#3D7ABF]' 
-              : 'bg-orange-500 text-white hover:bg-orange-600'
-            }`}
-          >
-            <FiCamera />
-            {currentStatus === 'OUT' ? 'Mark Check-In' : 'Mark Check-Out'}
-          </button>
+          {/* Mark Check-in button removed as requested */}
         </div>
 
         {/* Camera Modal */}
