@@ -1,661 +1,3 @@
-// "use client";
-
-// import api from "@/lib/api";
-// import { useState, useEffect } from "react";
-// import { useRouter } from "next/navigation";
-// import { FiEye, FiEyeOff } from "react-icons/fi";
-// import { toast, Toaster } from "react-hot-toast";
-
-// export default function Login() {
-//   const [studentId, setStudentId] = useState("");
-//   const [password, setPassword] = useState("");
-//   const [showPassword, setShowPassword] = useState(false);
-//   const [loading, setLoading] = useState(false);
-//   const [mounted, setMounted] = useState(false);
-//   const router = useRouter();
-
-//   // Mount animation
-//   useEffect(() => {
-//     setMounted(true);
-//   }, []);
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     setLoading(true);
-
-//     try {
-//       const res = await api.post("/login", { studentId, password });
-
-//       toast.success("Login successful!");
-
-//       // ✅ Store both token and studentId correctly
-//       localStorage.setItem("token", res.data.token);
-//       localStorage.setItem("studentId", res.data.student.studentId);
-
-//       router.push("/dashboard");
-//     } catch (err) {
-//       const status = err?.response?.status;
-//       const data = err?.response?.data;
-//       const msg = data?.message || err.message || "Login failed.";
-
-//       console.error("Login failed:", { status, data, msg });
-//       toast.error(msg);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   // Handle Enter key press
-//   const handleKeyPress = (e) => {
-//     if (e.key === 'Enter') {
-//       handleSubmit(e);
-//     }
-//   };
-
-//   return (
-//     <div className="min-h-screen w-full bg-white overflow-x-hidden">
-//       {/* Mobile Layout */}
-//       <div className="md:hidden flex flex-col min-h-screen">
-//         {/* Top Section */}
-//         <div className={`bg-[#A4B494] px-4 py-8 flex flex-col items-center justify-center text-center transition-all duration-1000 ease-out ${
-//           mounted ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
-//         }`}>
-//           <h1 className={`text-2xl font-extrabold mb-4 text-black transition-all duration-700 delay-300 ease-out ${
-//             mounted ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-//           }`}>
-//             Welcome Back!
-//           </h1>
-
-//           <div className={`transition-all duration-700 delay-500 ease-out transform ${
-//             mounted ? 'scale-100 opacity-100 rotate-0' : 'scale-75 opacity-0 rotate-12'
-//           }`}>
-//             <div className="w-32 h-32 rounded-xl overflow-hidden bg-white shadow-lg">
-//               <img
-//                 src="logo.png"
-//                 alt="Kokan Global Foundation"
-//                 className="w-full h-full object-cover"
-//               />
-//             </div>
-//           </div>
-
-//           <p className={`mt-4 text-xs font-bold text-black leading-tight transition-all duration-700 delay-700 ease-out px-2 ${
-//             mounted ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-//           }`}>
-//             "Manage Your Hostel Smarter – Everything You Need in One Platform."
-//           </p>
-//         </div>
-
-//         {/* Bottom Section - Login Form */}
-//         <div className={`bg-white px-4 py-4 transition-all duration-1000 ease-out ${
-//           mounted ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
-//         }`}>
-//           <h2 className={`text-xl font-bold mb-6 text-black text-center transition-all duration-700 delay-200 ease-out ${
-//             mounted ? 'translate-y-0 opacity-100' : '-translate-y-8 opacity-0'
-//           }`}>
-//             Student Login
-//           </h2>
-
-//           <div className={`transition-all duration-700 delay-400 ease-out ${
-//             mounted ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'
-//           }`}>
-//             <form onSubmit={handleSubmit} className="space-y-4">
-//               {/* User ID Input */}
-//               <div className="space-y-2">
-//                 <label className="text-sm font-semibold text-black block">
-//                   User ID
-//                 </label>
-//                 <input
-//                   type="text"
-//                   value={studentId}
-//                   onChange={(e) => setStudentId(e.target.value)}
-//                   placeholder="Enter Your User ID"
-//                   className="w-full px-3 py-2.5 text-sm rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#A4B494] focus:border-transparent transition-all duration-300 placeholder:text-gray-400 text-black"
-//                   onKeyDown={handleKeyPress}
-//                 />
-//               </div>
-
-//               {/* Password Input */}
-//               <div className="space-y-2">
-//                 <label className="text-sm font-semibold text-black block">
-//                   Password
-//                 </label>
-//                 <div className="relative">
-//                   <input
-//                     type={showPassword ? "text" : "password"}
-//                     value={password}
-//                     onChange={(e) => setPassword(e.target.value)}
-//                     placeholder="Enter Your Password"
-//                     className="w-full px-3 py-2.5 pr-10 text-sm rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#A4B494] focus:border-transparent transition-all duration-300 placeholder:text-gray-400 text-black"
-//                     onKeyDown={handleKeyPress}
-//                   />
-//                   <div
-//                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 cursor-pointer hover:text-[#A4B494] transition-colors duration-200"
-//                     onClick={() => setShowPassword(!showPassword)}
-//                   >
-//                     {showPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
-//                   </div>
-//                 </div>
-//               </div>
-
-//               {/* Forgot Password Link */}
-//               <div className="flex justify-end pt-1">
-//                 <p
-//                   onClick={() => router.push('/forget')}
-//                   className="text-xs text-blue-500 hover:text-blue-700 hover:underline cursor-pointer transition-all duration-200"
-//                 >
-//                   Forget Password?
-//                 </p>
-//               </div>
-
-//               {/* Login Button - Much closer to form */}
-//               <div className="pt-4 pb-2">
-//                 <button
-//                   type="submit"
-//                   disabled={loading}
-//                   className="w-full bg-[#BEC5AD] hover:bg-[#a9b29d] disabled:bg-gray-400 disabled:cursor-not-allowed text-black font-bold py-3 text-sm rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-[1.02] active:scale-95 disabled:scale-100"
-//                 >
-//                   {loading ? (
-//                     <div className="flex items-center justify-center space-x-2">
-//                       <div className="w-3 h-3 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-//                       <span>Signing in...</span>
-//                     </div>
-//                   ) : (
-//                     "Login"
-//                   )}
-//                 </button>
-//               </div>
-//             </form>
-//           </div>
-//         </div>
-//       </div>
-
-//       {/* Desktop Layout */}
-//       <div className="hidden md:flex md:flex-row md:h-screen">
-//         {/* Left Panel - Enhanced with animations */}
-//         <div className={`w-1/2 bg-[#A4B494] p-8 rounded-r-[5rem] flex flex-col items-center justify-center text-center transition-all duration-1000 ease-out ${
-//           mounted ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'
-//         }`}>
-//           <h1 className={`text-4xl font-extrabold mb-12 -mt-4 text-black transition-all duration-700 delay-300 ease-out ${
-//             mounted ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-//           }`}>
-//             Welcome Back!
-//           </h1>
-
-//           <div className={`transition-all duration-700 delay-500 ease-out transform ${
-//             mounted ? 'scale-100 opacity-100 rotate-0' : 'scale-75 opacity-0 rotate-12'
-//           }`}>
-//             <div className="w-72 h-72 rounded-xl overflow-hidden bg-white shadow-lg hover:scale-110 transition-transform duration-300 ease-in-out">
-//               <img
-//                 src="logo.png"
-//                 alt="Kokan Global Foundation"
-//                 className="w-full h-full object-cover"
-//               />
-//             </div>
-//           </div>
-
-//           <p className={`mt-10 text-xl font-bold text-black leading-tight transition-all duration-700 delay-700 ease-out ${
-//             mounted ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-//           }`}>
-//             "Manage Your Hostel Smarter – Everything You Need in&nbsp;
-//             <br />
-//             One Platform."
-//           </p>
-//         </div>
-
-//         {/* Right Panel - Enhanced with slide-in animation */}
-//         <div className={`w-1/2 bg-white p-12 flex flex-col justify-center items-center transition-all duration-1000 ease-out ${
-//           mounted ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
-//         }`}>
-//           <h2 className={`text-4xl font-bold mb-10 text-black text-center transition-all duration-700 delay-200 ease-out ${
-//             mounted ? 'translate-y-0 opacity-100' : '-translate-y-8 opacity-0'
-//           }`}>
-//             Student Login
-//           </h2>
-
-//           <div className={`flex flex-col w-full max-w-md transition-all duration-700 delay-400 ease-out ${
-//             mounted ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'
-//           }`}>
-//             <form onSubmit={handleSubmit} className="w-full space-y-6">
-//               {/* User ID Input */}
-//               <div className="space-y-2">
-//                 <label className="text-lg font-semibold text-black block">
-//                   User ID
-//                 </label>
-//                 <input
-//                   type="text"
-//                   value={studentId}
-//                   onChange={(e) => setStudentId(e.target.value)}
-//                   placeholder="Enter Your User ID"
-//                   className="w-full px-4 py-3 rounded-[1rem] border border-gray-300 shadow-md focus:outline-none focus:ring-2 focus:ring-[#A4B494] focus:border-transparent transition-all duration-300 ease-in-out transform focus:scale-[1.02] hover:shadow-lg placeholder:text-gray-400 text-black"
-//                   onKeyDown={handleKeyPress}
-//                 />
-//               </div>
-
-//               {/* Password Input */}
-//               <div className="space-y-2">
-//                 <label className="text-lg font-semibold text-black block">
-//                   Password
-//                 </label>
-//                 <div className="relative">
-//                   <input
-//                     type={showPassword ? "text" : "password"}
-//                     value={password}
-//                     onChange={(e) => setPassword(e.target.value)}
-//                     placeholder="Enter Your Password"
-//                     className="w-full px-4 py-3 pr-12 rounded-[1rem] border border-gray-300 shadow-md focus:outline-none focus:ring-2 focus:ring-[#A4B494] focus:border-transparent transition-all duration-300 ease-in-out transform focus:scale-[1.02] hover:shadow-lg placeholder:text-gray-400 text-black"
-//                     onKeyDown={handleKeyPress}
-//                   />
-//                   <div
-//                     className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-600 cursor-pointer hover:text-[#A4B494] transition-colors duration-200"
-//                     onClick={() => setShowPassword(!showPassword)}
-//                   >
-//                     {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
-//                   </div>
-//                 </div>
-//               </div>
-
-//               {/* Forgot Password Link */}
-//               <div className="flex justify-end">
-//                 <p
-//                   onClick={() => router.push('/forget')}
-//                   className="text-sm text-blue-500 hover:text-blue-700 hover:underline cursor-pointer transition-all duration-200 transform hover:translate-x-1"
-//                 >
-//                   Forget Password?
-//                 </p>
-//               </div>
-
-//               {/* Login Button */}
-//               <div className="w-full flex justify-center pt-2">
-//                 <button
-//                   type="submit"
-//                   disabled={loading}
-//                   className="w-2/3 bg-[#BEC5AD] hover:bg-[#a9b29d] disabled:bg-gray-400 disabled:cursor-not-allowed text-black font-bold py-3 rounded-xl shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg active:scale-95 disabled:scale-100 disabled:hover:shadow-md"
-//                 >
-//                   {loading ? (
-//                     <div className="flex items-center justify-center space-x-2">
-//                       <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-//                       <span>Signing in...</span>
-//                     </div>
-//                   ) : (
-//                     "Login"
-//                   )}
-//                 </button>
-//               </div>
-//             </form>
-//           </div>
-//         </div>
-//       </div>
-
-//       {/* Custom CSS for additional animations */}
-//       <style jsx>{`
-//         @keyframes fadeInUp {
-//           from {
-//             opacity: 0;
-//             transform: translateY(20px);
-//           }
-//           to {
-//             opacity: 1;
-//             transform: translateY(0);
-//           }
-//         }
-
-//         .animate-fadeInUp {
-//           animation: fadeInUp 0.5s ease-out forwards;
-//         }
-
-//         /* Pulse animation for loading states */
-//         @keyframes pulse {
-//           0%, 100% {
-//             opacity: 1;
-//           }
-//           50% {
-//             opacity: 0.5;
-//           }
-//         }
-
-//         .animate-pulse {
-//           animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-//         }
-//       `}</style>
-//     </div>
-//   );
-// }
-
-
-
-
-
-// "use client";
-
-// import api from "@/lib/api";
-// import { useState, useEffect } from "react";
-// import { useRouter } from "next/navigation";
-// import { FiEye, FiEyeOff } from "react-icons/fi";
-// import { toast, Toaster } from "react-hot-toast";
-
-// export default function Login() {
-//   const [studentId, setStudentId] = useState("");
-//   const [otp, setOtp] = useState("");
-//   const [otpSent, setOtpSent] = useState(false);
-//   const [showOtp, setShowOtp] = useState(false);
-//   const [loading, setLoading] = useState(false);
-//   const [mounted, setMounted] = useState(false);
-//   const router = useRouter();
-
-//   useEffect(() => setMounted(true), []);
-
-//   // Send OTP to student's email/WhatsApp
-//   const handleSendOtp = async () => {
-//     if (!studentId) return toast.error("Please enter your User ID");
-
-//     setLoading(true);
-//     try {
-//       const res = await api.post("/send-otp", { studentId });
-//       toast.success(res.data.message || "OTP sent successfully");
-//       setOtpSent(true);
-//     } catch (err) {
-//       const msg = err?.response?.data?.message || "Failed to send OTP";
-//       toast.error(msg);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   // Login with OTP
-//   const handleOtpLogin = async (e) => {
-//     e.preventDefault();
-//     if (!otp) return toast.error("Please enter OTP");
-
-//     setLoading(true);
-//     try {
-//       const res = await api.post("/login", { studentId, otp });
-//       toast.success("Login successful!");
-
-//       sessionStorage.clear(); // ONLY ADDITION - Clear sessionStorage for notice popup
-//       localStorage.setItem("token", res.data.token);
-//       localStorage.setItem("studentId", res.data.student.studentId);
-
-//       router.push("/dashboard");
-//     } catch (err) {
-//       const msg = err?.response?.data?.message || "Login failed";
-//       toast.error(msg);
-//     } finally { 
-//       setLoading(false);
-//     }
-//   };
-
-//   const handleSubmit = (e) => {
-//     e.preventDefault();
-//     otpSent ? handleOtpLogin(e) : handleSendOtp();
-//   };
-
-//   const handleKeyPress = (e) => {
-//     if (e.key === "Enter") handleSubmit(e);
-//   };
-
-//   return (
-//     <div className="min-h-screen w-full bg-white overflow-x-hidden">
-//       {/* <Toaster position="top-right" /> */}
-
-//       {/* Mobile Layout */}
-//       <div className="md:hidden flex flex-col min-h-screen">
-//         <div
-//           className={`bg-[#A4B494] px-4 py-8 flex flex-col items-center justify-center text-center transition-all duration-1000 ease-out ${
-//             mounted
-//               ? "translate-y-0 opacity-100"
-//               : "-translate-y-full opacity-0"
-//           }`}
-//         >
-//           <h1
-//             className={`text-2xl font-extrabold mb-4 text-black transition-all duration-700 delay-300 ease-out ${
-//               mounted ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
-//             }`}
-//           >
-//             Welcome Back!
-//           </h1>
-
-//           <div
-//             className={`transition-all duration-700 delay-500 ease-out transform ${
-//               mounted
-//                 ? "scale-100 opacity-100 rotate-0"
-//                 : "scale-75 opacity-0 rotate-12"
-//             }`}
-//           >
-//             <div className="w-32 h-32 rounded-xl overflow-hidden bg-white shadow-lg">
-//               <img
-//                 src="logo.png"
-//                 alt="Kokan Global Foundation"
-//                 className="w-full h-full object-cover"
-//               />
-//             </div>
-//           </div>
-
-//           <p
-//             className={`mt-4 text-xs font-bold text-black leading-tight transition-all duration-700 delay-700 ease-out px-2 ${
-//               mounted ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
-//             }`}
-//           >
-//             "Manage Your Hostel Smarter – Everything You Need in One Platform."
-//           </p>
-//         </div>
-
-//         {/* Login Form */}
-//         <div
-//           className={`bg-white px-4 py-4 transition-all duration-1000 ease-out ${
-//             mounted ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"
-//           }`}
-//         >
-//           <h2
-//             className={`text-xl font-bold mb-6 text-black text-center transition-all duration-700 delay-200 ease-out ${
-//               mounted ? "translate-y-0 opacity-100" : "-translate-y-8 opacity-0"
-//             }`}
-//           >
-//             Student Login
-//           </h2>
-
-//           <div
-//             className={`transition-all duration-700 delay-400 ease-out ${
-//               mounted ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
-//             }`}
-//           >
-//             <form onSubmit={handleSubmit} className="space-y-4">
-//               {/* Student ID */}
-//               <div className="space-y-2">
-//                 <label className="text-sm font-semibold text-black block">
-//                   User ID
-//                 </label>
-//                 <input
-//                   type="text"
-//                   value={studentId}
-//                   onChange={(e) => setStudentId(e.target.value)}
-//                   placeholder="Enter Your Student ID"
-//                   className="w-full px-3 py-2.5 text-sm rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#A4B494] focus:border-transparent transition-all duration-300 placeholder:text-gray-400 text-black"
-//                   onKeyDown={handleKeyPress}
-//                   disabled={otpSent}
-//                 />
-//               </div>
-
-//               {/* OTP Input */}
-//               {otpSent && (
-//                 <div className="space-y-2">
-//                   <label className="text-sm font-semibold text-black block">
-//                     OTP
-//                   </label>
-//                   <input
-//                     type="text"
-//                     value={otp}
-//                     onChange={(e) => setOtp(e.target.value)}
-//                     placeholder="Enter OTP"
-//                     className="w-full px-3 py-2.5 text-sm rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#A4B494] focus:border-transparent transition-all duration-300 placeholder:text-gray-400 text-black"
-//                     onKeyDown={handleKeyPress}
-//                   />
-//                 </div>
-//               )}
-
-//               {/* Forgot Password */}
-//               {/* <div className="flex justify-end pt-1">
-//                 <p
-//                   onClick={() => router.push("/forget")}
-//                   className="text-xs text-blue-500 hover:text-blue-700 hover:underline cursor-pointer transition-all duration-200"
-//                 >
-//                   Forget Password?
-//                 </p>
-//               </div> */}
-
-//               {/* Submit Button */}
-//               <div className="pt-4 pb-2">
-//                 <button
-//                   type="submit"
-//                   disabled={loading}
-//                   className="w-full bg-[#BEC5AD] hover:bg-[#a9b29d] disabled:bg-gray-400 disabled:cursor-not-allowed text-black font-bold py-3 text-sm rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-[1.02] active:scale-95 disabled:scale-100"
-//                 >
-//                   {loading ? (
-//                     <div className="flex items-center justify-center space-x-2">
-//                       <div className="w-3 h-3 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-//                       <span>
-//                         {otpSent ? "Logging in..." : "Sending OTP..."}
-//                       </span>
-//                     </div>
-//                   ) : otpSent ? (
-//                     "Login"
-//                   ) : (
-//                     "Send OTP"
-//                   )}
-//                 </button>
-//               </div>
-//             </form>
-//           </div>
-//         </div>
-//       </div>
-
-//       {/* Desktop Layout */}
-//       <div className="hidden md:flex md:flex-row md:h-screen">
-//         {/* Left Panel */}
-//         <div
-//           className={`w-1/2 bg-[#A4B494] p-8 rounded-r-[5rem] flex flex-col items-center justify-center text-center transition-all duration-1000 ease-out ${
-//             mounted
-//               ? "translate-x-0 opacity-100"
-//               : "-translate-x-full opacity-0"
-//           }`}
-//         >
-//           <h1
-//             className={`text-4xl font-extrabold mb-12 -mt-4 text-black transition-all duration-700 delay-300 ease-out ${
-//               mounted ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
-//             }`}
-//           >
-//             Welcome Back!
-//           </h1>
-
-//           <div
-//             className={`transition-all duration-700 delay-500 ease-out transform ${
-//               mounted
-//                 ? "scale-100 opacity-100 rotate-0"
-//                 : "scale-75 opacity-0 rotate-12"
-//             }`}
-//           >
-//             <div className="w-72 h-72 rounded-xl overflow-hidden bg-white shadow-lg hover:scale-110 transition-transform duration-300 ease-in-out">
-//               <img
-//                 src="logo.png"
-//                 alt="Kokan Global Foundation"
-//                 className="w-full h-full object-cover"
-//               />
-//             </div>
-//           </div>
-
-//           <p
-//             className={`mt-10 text-xl font-bold text-black leading-tight transition-all duration-700 delay-700 ease-out ${
-//               mounted ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
-//             }`}
-//           >
-//             "Manage Your Hostel Smarter – Everything You Need in&nbsp;
-//             <br />
-//             One Platform."
-//           </p>
-//         </div>
-
-//         {/* Right Panel */}
-//         <div
-//           className={`w-1/2 bg-white p-12 flex flex-col justify-center items-center transition-all duration-1000 ease-out ${
-//             mounted ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"
-//           }`}
-//         >
-//           <h2
-//             className={`text-4xl font-bold mb-10 text-black text-center transition-all duration-700 delay-200 ease-out ${
-//               mounted ? "translate-y-0 opacity-100" : "-translate-y-8 opacity-0"
-//             }`}
-//           >
-//             Student Login
-//           </h2>
-
-//           <div
-//             className={`flex flex-col w-full max-w-md transition-all duration-700 delay-400 ease-out ${
-//               mounted ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
-//             }`}
-//           >
-//             <form onSubmit={handleSubmit} className="w-full space-y-6">
-//               {/* Student ID */}
-//               <label className="text-xl font-semibold text-black w-full text-left block transition-colors duration-200">
-//                 Student ID
-//               </label>
-//               <input
-//                 type="text"
-//                 value={studentId}
-//                 onChange={(e) => setStudentId(e.target.value)}
-//                 placeholder="Enter Your Student ID"
-//                 className="w-full px-4 py-3 rounded-[1rem] border border-gray-300 shadow-md focus:outline-none focus:ring-2 focus:ring-[#A4B494] focus:border-transparent transition-all duration-300 ease-in-out transform focus:scale-[1.02] hover:shadow-lg placeholder:text-gray-400 text-black"
-//                 onKeyDown={handleKeyPress}
-//                 disabled={otpSent}
-//               />
-
-//               {/* OTP */}
-//               {otpSent && (
-//                 <input
-//                   type="text"
-//                   value={otp}
-//                   onChange={(e) => setOtp(e.target.value)}
-//                   placeholder="Enter OTP"
-//                   className="w-full px-4 py-3 rounded-[1rem] border border-gray-300 shadow-md focus:outline-none focus:ring-2 focus:ring-[#A4B494] focus:border-transparent transition-all duration-300 ease-in-out transform focus:scale-[1.02] hover:shadow-lg placeholder:text-gray-400 text-black"
-//                   onKeyDown={handleKeyPress}
-//                 />
-//               )}
-
-//               {/* Forgot Password */}
-//               {/* <div className="flex justify-end">
-//                 <p
-//                   onClick={() => router.push("/forget")}
-//                   className="text-sm text-blue-500 hover:text-blue-700 hover:underline cursor-pointer transition-all duration-200 transform hover:translate-x-1"
-//                 >
-//                   Forget Password?
-//                 </p>
-//               </div> */}
-
-//               {/* Submit Button */}
-//               <button
-//                 type="submit"
-//                 disabled={loading}
-//                 className="w-full bg-[#BEC5AD] hover:bg-[#a9b29d] disabled:bg-gray-400 disabled:cursor-not-allowed text-black font-bold py-3 rounded-xl shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg active:scale-95 disabled:scale-100 disabled:hover:shadow-md"
-//               >
-//                 {loading ? (
-//                   <div className="flex items-center justify-center space-x-2">
-//                     <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-//                     <span>{otpSent ? "Logging in..." : "Sending OTP..."}</span>
-//                   </div>
-//                 ) : otpSent ? (
-//                   "Login"
-//                 ) : (
-//                   "Send OTP"
-//                 )}
-//               </button>
-//             </form>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-
-
 "use client";
 
 import api from "@/lib/api";
@@ -663,42 +5,61 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 
-export default function Login() {
+const LoginForm = () => {
+  const [step, setStep] = useState(1);
   const [studentId, setStudentId] = useState("");
+  const [otp, setOtp] = useState("");
+  const [maskedEmail, setMaskedEmail] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [resendTimer, setResendTimer] = useState(0);
   const router = useRouter();
 
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  // ❌ OLD OTP FUNCTION (COMMENTED)
-  /*
-  const handleSendOtp = async () => {
-    if (!studentId) return toast.error("Please enter your User ID");
+  useEffect(() => {
+    if (resendTimer > 0) {
+      const timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendTimer]);
+
+  const handleSendOTP = async (e) => {
+    e.preventDefault();
+    if (!studentId) {
+      setErrorMsg("Please enter your Student ID");
+      return;
+    }
 
     setLoading(true);
+    setErrorMsg("");
     try {
       const res = await api.post("/send-otp", { studentId });
-      toast.success(res.data.message || "OTP sent successfully");
-      setOtpSent(true);
+      toast.success(res.data?.message || "OTP sent successfully");
+      setMaskedEmail(res.data?.email || "your registered email");
+      setStep(2);
+      setResendTimer(60);
     } catch (err) {
-      const msg = err?.response?.data?.message || "Failed to send OTP";
-      toast.error(msg);
+      setErrorMsg(err?.response?.data?.message || "Failed to send OTP");
     } finally {
       setLoading(false);
     }
   };
-  */
 
-  // ✅ SIMPLE LOGIN (WITHOUT OTP)
-  const handleLogin = async (e) => {
+  const handleVerifyOTP = async (e) => {
     e.preventDefault();
-    if (!studentId) return toast.error("Please enter your User ID");
+    if (!otp) {
+      setErrorMsg("Please enter OTP");
+      return;
+    }
 
     setLoading(true);
+    setErrorMsg("");
     try {
-      const res = await api.post("/login", { studentId });
-
+      const res = await api.post("/login", { studentId, otp });
       toast.success("Login successful!");
 
       sessionStorage.clear();
@@ -707,120 +68,424 @@ export default function Login() {
 
       router.push("/dashboard");
     } catch (err) {
-      const msg = err?.response?.data?.message || "Login failed";
-      toast.error(msg);
+      setErrorMsg(err?.response?.data?.message || "Login failed");
+    } finally { 
+      setLoading(false);
+    }
+  };
+
+  const handleResendOTP = async () => {
+    if (resendTimer > 0) return;
+    setLoading(true);
+    setErrorMsg("");
+    try {
+      const res = await api.post("/send-otp", { studentId });
+      toast.success(res.data?.message || "OTP resent successfully");
+      setMaskedEmail(res.data?.email || "your registered email");
+      setResendTimer(60);
+    } catch (err) {
+      setErrorMsg(err?.response?.data?.message || "Failed to resend OTP");
     } finally {
       setLoading(false);
     }
   };
 
+  const handleBack = () => {
+    setStep(1);
+    setOtp("");
+    setErrorMsg("");
+  };
+
   return (
-    <div className="min-h-screen w-full bg-white overflow-x-hidden">
-      {/* Mobile Layout */}
-      <div className="md:hidden flex flex-col min-h-screen">
+    <div className="h-screen w-screen flex items-center justify-center bg-[#A4B494] overflow-hidden">
+      {/* Desktop Layout */}
+      <div className="hidden lg:flex flex-row w-full h-full bg-white shadow-2xl overflow-hidden">
+        {/* Left Panel */}
         <div
-          className={`bg-[#A4B494] px-4 py-8 flex flex-col items-center justify-center text-center transition-all duration-1000 ease-out ${
+          className={`w-1/2 bg-[#9AAA87] flex flex-col items-center justify-center text-center px-6 py-10 lg:px-16 lg:py-0 rounded-none lg:rounded-r-[100px] shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-1000 ease-out ${
+            mounted
+              ? "translate-x-0 opacity-100"
+              : "-translate-x-full opacity-0"
+          }`}
+        >
+          <h2
+            className={`text-3xl sm:text-4xl font-bold text-black mb-12 transition-all duration-700 delay-300 ease-out ${
+              mounted ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+            }`}
+          >
+            Welcome Back!
+          </h2>
+
+          <div
+            className={`transition-all duration-700 delay-500 ease-out transform ${
+              mounted
+                ? "scale-100 opacity-100 rotate-0"
+                : "scale-75 opacity-0 rotate-12"
+            }`}
+          >
+            <img
+              src="logo.png"
+              alt="Logo"
+              className="w-[210px] h-[190px] bg-white p-4 rounded-lg mb-14 object-contain hover:scale-110 transition-transform duration-300 ease-in-out shadow-lg"
+            />
+          </div>
+
+          <p
+            className={`text-black text-lg font-semibold max-w-lg transition-all duration-700 delay-700 ease-out ${
+              mounted ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+            }`}
+          >
+            "Manage Your Hostel Smarter – Everything You Need in One Platform."
+          </p>
+        </div>
+
+        {/* Right Panel */}
+        <div
+          className={`w-1/2 flex flex-col justify-center items-center px-6 py-10 sm:px-10 lg:px-16 bg-white transition-all duration-1000 ease-out ${
+            mounted ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"
+          }`}
+        >
+          <h2
+            className={`text-4xl font-bold text-black mb-16 transition-all duration-700 delay-200 ease-out ${
+              mounted ? "translate-y-0 opacity-100" : "-translate-y-8 opacity-0"
+            }`}
+          >
+            Student Login
+          </h2>
+
+          <div
+            className={`w-full max-w-sm transition-all duration-700 delay-400 ease-out ${
+              mounted ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
+            }`}
+          >
+            {step === 1 ? (
+              // Step 1: Enter Student ID
+              <form onSubmit={handleSendOTP} className="space-y-6 w-full">
+                <div>
+                  <label className="block text-lg font-bold mb-2">Student ID</label>
+                  <input
+                    type="text"
+                    value={studentId}
+                    onChange={(e) => setStudentId(e.target.value)}
+                    placeholder="Enter Your Student ID"
+                    required
+                    className="w-full px-5 py-3 text-gray-800 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#9AAA87] placeholder:font-medium transition-all duration-300 ease-in-out transform focus:scale-[1.02] hover:shadow-lg"
+                    style={{
+                      boxShadow: "0px 4px 10px 0px #00000040",
+                      fontFamily: "Poppins, sans-serif",
+                      fontWeight: "500",
+                    }}
+                  />
+                </div>
+
+                {errorMsg && (
+                  <div className="text-red-600 text-sm font-semibold text-center animate-fadeInUp">
+                    {errorMsg}
+                  </div>
+                )}
+
+                <div className="flex justify-center">
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-[200px] cursor-pointer bg-[#BEC5AD] text-black font-bold py-3 rounded-xl hover:bg-[#c1cca4] transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg active:scale-95 disabled:scale-100 disabled:opacity-70"
+                    style={{ boxShadow: "0px 4px 10px 0px #00000040" }}
+                  >
+                    {loading ? (
+                      <div className="flex items-center justify-center space-x-2">
+                        <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                        <span>Sending...</span>
+                      </div>
+                    ) : (
+                      "Send OTP"
+                    )}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              // Step 2: Enter OTP
+              <form onSubmit={handleVerifyOTP} className="space-y-6 w-full">
+                <div className="text-center mb-4">
+                  <p className="text-sm text-gray-600">
+                    OTP sent to Registered Email: <span className="font-semibold">{maskedEmail}</span>
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-lg font-bold mb-2">Enter OTP</label>
+                  <input
+                    type="text"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    placeholder="Enter 6-digit OTP"
+                    required
+                    maxLength={6}
+                    className="w-full px-5 py-3 text-gray-800 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#9AAA87] placeholder:font-medium text-center text-xl tracking-widest transition-all duration-300 ease-in-out transform focus:scale-[1.02] hover:shadow-lg"
+                    style={{
+                      boxShadow: "0px 4px 10px 0px #00000040",
+                      fontFamily: "Poppins, sans-serif",
+                      fontWeight: "500",
+                    }}
+                  />
+                </div>
+
+                {errorMsg && (
+                  <div className="text-red-600 text-sm font-semibold text-center animate-fadeInUp">
+                    {errorMsg}
+                  </div>
+                )}
+
+                <div className="flex flex-col items-center space-y-3">
+                  <button
+                    type="submit"
+                    disabled={loading || otp.length !== 6}
+                    className="w-[200px] cursor-pointer bg-[#BEC5AD] text-black font-bold py-3 rounded-xl hover:bg-[#c1cca4] transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg active:scale-95 disabled:scale-100 disabled:opacity-70"
+                    style={{ boxShadow: "0px 4px 10px 0px #00000040" }}
+                  >
+                    {loading ? (
+                      <div className="flex items-center justify-center space-x-2">
+                        <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                        <span>Verifying...</span>
+                      </div>
+                    ) : (
+                      "Verify & Login"
+                    )}
+                  </button>
+
+                  <div className="flex items-center space-x-4 mt-4">
+                    <button
+                      type="button"
+                      onClick={handleBack}
+                      className="text-gray-600 text-sm font-medium hover:underline transition-colors duration-200"
+                    >
+                      ← Back
+                    </button>
+                    
+                    <button
+                      type="button"
+                      onClick={handleResendOTP}
+                      disabled={resendTimer > 0 || loading}
+                      className="text-gray-600 text-sm font-medium hover:underline transition-colors duration-200 disabled:text-gray-400 disabled:no-underline"
+                    >
+                      {resendTimer > 0 ? `Resend in ${resendTimer}s` : "Resend OTP"}
+                    </button>
+                  </div>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Layout */}
+      <div className="lg:hidden flex flex-col items-center w-full h-full relative overflow-hidden">
+        {/* Top white section with logo */}
+        <div
+          className={`w-full flex flex-col items-center justify-center bg-white pt-2 pb-10 sm:pb-8 md:pb-10 rounded-b-[20px] relative z-0 transition-all duration-1000 ease-out ${
             mounted
               ? "translate-y-0 opacity-100"
               : "-translate-y-full opacity-0"
           }`}
         >
-          <h1 className="text-2xl font-extrabold mb-4 text-black">
-            Welcome Back!
-          </h1>
-
-          <div className="w-32 h-32 rounded-xl overflow-hidden bg-white shadow-lg">
+          <div
+            className={`transition-all duration-700 delay-500 ease-out transform ${
+              mounted
+                ? "scale-100 opacity-100 rotate-0"
+                : "scale-75 opacity-0 rotate-12"
+            }`}
+          >
             <img
               src="logo.png"
-              alt="Kokan Global Foundation"
-              className="w-full h-full object-cover"
+              alt="Logo"
+              className="w-[200px] h-[180px] xs:w-[220px] xs:h-[200px] sm:w-[260px] sm:h-[240px] md:w-[300px] md:h-[280px] bg-white p-3 sm:p-4 rounded-lg object-contain hover:scale-105 transition-transform duration-300 ease-in-out shadow-md"
             />
           </div>
+        </div>
 
-          <p className="mt-4 text-xs font-bold text-black leading-tight px-2">
+        {/* Login Form Card */}
+        <div
+          className={`absolute top-[200px] xs:top-[220px] sm:top-[260px] md:top-[300px] w-[85%] xs:w-[80%] sm:w-[75%] md:w-9/12 max-w-[400px] bg-white rounded-t-[20px] rounded-b-xl z-20 p-0 min-h-[350px] xs:min-h-[380px] sm:min-h-[400px] overflow-hidden transition-all duration-1000 ease-out ${
+            mounted ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"
+          }`}
+          style={{ boxShadow: "0px 4px 10px 0px #00000040" }}
+        >
+          {/* Header */}
+          <div
+            className={`w-full transition-all duration-700 delay-200 ease-out ${
+              mounted ? "translate-y-0 opacity-100" : "-translate-y-8 opacity-0"
+            }`}
+          >
+            <h2
+              className="text-lg xs:text-xl sm:text-xl font-bold text-black bg-white text-center py-3 xs:py-4 m-0 rounded-t-[20px] rounded-b-[20px]"
+              style={{
+                border: "0.5px solid #000000",
+                fontFamily: "Poppins",
+                fontWeight: "600",
+              }}
+            >
+              Student Login
+            </h2>
+          </div>
+
+          {/* Login Form */}
+          <div
+            className={`p-4 xs:p-5 sm:p-6 md:p-8 transition-all duration-700 delay-400 ease-out ${
+              mounted ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
+            }`}
+          >
+            {step === 1 ? (
+              // Step 1: Enter Student ID (Mobile)
+              <form onSubmit={handleSendOTP} className="space-y-4 xs:space-y-5 sm:space-y-6 w-full">
+                <div>
+                  <label className="block text-base xs:text-lg font-bold mb-2">
+                    Student ID
+                  </label>
+                  <input
+                    type="text"
+                    value={studentId}
+                    onChange={(e) => setStudentId(e.target.value)}
+                    placeholder="Enter Student ID"
+                    required
+                    className="w-full px-3 xs:px-4 sm:px-5 py-2.5 xs:py-3 text-sm xs:text-base text-gray-800 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#9AAA87] placeholder:font-medium transition-all duration-300 ease-in-out transform focus:scale-[1.02] hover:shadow-lg"
+                    style={{
+                      boxShadow: "0px 4px 10px 0px #00000040",
+                      fontFamily: "Poppins, sans-serif",
+                      fontWeight: "500",
+                    }}
+                  />
+                </div>
+
+                {errorMsg && (
+                  <div className="text-red-600 text-xs xs:text-sm font-semibold text-center animate-fadeInUp">
+                    {errorMsg}
+                  </div>
+                )}
+
+                <div className="flex justify-center pt-2">
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-[160px] xs:w-[180px] sm:w-[200px] cursor-pointer bg-[#A4B494] text-black font-bold py-2.5 xs:py-3 text-sm xs:text-base rounded-xl hover:bg-[#9AAA87] transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg active:scale-95 disabled:scale-100 disabled:opacity-70"
+                    style={{ boxShadow: "0px 4px 10px 0px #00000040" }}
+                  >
+                    {loading ? (
+                      <div className="flex items-center justify-center space-x-2">
+                        <div className="w-3 h-3 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                        <span>Sending...</span>
+                      </div>
+                    ) : (
+                      "Send OTP"
+                    )}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              // Step 2: Enter OTP (Mobile)
+              <form onSubmit={handleVerifyOTP} className="space-y-4 xs:space-y-5 sm:space-y-6 w-full">
+                <div className="text-center mb-2">
+                  <p className="text-xs xs:text-sm text-gray-600">
+                    OTP sent to Registered Email: <span className="font-semibold">{maskedEmail}</span>
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-base xs:text-lg font-bold mb-2">
+                    Enter OTP
+                  </label>
+                  <input
+                    type="text"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    placeholder="6-digit OTP"
+                    required
+                    maxLength={6}
+                    className="w-full px-3 xs:px-4 sm:px-5 py-2.5 xs:py-3 text-base xs:text-lg text-gray-800 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#9AAA87] placeholder:font-medium text-center tracking-widest transition-all duration-300 ease-in-out transform focus:scale-[1.02] hover:shadow-lg"
+                    style={{
+                      boxShadow: "0px 4px 10px 0px #00000040",
+                      fontFamily: "Poppins, sans-serif",
+                      fontWeight: "500",
+                    }}
+                  />
+                </div>
+
+                {errorMsg && (
+                  <div className="text-red-600 text-xs xs:text-sm font-semibold text-center animate-fadeInUp">
+                    {errorMsg}
+                  </div>
+                )}
+
+                <div className="flex flex-col items-center space-y-3">
+                  <button
+                    type="submit"
+                    disabled={loading || otp.length !== 6}
+                    className="w-[160px] xs:w-[180px] sm:w-[200px] cursor-pointer bg-[#A4B494] text-black font-bold py-2.5 xs:py-3 text-sm xs:text-base rounded-xl hover:bg-[#9AAA87] transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg active:scale-95 disabled:scale-100 disabled:opacity-70"
+                    style={{ boxShadow: "0px 4px 10px 0px #00000040" }}
+                  >
+                    {loading ? (
+                      <div className="flex items-center justify-center space-x-2">
+                        <div className="w-3 h-3 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                        <span>Verifying...</span>
+                      </div>
+                    ) : (
+                      "Verify & Login"
+                    )}
+                  </button>
+
+                  <div className="flex items-center space-x-4 text-xs xs:text-sm mt-4">
+                    <button
+                      type="button"
+                      onClick={handleBack}
+                      className="text-gray-600 font-medium hover:underline transition-colors duration-200"
+                    >
+                      ← Back
+                    </button>
+                    
+                    <button
+                      type="button"
+                      onClick={handleResendOTP}
+                      disabled={resendTimer > 0 || loading}
+                      className="text-gray-600 font-medium hover:underline transition-colors duration-200 disabled:text-gray-400 disabled:no-underline"
+                    >
+                      {resendTimer > 0 ? `Resend ${resendTimer}s` : "Resend OTP"}
+                    </button>
+                  </div>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+
+        {/* Bottom quote section */}
+        <div
+          className={`w-full flex flex-col items-center justify-center text-center px-4 xs:px-5 sm:px-6 py-4 xs:py-5 sm:py-6 mt-[320px] xs:mt-[360px] sm:mt-[380px] md:mt-[400px] transition-all duration-700 delay-600 ease-out ${
+            mounted ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+          }`}
+        >
+          <p className="text-black text-sm xs:text-base sm:text-lg font-semibold max-w-xs xs:max-w-sm sm:max-w-lg leading-relaxed">
             "Manage Your Hostel Smarter – Everything You Need in One Platform."
           </p>
         </div>
-
-        {/* Login Form */}
-        <div className="bg-white px-4 py-4">
-          <h2 className="text-xl font-bold mb-6 text-black text-center">
-            Student Login
-          </h2>
-
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-black block">
-                User ID
-              </label>
-              <input
-                type="text"
-                value={studentId}
-                onChange={(e) => setStudentId(e.target.value)}
-                placeholder="Enter Your Student ID"
-                className="w-full px-3 py-2.5 text-sm rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#A4B494] text-black"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-[#BEC5AD] hover:bg-[#a9b29d] text-black font-bold py-3 text-sm rounded-lg shadow-md"
-            >
-              {loading ? "Logging in..." : "Login"}
-            </button>
-          </form>
-        </div>
       </div>
 
-      {/* Desktop Layout */}
-      <div className="hidden md:flex md:flex-row md:h-screen">
-        <div className="w-1/2 bg-[#A4B494] p-8 rounded-r-[5rem] flex flex-col items-center justify-center text-center">
-          <h1 className="text-4xl font-extrabold mb-12 text-black">
-            Welcome Back!
-          </h1>
+      {/* Custom CSS */}
+      <style jsx>{`
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
 
-          <div className="w-72 h-72 rounded-xl overflow-hidden bg-white shadow-lg">
-            <img
-              src="logo.png"
-              alt="Kokan Global Foundation"
-              className="w-full h-full object-cover"
-            />
-          </div>
-
-          <p className="mt-10 text-xl font-bold text-black">
-            "Manage Your Hostel Smarter – Everything You Need in One Platform."
-          </p>
-        </div>
-
-        <div className="w-1/2 bg-white p-12 flex flex-col justify-center items-center">
-          <h2 className="text-4xl font-bold mb-10 text-black text-center">
-            Student Login
-          </h2>
-
-          <form onSubmit={handleLogin} className="w-full max-w-md space-y-6">
-            <label className="text-xl font-semibold text-black block">
-              Student ID
-            </label>
-
-            <input
-              type="text"
-              value={studentId}
-              onChange={(e) => setStudentId(e.target.value)}
-              placeholder="Enter Your Student ID"
-              className="w-full px-4 py-3 rounded-[1rem] border border-gray-300 shadow-md focus:outline-none focus:ring-2 focus:ring-[#A4B494] text-black"
-            />
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-[#BEC5AD] hover:bg-[#a9b29d] text-black font-bold py-3 rounded-xl shadow-md"
-            >
-              {loading ? "Logging in..." : "Login"}
-            </button>
-          </form>
-        </div>
-      </div>
+        .animate-fadeInUp {
+          animation: fadeInUp 0.5s ease-out forwards;
+        }
+      `}</style>
     </div>
   );
-}
+};
+
+export default LoginForm;
