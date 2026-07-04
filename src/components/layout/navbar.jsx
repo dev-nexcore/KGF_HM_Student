@@ -68,8 +68,8 @@ export default function Navbar() {
   return (
     <nav className="flex items-center justify-between px-3 sm:px-4 md:px-6 py-4 bg-[#BEC5AD] h-20 min-h-[80px]">
       {/* Left Text */}
-      <div className="pl-2 sm:pl-4 md:pl-6 lg:pl-0 flex-1 min-w-0">
-        <h2 className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold text-gray-800 truncate">
+      <div className="pl-14 sm:pl-4 md:pl-6 lg:pl-0 flex-1 min-w-0">
+        <h2 className="text-lg sm:text-base md:text-lg lg:text-xl font-semibold text-gray-800 truncate">
           Welcome Back, {studentName}
         </h2>
         <p className="text-xs sm:text-xs md:text-sm text-gray-600 truncate">

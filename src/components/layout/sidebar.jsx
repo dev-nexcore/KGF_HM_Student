@@ -247,12 +247,14 @@ export default function Sidebar() {
     <div className="bg-[#BEC5AD]">
 
       {/* Mobile Menu Button */}
-      <button
-        className="md:hidden fixed top-2 left-2 z-50 p-2 bg-[#A4B494] rounded-md shadow text-black"
-        onClick={() => setSidebarOpen(true)}
-      >
-        <Menu size={24} />
-      </button>
+      {!sidebarOpen && (
+        <button
+          className="md:hidden fixed top-2 left-2 z-50 p-2 bg-[#A4B494] rounded-md shadow text-black"
+          onClick={() => setSidebarOpen(true)}
+        >
+          <Menu size={24} />
+        </button>
+      )}
 
       {/* Sidebar */}
       {/* <aside
