@@ -52,7 +52,7 @@ export default function DashboardPage() {
         <Navbar setSidebarOpen={setSidebarOpen} />
 
         {/* Scrollable Content */}
-        <main className="flex-1 p-5 lg:p-10 overflow-y-auto">
+        <main className="flex-1 p-5 lg:p-10 pt-20 sm:pt-20 lg:pt-24 overflow-y-auto">
           <DashboardContent />
         </main>
 
