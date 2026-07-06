@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import api from "@/lib/api";
+import { Bell } from "lucide-react";
 
 export default function Navbar() {
   const [studentName, setStudentName] = useState("...");
@@ -76,12 +77,15 @@ export default function Navbar() {
 
   return (
     <nav className="relative z-[99] flex items-center justify-between px-3 sm:px-4 md:px-6 py-4 bg-[#BEC5AD] h-20 min-h-[80px]">
-      {/* Left Text */}
-      <div className="pl-14 sm:pl-4 md:pl-6 lg:pl-0 flex-1 min-w-0">
-        <h2 className="text-lg sm:text-base md:text-lg lg:text-xl font-semibold text-gray-800 truncate">
+      {/* Left Menu Spacer */}
+      <div className="w-12 sm:w-14"></div>
+      
+      {/* Center Text */}
+      <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center justify-center min-w-0 w-full max-w-[calc(100%-180px)] sm:max-w-[calc(100%-220px)] md:max-w-[50%]">
+        <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-black leading-tight text-center truncate w-full">
           Welcome Back, {studentName}
-        </h2>
-        <p className="text-xs sm:text-xs md:text-sm text-gray-600 truncate">
+        </h1>
+        <p className="italic text-black text-[10px] sm:text-xs md:text-sm mt-0.5">
           - have a great day
         </p>
       </div>
@@ -94,41 +98,64 @@ export default function Navbar() {
             className="relative"
             aria-label="Toggle notifications"
           >
-            <Image
-              src="/student/icons/notifications.png"
-              alt="Notifications"
-              width={22}
-              height={22}
-              className="cursor-pointer"
-            />
+            <Bell className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" />
             {hasUnseen && (
               <span className="absolute top-0 right-0 inline-block w-2.5 h-2.5 bg-red-500 rounded-full"></span>
             )}
           </button>
 
           {showDropdown && (
-            <div className="absolute right-0 mt-2 w-screen sm:w-80 md:w-96 max-h-80 sm:max-h-96 overflow-y-auto bg-white border border-gray-300 rounded-md shadow-md z-[100] -mx-3 sm:mx-0">
-              {notifications.length > 0 ? (
-                notifications.map((notif, i) => (
-                  <Link
-                    href={notif.link}
-                    key={notif._id || i}
-                    className="block px-3 sm:px-4 py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-100 border-b"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      markAsSeen(notif.type, notif._id);
-                      setShowDropdown(false);
-                      router.push(notif.link);
-                    }}
-                  >
-                    {notif.message}
-                  </Link>
-                ))
-              ) : (
-                <div className="px-3 sm:px-4 py-2 text-xs sm:text-sm text-gray-500">
-                  No notifications
+            <div className="absolute right-[-10px] sm:right-0 mt-2 w-[300px] sm:w-80 bg-white rounded-xl shadow-xl z-[100] pb-2">
+              <div className="bg-[#A4B494] text-black px-4 py-3 rounded-t-xl flex justify-between items-center">
+                <div>
+                  <p className="font-semibold text-sm">Notifications</p>
+                  <p className="text-xs">Stay updated</p>
                 </div>
-              )}
+                <button
+                  onClick={() => setShowDropdown(false)}
+                  className="text-black hover:text-gray-700"
+                  aria-label="Close Notifications"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="max-h-80 overflow-y-auto">
+                {notifications.length > 0 ? (
+                  notifications.map((notif, i) => (
+                    <Link
+                      href={notif.link}
+                      key={notif._id || i}
+                      className="block px-3 sm:px-4 py-3 text-xs sm:text-sm text-gray-700 hover:bg-gray-100 border-b"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        markAsSeen(notif.type, notif._id);
+                        setShowDropdown(false);
+                        router.push(notif.link);
+                      }}
+                    >
+                      {notif.message}
+                    </Link>
+                  ))
+                ) : (
+                  <div className="flex flex-col items-center py-6">
+                    <Image
+                      src="/photos/bell1.png"
+                      width={35}
+                      height={35}
+                      alt="bell"
+                      className="mb-2"
+                    />
+                    <p className="font-semibold text-sm">All caught up!</p>
+                    <p className="text-xs text-gray-500">No new notifications to show</p>
+                    <Link
+                      href="/notifications"
+                      className="mt-4 px-4 py-2 text-black bg-[#A4B494] rounded-md text-sm hover:bg-[#92A385] transition-colors"
+                    >
+                      View History
+                    </Link>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>

@@ -46,7 +46,7 @@ export default function Notices() {
         <Navbar />
 
         {/* Page Content */}
-        <main className="flex-1 p-4 pt-20 overflow-y-auto">
+        <main className="flex-1 p-4 overflow-y-auto">
           <NoticesPage />
         </main>
 

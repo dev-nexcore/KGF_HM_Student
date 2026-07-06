@@ -35,7 +35,7 @@ export default function ComplaintsPage() {
       <Sidebar />
 
       {/* Main Content */}
-      <main className="flex flex-col flex-1 min-w-0 pt-20 overflow-x-hidden">
+      <main className="flex flex-col flex-1 min-w-0 overflow-x-hidden">
 
         {/* Navbar */}
         <Header />

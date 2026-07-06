@@ -353,33 +353,89 @@ ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
 
       {/* Logout Modal */}
       {showLogoutConfirmation && (
-        <div className="fixed inset-0 backdrop-blur flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-4 sm:p-6 max-w-sm mx-4 shadow-xl">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[1000] p-4" style={{ backdropFilter: 'blur(8px)' }}>
+          <div
+            className="max-w-md w-full p-6 rounded-2xl border shadow-2xl relative overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.2) 100%)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)'
+            }}
+          >
+            <div
+              className="absolute inset-0 rounded-2xl"
+              style={{
+                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, transparent 50%)',
+                pointerEvents: 'none'
+              }}
+            />
 
-            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">
-              Confirm Logout
-            </h3>
+            <div className="relative z-10">
+              <div className="flex items-center mb-4">
+                <div
+                  className="w-12 h-12 rounded-full flex items-center justify-center mr-3"
+                  style={{
+                    background: 'rgba(239, 68, 68, 0.9)',
+                    border: '1px solid rgba(239, 68, 68, 1)',
+                    backdropFilter: 'blur(10px)'
+                  }}
+                >
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 drop-shadow-sm">Confirm Logout</h3>
+              </div>
 
-            <p className="text-sm sm:text-base text-gray-600 mb-6">
-              Are you sure you want to logout?
-            </p>
+              <p className="text-gray-800 mb-6 text-sm leading-relaxed font-medium">
+                Are you sure you want to logout? You will need to sign in again to access your account.
+              </p>
 
-            <div className="flex gap-3 justify-end">
-              <button
-                onClick={handleLogoutCancel}
-                className="px-3 sm:px-4 py-2 text-xs sm:text-sm text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200"
-              >
-                Cancel
-              </button>
-
-              <button
-                onClick={handleLogoutConfirm}
-                className="px-3 sm:px-4 py-2 text-xs sm:text-sm bg-red-500 text-white rounded-md hover:bg-red-600"
-              >
-                Logout
-              </button>
+              <div className="flex gap-3 justify-end">
+                <button
+                  onClick={handleLogoutCancel}
+                  className="px-5 py-2.5 text-gray-800 font-semibold rounded-lg transition-all duration-200"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.8)',
+                    border: '1px solid rgba(0, 0, 0, 0.2)',
+                    backdropFilter: 'blur(10px)',
+                    boxShadow: '0 4px 15px 0 rgba(0, 0, 0, 0.1)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = 'rgba(255, 255, 255, 0.95)';
+                    e.target.style.transform = 'scale(1.05)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = 'rgba(255, 255, 255, 0.8)';
+                    e.target.style.transform = 'scale(1)';
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleLogoutConfirm}
+                  className="px-5 py-2.5 text-white font-semibold rounded-lg transition-all duration-200"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.95) 0%, rgba(220, 38, 38, 1) 100%)',
+                    border: '1px solid rgba(185, 28, 28, 0.8)',
+                    backdropFilter: 'blur(10px)',
+                    boxShadow: '0 4px 15px 0 rgba(239, 68, 68, 0.5)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = 'linear-gradient(135deg, rgba(220, 38, 38, 1) 0%, rgba(185, 28, 28, 1) 100%)';
+                    e.target.style.transform = 'scale(1.05)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = 'linear-gradient(135deg, rgba(239, 68, 68, 0.95) 0%, rgba(220, 38, 38, 1) 100%)';
+                    e.target.style.transform = 'scale(1)';
+                  }}
+                >
+                  Logout
+                </button>
+              </div>
             </div>
-
           </div>
         </div>
       )}

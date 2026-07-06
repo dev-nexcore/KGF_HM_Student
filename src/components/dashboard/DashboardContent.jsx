@@ -402,8 +402,6 @@ export default function DashboardContent() {
 
   return (
     <main className="bg-[#ffffff] px-6 sm:px-8 lg:px-2.5 py-2 min-h-screen font-sans">
-      <Toaster position="top-right" />
-
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-black border-l-4 border-[#4F8DCF] pl-2">
           Overview

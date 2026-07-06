@@ -144,7 +144,6 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-[#FDFDFD] pb-12">
-      <Toaster position="top-right" />
       
       {/* Header Spacer */}
       <div className="h-10"></div>
@@ -179,7 +178,7 @@ export default function Profile() {
                 </div>
 
                 {/* Photo Actions Overlay */}
-                <div className="absolute -bottom-2 -right-2 flex gap-2">
+                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 flex gap-3 z-10">
                   <label className="w-10 h-10 bg-white text-[#4F8CCF] rounded-2xl flex items-center justify-center shadow-lg cursor-pointer hover:bg-gray-50 transition-all hover:scale-110 active:scale-95">
                     <FiUpload />
                     <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />

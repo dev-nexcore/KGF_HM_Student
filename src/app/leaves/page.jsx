@@ -46,7 +46,7 @@ export default function Leaves() {
         <Navbar />
 
         {/* Leaves Page Content */}
-        <main className="flex-1 p-6 pt-20 overflow-y-auto">
+        <main className="flex-1 p-6 overflow-y-auto">
           <LeavesPage />
         </main>
 

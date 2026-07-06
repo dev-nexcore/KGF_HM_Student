@@ -21,7 +21,7 @@ export default function AttendancePage() {
         <Navbar setSidebarOpen={setSidebarOpen} />
 
         {/* Scrollable Content */}
-        <main className="flex-1 p-4 lg:p-8 pt-20 overflow-y-auto">
+        <main className="flex-1 p-4 lg:p-8 overflow-y-auto">
           <AttendanceLog />
         </main>
       </div>

@@ -65,7 +65,7 @@ export default function FeesStatusPage() {
 
         {/* Scrollable Content */}
         <main
-          className="flex-1 p-5 lg:p-10 pt-20 overflow-y-auto"
+          className="flex-1 p-5 lg:p-10 overflow-y-auto"
           style={{
             msOverflowStyle: 'none',
             scrollbarWidth: 'none',
