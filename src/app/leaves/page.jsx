@@ -40,7 +40,7 @@ export default function Leaves() {
       <Sidebar />
 
       {/* Main content */}
-      <div className="flex flex-col flex-1 md:ml-55">
+      <div className="flex flex-col flex-1">
 
         {/* Navbar */}
         <Navbar />

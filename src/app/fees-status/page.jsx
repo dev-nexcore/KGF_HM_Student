@@ -58,7 +58,7 @@ export default function FeesStatusPage() {
       />
 
       {/* Main Content */}
-      <div className="flex flex-col flex-1 md:ml-55">
+      <div className="flex flex-col flex-1">
 
         {/* Navbar */}
         <Navbar setSidebarOpen={setSidebarOpen} />

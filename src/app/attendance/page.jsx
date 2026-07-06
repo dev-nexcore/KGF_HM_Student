@@ -16,7 +16,7 @@ export default function AttendancePage() {
       />
 
       {/* Main Content */}
-      <div className="flex flex-col flex-1 md:ml-64">
+      <div className="flex flex-col flex-1">
         {/* Navbar */}
         <Navbar setSidebarOpen={setSidebarOpen} />
 
