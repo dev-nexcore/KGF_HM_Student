@@ -19,6 +19,15 @@ export default function Navbar() {
     if (typeof window !== "undefined") {
       const id = localStorage.getItem("studentId");
       setStudentId(id);
+      
+      const handleProfileUpdate = () => {
+        const storedImage = localStorage.getItem("profileImage");
+        if (storedImage) {
+          setStudentProfile(storedImage);
+        }
+      };
+      window.addEventListener("profileUpdated", handleProfileUpdate);
+      return () => window.removeEventListener("profileUpdated", handleProfileUpdate);
     }
   }, []);
 
@@ -81,9 +90,9 @@ export default function Navbar() {
       <div className="flex items-center gap-2 sm:gap-3 md:gap-4 flex-shrink-0">
         <div className="relative">
           <button
-            onClick={() => setShowDropdown((prev) => !prev)}
+            onClick={(e) => { e.stopPropagation(); setShowDropdown(!showDropdown); }}
             className="relative"
-            aria-label="Notifications"
+            aria-label="Toggle notifications"
           >
             <Image
               src="/student/icons/notifications.png"

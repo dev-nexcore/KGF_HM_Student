@@ -108,7 +108,10 @@ export default function Profile() {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      setProfile(prev => ({ ...prev, profileImage: res.data.imageUrl }));
+      const newImageUrl = `${res.data.imageUrl}?t=${Date.now()}`;
+      setProfile(prev => ({ ...prev, profileImage: newImageUrl }));
+      localStorage.setItem("profileImage", newImageUrl);
+      window.dispatchEvent(new Event("profileUpdated"));
       toast.success("Image updated", { id: 'upload' });
     } catch (err) {
       console.error('Image upload failed:', err);

@@ -249,7 +249,7 @@ export default function Sidebar() {
       {/* Mobile Menu Button */}
       {!sidebarOpen && (
         <button
-          className="md:hidden fixed top-2 left-2 z-50 p-2 bg-[#A4B494] rounded-md shadow text-black"
+          className="md:hidden fixed top-2 left-2 z-[100] p-2 bg-[#A4B494] rounded-md shadow text-black"
           onClick={() => setSidebarOpen(true)}
         >
           <Menu size={24} />
@@ -266,8 +266,8 @@ export default function Sidebar() {
       > */}
 
       <aside
-        className={`fixed top-0 left-0 z-40 w-56 sm:w-48 md:w-60 h-screen bg-[#A4B494]
-py-6 sm:py-8 md:pl-5 sm:pl-0 flex flex-col justify-between
+        className={`fixed md:sticky top-0 left-0 z-[100] w-64 sm:w-56 md:w-64 h-screen bg-[#A4B494]
+py-6 sm:py-8 md:pl-5 sm:pl-0 flex flex-col justify-between shrink-0
 rounded-tr-3xl shadow transform transition-transform duration-300
 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
       >
@@ -337,8 +337,7 @@ ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
                 width={18}
                 height={18}
               />
-              <span className="hidden sm:inline">Logout</span>
-              <span className="sm:hidden">Out</span>
+              <span className="inline">Logout</span>
             </button>
           </div>
         </div>

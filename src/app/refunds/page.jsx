@@ -10,7 +10,7 @@ export default function RefundsPage() {
       <Sidebar />
 
       {/* Main Content (Remove p-6 and margin-left) */}
-      <main className="flex flex-col flex-1">
+      <main className="flex flex-col flex-1 pt-20">
         <Header />
         <div className="px-6 py-4">
           <Refunds />

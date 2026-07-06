@@ -313,6 +313,7 @@ export default function LeavesPage() {
                 </label>
                 <input
                   type="date"
+                  min={new Date().toISOString().split('T')[0]}
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
                   className="w-full sm:w-auto px-3 py-2 rounded-md shadow-md border border-gray-300 text-sm sm:text-base"
@@ -324,6 +325,7 @@ export default function LeavesPage() {
                 </label>
                 <input
                   type="date"
+                  min={new Date().toISOString().split('T')[0]}
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
                   className="w-full sm:w-auto px-3 py-2 rounded-md shadow-md border border-gray-300 text-sm sm:text-base"
@@ -793,6 +795,7 @@ export default function LeavesPage() {
                   </label>
                   <input
                     type="date"
+                    min={new Date().toISOString().split('T')[0]}
                     value={editStartDate}
                     onChange={(e) => setEditStartDate(e.target.value)}
                     className="w-full px-3 py-2 rounded-md shadow-md border border-gray-300 text-sm text-black"
@@ -805,6 +808,7 @@ export default function LeavesPage() {
                   </label>
                   <input
                     type="date"
+                    min={new Date().toISOString().split('T')[0]}
                     value={editEndDate}
                     onChange={(e) => setEditEndDate(e.target.value)}
                     className="w-full px-3 py-2 rounded-md shadow-md border border-gray-300 text-sm text-black"
