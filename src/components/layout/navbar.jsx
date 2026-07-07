@@ -4,7 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import api from "@/lib/api";
-import { Bell } from "lucide-react";
+import { Bell, Menu } from "lucide-react";
 
 export default function Navbar() {
   const [studentName, setStudentName] = useState("...");
@@ -77,8 +77,17 @@ export default function Navbar() {
 
   return (
     <nav className="relative z-[99] flex items-center justify-between px-3 sm:px-4 md:px-6 py-4 bg-[#BEC5AD] h-20 min-h-[80px]">
-      {/* Left Menu Spacer */}
-      <div className="w-12 sm:w-14"></div>
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => window.dispatchEvent(new Event("toggleSidebar"))}
+        className="md:hidden p-2 text-black flex-shrink-0"
+        aria-label="Toggle sidebar"
+      >
+        <Menu size={24} />
+      </button>
+      
+      {/* Left Menu Spacer for Desktop */}
+      <div className="hidden md:block w-12 sm:w-14"></div>
       
       {/* Center Text */}
       <div className="absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0 flex flex-col items-center justify-center md:items-start md:justify-start min-w-0 w-full max-w-[calc(100%-180px)] sm:max-w-[calc(100%-220px)] md:max-w-none">
@@ -148,7 +157,7 @@ export default function Navbar() {
                     <p className="font-semibold text-sm">All caught up!</p>
                     <p className="text-xs text-gray-500">No new notifications to show</p>
                     <Link
-                      href="/notifications"
+                      href="/notices"
                       className="mt-4 px-4 py-2 text-black bg-[#A4B494] rounded-md text-sm hover:bg-[#92A385] transition-colors"
                     >
                       View History

@@ -201,6 +201,12 @@ export default function Sidebar() {
     setSidebarOpen(false);
   }, [pathname]);
 
+  useEffect(() => {
+    const handleToggle = () => setSidebarOpen(prev => !prev);
+    window.addEventListener("toggleSidebar", handleToggle);
+    return () => window.removeEventListener("toggleSidebar", handleToggle);
+  }, []);
+
   const handleLogoutClick = () => {
     setShowLogoutConfirmation(true);
   };
@@ -246,15 +252,7 @@ export default function Sidebar() {
   return (
     <div className="bg-[#BEC5AD]">
 
-      {/* Mobile Menu Button */}
-      {!sidebarOpen && (
-        <button
-          className="md:hidden fixed top-2 left-2 z-[100] p-2 bg-[#A4B494] rounded-md shadow text-black"
-          onClick={() => setSidebarOpen(true)}
-        >
-          <Menu size={24} />
-        </button>
-      )}
+      {/* Mobile Menu Button handled by Navbar */}
 
       {/* Sidebar */}
       {/* <aside
