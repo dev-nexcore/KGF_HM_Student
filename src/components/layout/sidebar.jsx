@@ -264,8 +264,8 @@ export default function Sidebar() {
       > */}
 
       <aside
-        className={`fixed md:sticky top-0 left-0 z-[100] w-64 sm:w-56 md:w-64 h-screen bg-[#A4B494]
-py-6 sm:py-8 md:pl-5 sm:pl-0 flex flex-col justify-between shrink-0
+        className={`fixed md:sticky top-0 left-0 z-[100] w-64 sm:w-56 md:w-64 h-[100dvh] overflow-y-auto no-scrollbar bg-[#A4B494]
+py-6 sm:py-8 md:pl-5 sm:pl-0 flex flex-col md:justify-between shrink-0
 rounded-tr-3xl shadow transform transition-transform duration-300
 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
       >
