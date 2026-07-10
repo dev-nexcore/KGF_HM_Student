@@ -108,8 +108,10 @@ export default function Navbar() {
             aria-label="Toggle notifications"
           >
             <Bell className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" />
-            {hasUnseen && (
-              <span className="absolute top-0 right-0 inline-block w-2.5 h-2.5 bg-red-500 rounded-full"></span>
+            {notifications.length > 0 && (
+              <span className="absolute -top-1 -right-1 inline-flex items-center justify-center w-4 h-4 sm:w-4.5 sm:h-4.5 text-[9px] sm:text-[10px] font-bold text-white bg-red-500 rounded-full">
+                {notifications.length}
+              </span>
             )}
           </button>
 
@@ -148,7 +150,7 @@ export default function Navbar() {
                 ) : (
                   <div className="flex flex-col items-center py-6">
                     <Image
-                      src="/photos/bell1.png"
+                      src="/student/photos/bell1.png"
                       width={35}
                       height={35}
                       alt="bell"
@@ -156,12 +158,6 @@ export default function Navbar() {
                     />
                     <p className="font-semibold text-sm">All caught up!</p>
                     <p className="text-xs text-gray-500">No new notifications to show</p>
-                    <Link
-                      href="/notices"
-                      className="mt-4 px-4 py-2 text-black bg-[#A4B494] rounded-md text-sm hover:bg-[#92A385] transition-colors"
-                    >
-                      View History
-                    </Link>
                   </div>
                 )}
               </div>
@@ -175,7 +171,7 @@ export default function Navbar() {
                 src={
                   studentProfile && studentProfile !== "null"
                     ? studentProfile
-                    : "/default-icon.jpg"
+                    : "/student/default-icon.jpg"
                 }
                 alt="Profile"
                 width={40}

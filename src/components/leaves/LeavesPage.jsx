@@ -150,11 +150,11 @@ export default function LeavesPage() {
   }, [studentId]);
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
+    const d = new Date(dateString);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
   };
 
   // Calculate statistics
@@ -197,10 +197,11 @@ export default function LeavesPage() {
   const paginatedData = filteredLeaveHistory.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   return (
-    <div className="w-full min-h-screen bg-white pt-6 pb-6 sm:pb-10 sm:px-6 dark:bg-white overflow-hidden">
-      <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-black border-l-4 border-[#4F8CCF] pl-2 mb-4 sm:mb-9">
-        Leaves
-      </h2>
+    <main className="bg-[#ffffff] px-6 sm:px-8 lg:px-2.5 py-2 min-h-screen font-sans pb-10">
+      <div className="max-w-7xl mx-auto space-y-6 mt-4">
+        <h2 className="text-xl sm:text-2xl font-semibold mb-6 text-black border-l-4 border-[#4F8CCF] pl-2">
+          Leaves
+        </h2>
 
       {/* Status Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -266,9 +267,9 @@ export default function LeavesPage() {
       </div>
 
       {/* Leave Application Form */}
-      <div className="mt-[-10px] ml-0.5">
-        <div className="bg-white rounded-lg sm:rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.25)] mb-6 sm:mb-10 w-full text-black">
-          <div className="bg-[#A4B494] rounded-t-lg sm:rounded-t-xl px-6 sm:px-8 md:px-10 py-4 sm:py-5 font-semibold text-base sm:text-lg md:text-xl text-white">
+      <div className="mt-0">
+        <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none w-full text-black">
+          <div className="bg-[#AAB491] px-6 py-3 rounded-t-lg font-semibold text-lg text-black">
             Leave Application Form
           </div>
 
@@ -360,7 +361,11 @@ export default function LeavesPage() {
       </div>
 
       {/* Leave History */}
-      <div className="bg-white min-h-[400px] sm:min-h-[450px] rounded-lg sm:rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.25)] px-6 sm:px-8 md:px-10 py-6 sm:py-8 md:py-10 w-full mb-10">
+      <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none w-full overflow-hidden mb-10">
+        <div className="bg-[#AAB491] px-6 py-3 rounded-t-lg font-semibold text-lg text-black">
+          Leave History
+        </div>
+        <div className="p-5 sm:p-8">
         
         {/* ── FILTER BAR ── */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8">
@@ -434,18 +439,20 @@ export default function LeavesPage() {
             </div>
 
             {/* Clear */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-transparent uppercase tracking-wider select-none">Action</label>
-              <button
-                onClick={clearFilters}
-                className="flex items-center justify-center gap-2 w-full bg-red-50 text-red-500 border border-red-200 hover:border-red-500 text-sm font-semibold rounded-lg px-4 py-2.5 transition-all duration-200"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-                Clear Filters
-              </button>
-            </div>
+            {(searchQuery !== '' || filterStatus !== 'all' || dateFilter !== '') && (
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-transparent uppercase tracking-wider select-none">Action</label>
+                <button
+                  onClick={clearFilters}
+                  className="flex items-center justify-center gap-2 w-full bg-red-50 text-red-500 border border-red-200 hover:border-red-500 text-sm font-semibold rounded-lg px-4 py-2.5 transition-all duration-200"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  Clear Filters
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -658,13 +665,14 @@ export default function LeavesPage() {
             </div>
           </div>
         )}
+        </div>
       </div>
 
       {/* View Modal */}
       {viewModalOpen && selectedLeave && (
-        <div className="fixed inset-0 bg-blur backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-blur backdrop-blur-sm flex items-center justify-center z-[105] p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="bg-[#4F8CCF] text-white px-6 py-4 rounded-t-lg flex justify-between items-center">
+            <div className="bg-[#A4B494] text-white px-6 py-4 rounded-t-lg flex justify-between items-center">
               <h3 className="text-xl font-semibold">Leave Details</h3>
               <button
                 onClick={() => setViewModalOpen(false)}
@@ -738,7 +746,7 @@ export default function LeavesPage() {
 
       {/* Edit Modal */}
       {editModalOpen && editingLeave && (
-        <div className="fixed inset-0 backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-[105] p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="bg-[#A4B494] text-white px-6 py-4 rounded-t-lg flex justify-between items-center">
               <h3 className="text-xl font-semibold">Edit Leave</h3>
@@ -850,6 +858,7 @@ export default function LeavesPage() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </main>
   );
 }

@@ -8,6 +8,7 @@ const NoticePage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
+  const [dateFilter, setDateFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -37,9 +38,19 @@ const NoticePage = () => {
       const matchesFilter = filterType === 'all' || 
         (filterType === 'recent' && (new Date() - new Date(notice.issueDate)) / (1000 * 60 * 60 * 24) <= 7);
 
-      return matchesSearch && matchesFilter;
+      let matchesDate = true;
+      if (dateFilter) {
+        const filterD = new Date(dateFilter);
+        const noticeD = new Date(notice.issueDate);
+        matchesDate = 
+          filterD.getFullYear() === noticeD.getFullYear() &&
+          filterD.getMonth() === noticeD.getMonth() &&
+          filterD.getDate() === noticeD.getDate();
+      }
+
+      return matchesSearch && matchesFilter && matchesDate;
     });
-  }, [allNotices, searchTerm, filterType]);
+  }, [allNotices, searchTerm, filterType, dateFilter]);
 
   // Pagination Logic
   const totalPages = Math.ceil(filteredNotices.length / itemsPerPage);
@@ -68,7 +79,7 @@ const NoticePage = () => {
         </h2>
 
         {/* Search and Filter */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <input 
             type="text"
             placeholder="Search..."
@@ -90,6 +101,23 @@ const NoticePage = () => {
             <option value="all">All</option>
             <option value="recent">Recent</option>
           </select>
+          <input
+            type="date"
+            value={dateFilter}
+            onChange={(e) => {
+              setDateFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="px-3 py-1.5 border border-gray-300 rounded text-sm outline-none focus:border-[#4F8CCF] cursor-pointer [color-scheme:light]"
+          />
+          {dateFilter && (
+            <button 
+              onClick={() => { setDateFilter(''); setCurrentPage(1); }}
+              className="px-3 py-1.5 bg-red-50 text-red-500 border border-red-200 hover:border-red-500 text-sm font-medium rounded transition"
+            >
+              Clear
+            </button>
+          )}
         </div>
       </div>
 
@@ -107,59 +135,81 @@ const NoticePage = () => {
 
             return (
               <div key={noticeId} className="mb-6 sm:mb-8">
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 sm:mb-1 gap-1 sm:gap-0">
-                  <h2 className="text-base sm:text-lg font-bold">{notice.title}</h2>
-                  <p className="text-xs sm:text-sm font-semibold text-gray-700">
-                    {new Date(notice.issueDate).toLocaleDateString()}
-                  </p>
-                </div>
-                <div className="shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none rounded-md p-3 sm:p-4 md:p-5">
-                  <p className="text-sm sm:text-base leading-relaxed whitespace-pre-line">
-                    {displayText}
-                  </p>
-                  {needsTruncation && (
-                    <button 
-                      onClick={() => toggleNotice(noticeId)}
-                      className="mt-2 text-[#4F8CCF] font-bold text-xs hover:underline cursor-pointer"
-                    >
-                      {isExpanded ? "Read Less" : "Read More"}
-                    </button>
-                  )}
+                <div className="bg-white shadow-[0_4px_15px_rgba(0,0,0,0.1)] border border-gray-100 rounded-xl overflow-hidden flex flex-col">
+                  {/* Header: Title and Date */}
+                  <div className="bg-[#AAB491] px-5 py-3 sm:px-6 sm:py-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0">
+                    <h2 className="text-base sm:text-lg font-semibold text-black">{notice.title}</h2>
+                    <p className="text-xs sm:text-sm font-medium text-black/80">
+                      {new Date(notice.issueDate).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                    </p>
+                  </div>
+                  
+                  {/* Content: Message */}
+                  <div className="p-5 sm:p-6 text-gray-800">
+                    <p className="text-sm sm:text-base leading-relaxed whitespace-pre-line">
+                      {displayText}
+                    </p>
+                    {needsTruncation && (
+                      <button 
+                        onClick={() => toggleNotice(noticeId)}
+                        className="mt-3 text-[#4F8CCF] font-semibold text-sm hover:underline cursor-pointer transition-colors"
+                      >
+                        {isExpanded ? "Read Less" : "Read More"}
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             );
           })}
 
           {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex justify-center items-center gap-2 mt-8">
-              <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="px-3 py-1 bg-gray-100 rounded disabled:opacity-50 text-sm font-medium"
-              >
-                Prev
-              </button>
-              
-              {[...Array(totalPages)].map((_, i) => (
+          {totalPages > 0 && (
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 pt-6 border-t border-gray-100">
+              <div className="text-sm text-gray-600 font-medium bg-gray-50 px-4 py-2 rounded-full border border-gray-200">
+                Showing {filteredNotices.length > 0 ? startIndex + 1 : 0} - {Math.min(startIndex + itemsPerPage, filteredNotices.length)} of {filteredNotices.length} notices
+              </div>
+              <div className="flex flex-wrap items-center justify-center gap-2">
                 <button
-                  key={i}
-                  onClick={() => handlePageChange(i + 1)}
-                  className={`px-3 py-1 rounded text-sm font-medium ${
-                    currentPage === i + 1 ? 'bg-[#4F8CCF] text-white' : 'bg-gray-100'
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className={`px-3 py-1.5 rounded-lg font-medium text-sm transition-all duration-200 ${
+                    currentPage === 1 
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                      : 'bg-white text-gray-700 border border-gray-200 hover:border-[#4F8CCF] hover:text-[#4F8CCF] hover:shadow-sm cursor-pointer'
                   }`}
                 >
-                  {i + 1}
+                  Previous
                 </button>
-              ))}
+                
+                <div className="flex flex-wrap items-center justify-center gap-1">
+                  {[...Array(totalPages)].map((_, i) => (
+                    <button
+                      key={i + 1}
+                      onClick={() => handlePageChange(i + 1)}
+                      className={`w-8 h-8 rounded-lg font-medium text-sm transition-all duration-200 ${
+                        currentPage === i + 1
+                          ? 'bg-[#4F8CCF] text-white shadow-md'
+                          : 'bg-white text-gray-600 border border-gray-200 hover:border-[#4F8CCF] hover:text-[#4F8CCF] cursor-pointer'
+                      }`}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                </div>
 
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="px-3 py-1 bg-gray-100 rounded disabled:opacity-50 text-sm font-medium"
-              >
-                Next
-              </button>
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className={`px-3 py-1.5 rounded-lg font-medium text-sm transition-all duration-200 ${
+                    currentPage === totalPages 
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                      : 'bg-white text-gray-700 border border-gray-200 hover:border-[#4F8CCF] hover:text-[#4F8CCF] hover:shadow-sm cursor-pointer'
+                  }`}
+                >
+                  Next
+                </button>
+              </div>
             </div>
           )}
         </>

@@ -11,6 +11,8 @@ export default function AttendanceLog() {
   const [studentId, setStudentId] = useState(null);
   const [currentStatus, setCurrentStatus] = useState('OUT'); // 'IN' or 'OUT'
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [attendanceStats, setAttendanceStats] = useState({ present: 0, absent: 0 });
   
   // Camera & Location states
   const [showScanner, setShowScanner] = useState(false);
@@ -51,8 +53,24 @@ export default function AttendanceLog() {
     }
   };
 
+  const fetchStats = async () => {
+    if (!studentId) return;
+    try {
+      const res = await api.get(`/attendanceSummary/${studentId}?range=month`);
+      if (res.data) {
+        setAttendanceStats({
+          present: res.data.present ?? 0,
+          absent: res.data.absent ?? 0,
+        });
+      }
+    } catch (err) {
+      console.error("Failed to fetch attendance stats", err);
+    }
+  };
+
   useEffect(() => {
     fetchLogs();
+    fetchStats();
   }, [studentId]);
 
   // --- Attendance Logic ---
@@ -154,33 +172,53 @@ export default function AttendanceLog() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-[#F8FAF5] pb-10">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <main className="bg-[#ffffff] px-6 sm:px-8 lg:px-2.5 py-2 min-h-screen font-sans pb-10">
+      <div className="max-w-7xl mx-auto space-y-6 mt-4">
+        <h2 className="text-xl sm:text-2xl font-semibold mb-6 text-black border-l-4 border-[#4F8CCF] pl-2">
+          Attendance
+        </h2>
         
         {/* Header Section */}
-        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-4">
-            <div className={`p-4 rounded-2xl ${currentStatus === 'IN' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'}`}>
-              {currentStatus === 'IN' ? <FiLogIn size={32} /> : <FiLogOut size={32} />}
+        <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full">
+          <div className="bg-[#AAB491] px-6 py-3 rounded-t-lg">
+            <h2 className="text-lg font-semibold text-black">Attendance Center</h2>
+          </div>
+          <div className="p-7 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="flex items-center gap-4">
+              <div className={`p-4 rounded-lg ${currentStatus === 'IN' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'}`}>
+                {currentStatus === 'IN' ? <FiLogIn size={32} /> : <FiLogOut size={32} />}
+              </div>
+              <div>
+                <p className="text-base font-semibold text-black">
+                  Status: <span className={currentStatus === 'IN' ? 'text-green-600' : 'text-orange-600'}>{currentStatus === 'IN' ? 'Checked IN' : 'Checked OUT'}</span>
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-2xl font-black text-gray-800">Attendance Center</h2>
-              <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">
-                Status: <span className={currentStatus === 'IN' ? 'text-green-600' : 'text-orange-600'}>{currentStatus === 'IN' ? 'Checked IN' : 'Checked OUT'}</span>
-              </p>
+
+            <div className="flex gap-4">
+              <div className="bg-blue-50 px-6 py-2 rounded-lg border border-blue-200 text-center min-w-[100px]">
+                <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider">Present</p>
+                <p className="text-xl font-bold text-blue-700">{attendanceStats.present}</p>
+              </div>
+              <div className="bg-red-50 px-6 py-2 rounded-lg border border-red-200 text-center min-w-[100px]">
+                <p className="text-xs font-semibold text-red-600 uppercase tracking-wider">Absent</p>
+                <p className="text-xl font-bold text-red-700">{attendanceStats.absent}</p>
+              </div>
+              <div className="bg-gray-50 px-6 py-2 rounded-lg border border-gray-200 text-center min-w-[100px]">
+                <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Total</p>
+                <p className="text-xl font-bold text-gray-700">{attendanceStats.present + attendanceStats.absent}</p>
+              </div>
             </div>
           </div>
-          
-          {/* Mark Check-in button removed as requested */}
         </div>
 
         {/* Camera Modal */}
         {showScanner && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-            <div className="bg-white w-full max-w-md rounded-3xl overflow-hidden shadow-2xl">
-              <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-                <h3 className="font-black text-gray-800 uppercase tracking-widest">Selfie Verification</h3>
-                <button onClick={() => { setShowScanner(false); setMarkingAttendance(false); }} className="p-2 bg-gray-100 rounded-full"><FiXCircle /></button>
+            <div className="bg-white w-full max-w-md rounded-lg overflow-hidden shadow-2xl font-sans">
+              <div className="bg-[#AAB491] px-6 py-3 border-b border-gray-100 flex justify-between items-center">
+                <h3 className="text-lg font-semibold text-black">Selfie Verification</h3>
+                <button onClick={() => { setShowScanner(false); setMarkingAttendance(false); }} className="p-2 bg-white/50 hover:bg-white/80 rounded-full text-black"><FiXCircle /></button>
               </div>
               
               <div className="relative aspect-square bg-black">
@@ -201,21 +239,21 @@ export default function AttendanceLog() {
               </div>
               
               <div className="p-6">
-                <div className="flex items-center gap-3 mb-6 p-3 bg-gray-50 rounded-xl">
+                <div className="flex items-center gap-3 mb-6 p-3 bg-gray-50 rounded-lg border border-gray-200">
                   <FiMapPin className="text-blue-500" />
-                  <div className="text-xs font-bold text-gray-600">
+                  <div className="text-sm font-semibold text-black">
                     <p>Verified Location:</p>
-                    <p>{location?.lat.toFixed(6)}, {location?.lng.toFixed(6)}</p>
+                    <p className="text-xs text-gray-500">{location?.lat.toFixed(6)}, {location?.lng.toFixed(6)}</p>
                   </div>
                 </div>
                 
                 {selfie ? (
                   <div className="flex gap-4">
-                    <button onClick={() => setSelfie(null)} className="flex-1 py-4 bg-gray-100 text-gray-600 rounded-2xl font-black uppercase tracking-widest text-xs">Retake</button>
-                    <button onClick={submitAttendance} className="flex-1 py-4 bg-green-500 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-green-200">Confirm & Submit</button>
+                    <button onClick={() => setSelfie(null)} className="flex-1 py-3 bg-gray-200 hover:bg-gray-300 text-black rounded-lg font-semibold text-sm transition-colors">Retake</button>
+                    <button onClick={submitAttendance} className="flex-1 py-3 bg-[#AAB491] hover:bg-[#97a081] text-black rounded-lg font-semibold text-sm transition-colors">Confirm & Submit</button>
                   </div>
                 ) : (
-                  <p className="text-center text-xs font-bold text-gray-400 italic">Position your face in the circle and capture</p>
+                  <p className="text-center text-sm font-semibold text-gray-500 italic">Position your face in the circle and capture</p>
                 )}
               </div>
             </div>
@@ -226,108 +264,124 @@ export default function AttendanceLog() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
           {/* Calendar Section */}
-          <div className="lg:col-span-1 bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-            <div className="flex justify-between items-center mb-6">
-              <button onClick={prevMonth} className="p-2 hover:bg-gray-50 rounded-lg transition-colors"><FiArrowLeft /></button>
-              <h3 className="font-black text-gray-800 uppercase tracking-widest text-sm">
+          <div className="lg:col-span-1 bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full">
+            <div className="bg-[#AAB491] px-6 py-3 rounded-t-lg flex justify-between items-center">
+              <button onClick={prevMonth} className="text-black hover:bg-black/10 p-1 rounded transition-colors"><FiArrowLeft /></button>
+              <h3 className="text-lg font-semibold text-black">
                 {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
               </h3>
-              <button onClick={nextMonth} className="p-2 hover:bg-gray-50 rounded-lg transition-colors"><FiArrowRight /></button>
+              <button onClick={nextMonth} className="text-black hover:bg-black/10 p-1 rounded transition-colors"><FiArrowRight /></button>
             </div>
             
-            <div className="grid grid-cols-7 gap-1 mb-2">
-              {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
-                <div key={i} className="text-center text-[10px] font-black text-gray-400 p-2">{d}</div>
-              ))}
-            </div>
-            
-            <div className="grid grid-cols-7 gap-1">
-              {[...Array(firstDay)].map((_, i) => <div key={`empty-${i}`} className="p-2"></div>)}
-              {[...Array(daysInMonth)].map((_, i) => {
-                const day = i + 1;
-                const marked = hasAttendance(day);
-                const isToday = day === new Date().getDate() && currentDate.getMonth() === new Date().getMonth() && currentDate.getFullYear() === new Date().getFullYear();
-                
-                return (
-                  <div 
-                    key={day} 
-                    className={`aspect-square flex items-center justify-center text-xs font-bold rounded-xl transition-all relative ${
-                      marked ? 'bg-blue-500 text-white shadow-md shadow-blue-100' : 
-                      isToday ? 'bg-gray-100 text-gray-800 border-2 border-[#4F8CCF]' : 'text-gray-600 hover:bg-gray-50'
-                    }`}
-                  >
-                    {day}
-                    {marked && <div className="absolute bottom-1 w-1 h-1 bg-white rounded-full"></div>}
-                  </div>
-                );
-              })}
-            </div>
-            
-            <div className="mt-6 pt-6 border-t border-gray-50 flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-gray-400">
-              <div className="flex items-center gap-1"><div className="w-3 h-3 bg-blue-500 rounded-full"></div> Present</div>
-              <div className="flex items-center gap-1"><div className="w-3 h-3 bg-gray-100 border border-[#4F8CCF] rounded-full"></div> Today</div>
+            <div className="p-7">
+              <div className="grid grid-cols-7 gap-1 mb-2">
+                {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
+                  <div key={i} className="text-center text-sm font-semibold text-gray-600 p-2">{d}</div>
+                ))}
+              </div>
+              
+              <div className="grid grid-cols-7 gap-1">
+                {[...Array(firstDay)].map((_, i) => <div key={`empty-${i}`} className="p-2"></div>)}
+                {[...Array(daysInMonth)].map((_, i) => {
+                  const day = i + 1;
+                  const iterDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+                  const marked = hasAttendance(day);
+                  const isToday = iterDate.toDateString() === new Date().toDateString();
+                  const isSelected = iterDate.toDateString() === selectedDate.toDateString();
+                  
+                  // Calculate if absent (past day, not Sunday, and not marked)
+                  const now = new Date();
+                  now.setHours(0, 0, 0, 0);
+                  const isAbsent = !marked && iterDate < now && iterDate.getDay() !== 0;
+
+                  return (
+                    <div 
+                      key={day} 
+                      onClick={() => setSelectedDate(iterDate)}
+                      className={`aspect-square flex items-center justify-center text-sm font-semibold rounded-lg transition-all relative cursor-pointer ${
+                        isSelected ? 'ring-2 ring-offset-2 ring-blue-500 ' : ''
+                      }${
+                        marked ? 'bg-blue-50 text-blue-600 border border-blue-500' : 
+                        isAbsent ? 'bg-red-500 text-white' :
+                        isToday ? 'bg-gray-100 text-black border border-[#4F8CCF]' : 'text-black hover:bg-gray-100'
+                      }`}
+                    >
+                      {day}
+                    </div>
+                  );
+                })}
+              </div>
+              
+              <div className="mt-6 pt-6 border-t border-gray-200 flex flex-wrap items-center gap-4 text-sm font-semibold text-gray-600">
+                <div className="flex items-center gap-2"><div className="w-3 h-3 bg-blue-50 border border-blue-500 rounded-full"></div> Present</div>
+                <div className="flex items-center gap-2"><div className="w-3 h-3 bg-red-500 rounded-full"></div> Absent</div>
+                <div className="flex items-center gap-2"><div className="w-3 h-3 bg-gray-100 border border-[#4F8CCF] rounded-full"></div> Today</div>
+              </div>
             </div>
           </div>
 
           {/* History Section */}
-          <div className="lg:col-span-2 bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
-            <div className="p-6 border-b border-gray-50 flex justify-between items-center">
-              <h3 className="font-black text-gray-800 uppercase tracking-widest text-sm">Attendance History</h3>
-              <div className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-[10px] font-black">{logs.length} Records</div>
-            </div>
-            
-            <div className="flex-1 overflow-y-auto max-h-[500px]">
-              {loading ? (
-                <div className="p-20 flex flex-col items-center justify-center gap-4">
-                  <div className="w-8 h-8 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
-                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest animate-pulse">Syncing Logs...</p>
+          {(() => {
+            const filteredLogs = logs.filter(log => new Date(log.checkInDate).toDateString() === selectedDate.toDateString());
+            return (
+              <div className="lg:col-span-2 bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] w-full flex flex-col">
+                <div className="bg-[#AAB491] px-6 py-3 rounded-t-lg flex justify-between items-center">
+                  <h3 className="text-lg font-semibold text-black">Attendance History</h3>
+                  <div className="px-3 py-1 bg-white text-black rounded-lg text-sm font-semibold">{filteredLogs.length} Records</div>
                 </div>
-              ) : logs.length === 0 ? (
-                <div className="p-20 text-center">
-                  <FiCalendar className="mx-auto text-4xl text-gray-200 mb-4" />
-                  <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">No records found</p>
-                </div>
-              ) : (
-                <div className="divide-y divide-gray-50">
-                  {logs.map((log, idx) => (
-                    <div key={idx} className="p-5 hover:bg-gray-50/50 transition-colors flex justify-between items-center group">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-gray-50 flex flex-col items-center justify-center border border-gray-100 group-hover:bg-white transition-colors">
-                          <span className="text-[8px] font-black text-gray-400 uppercase">{new Date(log.checkInDate).toLocaleDateString('en-US', { month: 'short' })}</span>
-                          <span className="text-sm font-black text-gray-800 leading-none">{new Date(log.checkInDate).getDate()}</span>
-                        </div>
-                        <div>
-                          <p className="text-xs font-black text-gray-800 flex items-center gap-2">
-                            <FiClock className="text-blue-500" size={12} />
-                            {new Date(log.checkInDate).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })}
-                            {log.checkOutDate && (
-                              <>
-                                <FiArrowRight className="text-gray-300" />
-                                {new Date(log.checkOutDate).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })}
-                              </>
-                            )}
-                          </p>
-                          <p className="text-[10px] font-bold text-gray-400 mt-0.5 flex items-center gap-1">
-                            <FiMapPin size={10} /> 
-                            {log.checkInLocation?.lat.toFixed(4)}, {log.checkInLocation?.lng.toFixed(4)}
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                        log.checkOutDate ? 'bg-gray-100 text-gray-500' : 'bg-green-100 text-green-600'
-                      }`}>
-                        {log.checkOutDate ? 'Completed' : 'Active'}
-                      </div>
+                
+                <div className="flex-1 overflow-y-auto max-h-[500px] p-7">
+                  {loading ? (
+                    <div className="p-10 flex flex-col items-center justify-center gap-4">
+                      <div className="w-8 h-8 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
+                      <p className="text-sm font-semibold text-gray-600">Syncing Logs...</p>
                     </div>
-                  ))}
+                  ) : filteredLogs.length === 0 ? (
+                    <div className="p-10 text-center">
+                      <FiCalendar className="mx-auto text-4xl text-gray-300 mb-4" />
+                      <p className="text-base font-semibold text-gray-500">No records found for {selectedDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</p>
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-gray-200">
+                      {filteredLogs.map((log, idx) => (
+                        <div key={idx} className="py-4 hover:bg-gray-50 transition-colors flex justify-between items-center group px-4 rounded-lg">
+                          <div className="flex items-center gap-4">
+                            <div className="w-14 h-14 rounded-lg bg-gray-100 flex flex-col items-center justify-center border border-gray-200 group-hover:bg-white transition-colors">
+                              <span className="text-xs font-semibold text-gray-500">{new Date(log.checkInDate).toLocaleDateString('en-US', { month: 'short' })}</span>
+                              <span className="text-lg font-semibold text-black leading-none">{new Date(log.checkInDate).getDate()}</span>
+                            </div>
+                            <div>
+                              <p className="text-sm font-semibold text-black flex items-center gap-2">
+                                <FiLogIn className="text-green-500" size={14} />
+                                {new Date(log.checkInDate).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })}
+                                {log.checkOutDate && (
+                                  <>
+                                    <span className="text-gray-300 mx-1">|</span>
+                                    <FiLogOut className="text-orange-500" size={14} />
+                                    {new Date(log.checkOutDate).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })}
+                                  </>
+                                )}
+                              </p>
+
+                            </div>
+                          </div>
+                          
+                          <div className={`px-4 py-1.5 rounded-lg text-xs font-semibold ${
+                            log.checkOutDate ? 'bg-gray-200 text-gray-700' : 'bg-green-100 text-green-700'
+                          }`}>
+                            {log.checkOutDate ? 'Completed' : 'Active'}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </div>
+              </div>
+            );
+          })()}
 
         </div>
       </div>
-    </div>
+    </main>
   );
 }

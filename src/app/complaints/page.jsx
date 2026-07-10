@@ -29,23 +29,23 @@ import Sidebar from "@/components/layout/sidebar";
 
 export default function ComplaintsPage() {
   return (
-    <div className="flex min-h-screen bg-white overflow-x-hidden">
+    <div className="flex min-h-screen bg-white">
 
       {/* Sidebar */}
       <Sidebar />
 
       {/* Main Content */}
-      <main className="flex flex-col flex-1 min-w-0 overflow-x-hidden">
+      <div className="flex flex-col flex-1 min-w-0">
 
         {/* Navbar */}
         <Header />
 
         {/* Page Content */}
-        <div className="flex-1 w-full overflow-y-auto p-4 lg:p-8">
+        <main className="flex-1 w-full p-4 lg:p-8">
           <Complaints />
-        </div>
+        </main>
 
-      </main>
+      </div>
 
     </div>
   );

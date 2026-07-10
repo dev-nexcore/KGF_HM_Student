@@ -38,7 +38,7 @@ export default function DashboardContent() {
     absent: 0,
   });
   const [totalDays, setTotalDays] = useState(0);
-  const [selectedRange, setSelectedRange] = useState("day");
+  const [selectedRange, setSelectedRange] = useState("month");
   const [barcodeId, setBarcodeId] = useState("");
   const [bedAllotment, setBedAllotment] = useState("");
   const [floor, setFloor] = useState("");
@@ -213,7 +213,8 @@ export default function DashboardContent() {
           // Always set recent notices for the card
           setRecentNotices(sortedNotices.slice(0, 3));
           
-          const newestNotice = sortedNotices[0];
+          // Find the newest notice that hasn't been read by the student
+          const firstUnreadNotice = sortedNotices.find(n => !n.isRead);
 
           // Popup Logic - ONLY SHOW ONCE PER LOGIN SESSION
           const noticeShownThisSession = sessionStorage.getItem(
@@ -221,18 +222,9 @@ export default function DashboardContent() {
           );
 
           if (noticeShownThisSession !== "true") {
-            // Check if student has permanently marked this notice as read
-            const lastReadNoticeId = localStorage.getItem(
-              `lastReadNotice_${studentId}`
-            );
-
-            // Show popup only if it's a new notice
-            if (lastReadNoticeId !== (newestNotice._id || newestNotice.id)) {
-              setLatestNotice(newestNotice);
+            if (firstUnreadNotice) {
+              setLatestNotice(firstUnreadNotice);
               setShowNoticePopup(true);
-
-              // Mark that we've shown a notice in this session
-              sessionStorage.setItem(`noticeShown_${studentId}`, "true");
             }
           }
         }
@@ -251,13 +243,14 @@ export default function DashboardContent() {
   }, [studentId]);
 
   // Handle marking notice as read - PERMANENT
-  const handleMarkNoticeAsRead = () => {
+  const handleMarkNoticeAsRead = async () => {
     if (latestNotice && studentId) {
-      // Save to localStorage - persists even after logout
-      localStorage.setItem(
-        `lastReadNotice_${studentId}`,
-        latestNotice._id || latestNotice.id
-      );
+      // Mark in backend so it persists across devices/logins
+      try {
+        await api.patch(`/notices/${latestNotice._id || latestNotice.id}/read`);
+      } catch (err) {
+        console.error("Failed to mark notice as read in backend", err);
+      }
 
       // Also mark in sessionStorage that we've shown it
       sessionStorage.setItem(`noticeShown_${studentId}`, "true");
@@ -407,7 +400,7 @@ export default function DashboardContent() {
           Overview
         </h2>
         <div className="text-sm text-gray-500 font-medium">
-          Last login: {new Date().toLocaleDateString('en-IN')}
+          Last login: {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}
         </div>
       </div>
 
@@ -594,9 +587,9 @@ export default function DashboardContent() {
                   <span>Next Inspection:</span>
                   <span>
                     {inspection.date
-                      ? new Date(inspection.date).toLocaleDateString("en-IN", {
-                          day: "numeric",
-                          month: "long",
+                      ? new Date(inspection.date).toLocaleDateString("en-GB", {
+                          day: "2-digit",
+                          month: "2-digit",
                           year: "numeric",
                         })
                       : "-"}
@@ -664,37 +657,42 @@ export default function DashboardContent() {
           </div>
           <div className="p-7 flex flex-col gap-5 text-base font-semibold text-black">
             {fees.length > 0 ? (
-              fees.map((fee, index) => (
-                <div key={index} className="flex flex-col gap-3">
-                  <div className="flex justify-between">
-                    <span>{fee.feeType} Fee:</span>
-                    <span
-                      className={
-                        fee.status === "paid"
-                          ? "text-green-600"
-                          : fee.status === "unpaid"
-                          ? "text-yellow-600"
-                          : "text-red-600"
-                      }
-                    >
-                      {fee.status.charAt(0).toUpperCase() + fee.status.slice(1)}
-                    </span>
+              <>
+                {fees.slice(0, 2).map((fee, index) => (
+                  <div key={index} className="flex flex-col gap-3">
+                    <div className="flex justify-between">
+                      <span>{fee.feeType}:</span>
+                      <span
+                        className={
+                          fee.status === "paid"
+                            ? "text-green-600"
+                            : fee.status === "unpaid"
+                            ? "text-yellow-600"
+                            : "text-red-600"
+                        }
+                      >
+                        {fee.status.charAt(0).toUpperCase() + fee.status.slice(1)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Due Date:</span>
+                      <span>
+                        {new Date(fee.dueDate).toLocaleDateString("en-GB", { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Amount:</span>
+                      <span>₹ {fee.amount}</span>
+                    </div>
+                    {index < fees.slice(0, 2).length - 1 && (
+                      <hr className="border-gray-300" />
+                    )}
                   </div>
-                  <div className="flex justify-between">
-                    <span>Due Date:</span>
-                    <span>
-                      {new Date(fee.dueDate).toLocaleDateString("en-IN")}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Amount:</span>
-                    <span>₹ {fee.amount}</span>
-                  </div>
-                  {index < fees.length - 1 && (
-                    <hr className="border-gray-300" />
-                  )}
-                </div>
-              ))
+                ))}
+                {fees.length > 2 && (
+                  <p className="text-center text-xs text-[#4F8DCF] font-semibold mt-2">View more</p>
+                )}
+              </>
             ) : (
               <div className="text-base">No fees found</div>
             )}
@@ -729,7 +727,7 @@ export default function DashboardContent() {
                       </span>
                     </div>
                     <div className="flex items-center gap-1 text-[11px] text-gray-500">
-                      <FiClock /> {new Date(comp.filedDate || comp.createdAt).toLocaleDateString()}
+                      <FiClock /> {new Date(comp.filedDate || comp.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                     </div>
                   </div>
                 ))}
@@ -757,9 +755,9 @@ export default function DashboardContent() {
                 {recentNotices.map((notice, idx) => (
                   <div key={idx} className="border-l-4 border-blue-400 pl-3 py-1">
                     <h4 className="text-sm font-bold text-gray-800 line-clamp-1">{notice.title}</h4>
-                    <p className="text-xs text-gray-500 line-clamp-1">{notice.description}</p>
+                    <p className="text-xs text-gray-500 line-clamp-1">{notice.message}</p>
                     <span className="text-[10px] text-gray-400 font-medium">
-                      {new Date(notice.issueDate).toLocaleDateString()}
+                      {new Date(notice.issueDate).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                     </span>
                   </div>
                 ))}

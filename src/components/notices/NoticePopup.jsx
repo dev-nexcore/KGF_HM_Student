@@ -76,9 +76,9 @@ const NoticePopup = ({ notice, onMarkAsRead }) => {
           {/* Date Badge */}
           <div className="flex justify-end mb-3">
             <span className="text-xs font-semibold text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
-              {new Date(notice.issueDate).toLocaleDateString("en-IN", {
-                day: "numeric",
-                month: "long",
+              {new Date(notice.issueDate).toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "2-digit",
                 year: "numeric",
               })}
             </span>

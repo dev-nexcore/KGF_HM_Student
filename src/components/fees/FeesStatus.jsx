@@ -1,18 +1,26 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import api from '@/lib/api';
-import PaymentModal from './PaymentModal';
 import { toast } from 'react-hot-toast';
 
 export default function FeesStatus() {
-  const [showModal, setShowModal] = useState(false);
   const [currentFees, setCurrentFees] = useState([]);
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [studentProfile, setStudentProfile] = useState(null);
   const [ready, setReady] = useState(false);
-  const [selectedFeeAmount, setSelectedFeeAmount] = useState(null);
+
+  // Search, Filter, Pagination States
+  const [currentSearch, setCurrentSearch] = useState('');
+  const [currentFilter, setCurrentFilter] = useState('All');
+  const [currentFeesPage, setCurrentFeesPage] = useState(1);
+
+  const [historySearch, setHistorySearch] = useState('');
+  const [historyFilter, setHistoryFilter] = useState('All');
+  const [historyPage, setHistoryPage] = useState(1);
+
+  const itemsPerPage = 5;
 
   useEffect(() => {
     setReady(true);
@@ -53,17 +61,55 @@ console.log(profileRes.data)
 
   if (!ready) return null;
 
-  return (
-    <div className="w-full min-h-screen bg-white pt-2 pb-6 sm:pb-10 sm:px-2.5 dark:bg-white overflow-hidden">
-      <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-black border-l-4 border-[#4F8CCF] pl-2 mb-4 sm:mb-6">
-        Fees Status
-      </h2>
+  // Derived Data for Current Fees
+  const filteredCurrentFees = currentFees.filter(fee => {
+    const matchesSearch = fee.feeType.toLowerCase().includes(currentSearch.toLowerCase());
+    const matchesFilter = currentFilter === 'All' || fee.status.toLowerCase() === currentFilter.toLowerCase();
+    return matchesSearch && matchesFilter;
+  });
+  const paginatedCurrentFees = filteredCurrentFees.slice((currentFeesPage - 1) * itemsPerPage, currentFeesPage * itemsPerPage);
+  const currentTotalPages = Math.ceil(filteredCurrentFees.length / itemsPerPage);
 
-      {/* Current Fees Status Card */}
-      <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none overflow-hidden w-full max-w-2xl min-h-[400px] mb-6 sm:mb-8">
-        <div className="bg-[#A4B494] px-6 sm:px-8 py-4 sm:py-5">
-          <h3 className="text-lg sm:text-xl font-bold text-black">Current Fees Status</h3>
-        </div>
+  // Derived Data for History Fees
+  const uniqueHistoryFeeTypes = ["All", ...new Set(paymentHistory.map(f => f.feeType))];
+  const filteredHistoryFees = paymentHistory.filter(fee => {
+    const matchesSearch = fee.feeType.toLowerCase().includes(historySearch.toLowerCase());
+    const matchesFilter = historyFilter === 'All' || fee.feeType === historyFilter;
+    return matchesSearch && matchesFilter;
+  });
+  const paginatedHistoryFees = filteredHistoryFees.slice((historyPage - 1) * itemsPerPage, historyPage * itemsPerPage);
+  const historyTotalPages = Math.ceil(filteredHistoryFees.length / itemsPerPage);
+
+  return (
+    <main className="bg-[#ffffff] px-6 sm:px-8 lg:px-2.5 py-2 min-h-screen font-sans pb-10">
+      <div className="max-w-7xl mx-auto space-y-6 mt-4">
+        <h2 className="text-xl sm:text-2xl font-semibold mb-6 text-black border-l-4 border-[#4F8CCF] pl-2">
+          Fees Status
+        </h2>
+
+        {/* Current Fees Status Card */}
+        <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none w-full">
+          <div className="bg-[#AAB491] px-6 py-3 rounded-t-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <h2 className="text-lg font-semibold text-black">Current Fees Status</h2>
+            <div className="flex gap-3 w-full sm:w-auto">
+              <input 
+                type="text" 
+                placeholder="Search fee type..." 
+                className="px-3 py-1.5 rounded-md border border-gray-300 text-sm w-full sm:w-48 focus:outline-none focus:border-[#8b9674] text-black"
+                value={currentSearch}
+                onChange={(e) => { setCurrentSearch(e.target.value); setCurrentFeesPage(1); }}
+              />
+              <select 
+                className="px-3 py-1.5 rounded-md border border-gray-300 text-sm focus:outline-none focus:border-[#8b9674] text-black"
+                value={currentFilter}
+                onChange={(e) => { setCurrentFilter(e.target.value); setCurrentFeesPage(1); }}
+              >
+                <option value="All">All Status</option>
+                <option value="unpaid">Unpaid</option>
+                <option value="overdue">Overdue</option>
+              </select>
+            </div>
+          </div>
 
         {loading ? (
           <div className="flex items-center justify-center h-80 text-gray-600">
@@ -78,60 +124,136 @@ console.log(profileRes.data)
             <p className="text-sm">No pending fees at the moment.</p>
           </div>
         ) : (
-          currentFees.map((fee, idx) => (
-            <div key={idx} className="flex flex-col h-80 px-6 sm:px-8 py-6 sm:py-8">
-              <div className="flex-1 flex flex-col justify-center space-y-8 text-lg">
-                <div className="flex justify-between">
-                  <span className="font-semibold text-black">Fee Type:</span>
-                  <span className="font-medium text-black">{fee.feeType}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-semibold text-black">Due Date:</span>
-                  <span className="font-medium text-black">
-                    {new Date(fee.dueDate).toLocaleDateString('en-IN', {
-                      day: '2-digit',
-                      month: 'short',
-                      year: 'numeric'
-                    })}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-semibold text-black">Amount:</span>
-                  <span className="font-medium text-black text-xl font-bold">₹ {fee.amount?.toLocaleString('en-IN')}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-semibold text-black">Status:</span>
-                  <span className={`font-bold px-3 py-1 rounded-full text-xs uppercase tracking-wider ${
-                    fee.status === 'overdue' ? 'bg-red-100 text-red-700' :
-                    fee.status === 'unpaid' ? 'bg-yellow-100 text-yellow-700' :
-                    'bg-green-100 text-green-700'
-                  }`}>
-                    {fee.status}
-                  </span>
-                </div>
-              </div>
-              <div className="flex justify-center pb-2">
-                <button
-                  onClick={() => {
-                    setSelectedFeeAmount(fee.amount);
-                    setShowModal(true);
-                  }}
-                  className="bg-[#A4B494] hover:bg-[#8fa082] px-12 py-3 rounded-xl text-black font-bold shadow-lg transition-all active:scale-95"
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden sm:block overflow-x-auto p-5 sm:p-8">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-100">
+                    <th className="text-left p-4 font-bold text-gray-600">Fee Type</th>
+                    <th className="text-left p-4 font-bold text-gray-600">Due Date</th>
+                    <th className="text-left p-4 font-bold text-gray-600">Amount (₹)</th>
+                    <th className="text-left p-4 font-bold text-gray-600">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedCurrentFees.length === 0 ? (
+                    <tr>
+                      <td colSpan="4" className="text-center p-8 text-gray-500">No matching fees found</td>
+                    </tr>
+                  ) : (
+                    paginatedCurrentFees.map((fee, idx) => (
+                      <tr key={idx} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                        <td className="p-4 text-gray-700">{fee.feeType}</td>
+                        <td className="p-4 text-gray-700 font-medium">
+                          {new Date(fee.dueDate).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                        </td>
+                        <td className="p-4 text-gray-900 font-bold">₹ {fee.amount?.toLocaleString('en-IN')}</td>
+                        <td className="p-4">
+                          <span className={`font-bold px-3 py-1 rounded-full text-xs uppercase tracking-wider ${
+                            fee.status === 'overdue' ? 'bg-red-100 text-red-700' :
+                            fee.status === 'unpaid' ? 'bg-yellow-100 text-yellow-700' :
+                            'bg-green-100 text-green-700'
+                          }`}>
+                            {fee.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Cards View */}
+            <div className="sm:hidden space-y-4 p-5 sm:p-8">
+              {paginatedCurrentFees.length === 0 ? (
+                <p className="text-center p-8 text-gray-500">No matching fees found</p>
+              ) : (
+                paginatedCurrentFees.map((fee, idx) => (
+                  <div key={idx} className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">Due Date</p>
+                        <p className="text-sm font-bold text-gray-900">
+                          {new Date(fee.dueDate).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                        </p>
+                      </div>
+                      <span className={`px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${
+                        fee.status === 'overdue' ? 'bg-red-100 text-red-700' :
+                        fee.status === 'unpaid' ? 'bg-yellow-100 text-yellow-700' :
+                        'bg-green-100 text-green-700'
+                      }`}>
+                        {fee.status}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-xs text-gray-500">Type</p>
+                        <p className="text-sm font-medium">{fee.feeType}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Amount</p>
+                        <p className="text-sm font-black text-gray-900">₹ {fee.amount?.toLocaleString('en-IN')}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Pagination Controls for Current Fees */}
+            {currentTotalPages > 1 && (
+              <div className="flex justify-end items-center space-x-2 p-5 sm:p-8 border-t border-gray-100">
+                <button 
+                  onClick={() => setCurrentFeesPage(p => Math.max(1, p - 1))} 
+                  disabled={currentFeesPage === 1}
+                  className="px-3 py-1 rounded bg-gray-100 text-gray-600 disabled:opacity-50 hover:bg-gray-200 transition-colors text-sm font-medium"
                 >
-                  Pay Now
+                  Prev
+                </button>
+                <span className="text-sm text-gray-600 font-medium">
+                  Page {currentFeesPage} of {currentTotalPages}
+                </span>
+                <button 
+                  onClick={() => setCurrentFeesPage(p => Math.min(currentTotalPages, p + 1))} 
+                  disabled={currentFeesPage === currentTotalPages}
+                  className="px-3 py-1 rounded bg-gray-100 text-gray-600 disabled:opacity-50 hover:bg-gray-200 transition-colors text-sm font-medium"
+                >
+                  Next
                 </button>
               </div>
-            </div>
-          ))
+            )}
+          </>
         )}
       </div>
 
       {/* Payment History Table */}
-      <div className="bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.1)] w-full max-w-7xl overflow-hidden">
+      <div className="bg-white rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.2)] focus:outline-none w-full overflow-hidden">
+        <div className="bg-[#AAB491] px-6 py-3 rounded-t-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <h2 className="text-lg font-semibold text-black">Payment History</h2>
+          <div className="flex gap-3 w-full sm:w-auto">
+            <input 
+              type="text" 
+              placeholder="Search history..." 
+              className="px-3 py-1.5 rounded-md border border-gray-300 text-sm w-full sm:w-48 focus:outline-none focus:border-[#8b9674] text-black"
+              value={historySearch}
+              onChange={(e) => { setHistorySearch(e.target.value); setHistoryPage(1); }}
+            />
+            <select 
+              className="px-3 py-1.5 rounded-md border border-gray-300 text-sm focus:outline-none focus:border-[#8b9674] text-black"
+              value={historyFilter}
+              onChange={(e) => { setHistoryFilter(e.target.value); setHistoryPage(1); }}
+            >
+              {uniqueHistoryFeeTypes.map(type => (
+                <option key={type} value={type}>
+                  {type === 'All' ? 'All Fee Types' : type}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
         <div className="p-5 sm:p-8">
-          <h3 className="text-lg sm:text-xl font-bold mb-6 text-black flex items-center gap-2">
-            Payment History
-          </h3>
 
           {/* Desktop Table View */}
           <div className="hidden sm:block overflow-x-auto">
@@ -150,11 +272,15 @@ console.log(profileRes.data)
                   <tr>
                     <td colSpan="5" className="text-center p-10 text-gray-400">No payment records found</td>
                   </tr>
+                ) : paginatedHistoryFees.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" className="text-center p-10 text-gray-500">No matching history found</td>
+                  </tr>
                 ) : (
-                  paymentHistory.map((item, idx) => (
+                  paginatedHistoryFees.map((item, idx) => (
                     <tr key={idx} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                       <td className="p-4 text-gray-700 font-medium">
-                        {new Date(item.updatedAt || item.dueDate).toLocaleDateString('en-IN')}
+                        {new Date(item.updatedAt || item.dueDate).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                       </td>
                       <td className="p-4 text-gray-700">{item.feeType}</td>
                       <td className="p-4 text-gray-900 font-bold">₹{item.amount?.toLocaleString('en-IN')}</td>
@@ -175,13 +301,15 @@ console.log(profileRes.data)
           <div className="sm:hidden space-y-4">
             {paymentHistory.length === 0 ? (
               <p className="text-center py-10 text-gray-400">No payment records found</p>
+            ) : paginatedHistoryFees.length === 0 ? (
+              <p className="text-center py-10 text-gray-500">No matching history found</p>
             ) : (
-              paymentHistory.map((item, idx) => (
+              paginatedHistoryFees.map((item, idx) => (
                 <div key={idx} className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
                   <div className="flex justify-between items-start mb-3">
                     <div>
                       <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">Date</p>
-                      <p className="text-sm font-bold text-gray-900">{new Date(item.updatedAt || item.dueDate).toLocaleDateString('en-IN')}</p>
+                      <p className="text-sm font-bold text-gray-900">{new Date(item.updatedAt || item.dueDate).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</p>
                     </div>
                     <span className="bg-green-100 text-green-700 px-2 py-1 rounded-lg text-[10px] font-bold uppercase">
                       Paid
@@ -201,18 +329,32 @@ console.log(profileRes.data)
               ))
             )}
           </div>
+
+          {/* Pagination Controls for History */}
+          {historyTotalPages > 1 && (
+            <div className="flex justify-end items-center space-x-2 mt-4 pt-4 border-t border-gray-100">
+              <button 
+                onClick={() => setHistoryPage(p => Math.max(1, p - 1))} 
+                disabled={historyPage === 1}
+                className="px-3 py-1 rounded bg-gray-100 text-gray-600 disabled:opacity-50 hover:bg-gray-200 transition-colors text-sm font-medium"
+              >
+                Prev
+              </button>
+              <span className="text-sm text-gray-600 font-medium">
+                Page {historyPage} of {historyTotalPages}
+              </span>
+              <button 
+                onClick={() => setHistoryPage(p => Math.min(historyTotalPages, p + 1))} 
+                disabled={historyPage === historyTotalPages}
+                className="px-3 py-1 rounded bg-gray-100 text-gray-600 disabled:opacity-50 hover:bg-gray-200 transition-colors text-sm font-medium"
+              >
+                Next
+              </button>
+            </div>
+          )}
         </div>
       </div>
-
-      {/* Payment Modal */}
-      <PaymentModal
-        isOpen={showModal}
-        onClose={() => {
-          setShowModal(false);
-          setSelectedFeeAmount(null);
-        }}
-        amount={selectedFeeAmount}
-      />
-    </div>
+      </div>
+    </main>
   );
 }

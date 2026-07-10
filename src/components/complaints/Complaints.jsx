@@ -5,6 +5,52 @@ import api from "@/lib/api";
 import toast from "react-hot-toast";
 import { FiUpload, FiX, FiFile, FiImage, FiVideo, FiEye, FiSearch, FiFilter, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 
+const AttachmentThumbnail = ({ complaintId, attachment }) => {
+  const [thumbUrl, setThumbUrl] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let url = null;
+    if (attachment.mimeType?.startsWith('image/')) {
+      api.get(`/complaint/${complaintId}/attachment/${attachment._id}`, { responseType: 'blob' })
+        .then(res => {
+          url = URL.createObjectURL(res.data);
+          setThumbUrl(url);
+          setLoading(false);
+        })
+        .catch(err => {
+          // Silently ignore 404s for thumbnails to prevent Next.js error overlay
+          setLoading(false);
+        });
+    } else {
+      setLoading(false);
+    }
+    return () => {
+      if (url) URL.revokeObjectURL(url);
+    };
+  }, [complaintId, attachment._id, attachment.mimeType]);
+
+  if (!attachment.mimeType?.startsWith('image/')) {
+    return (
+       <div className="h-24 w-full bg-gray-100 rounded-lg flex items-center justify-center mb-2">
+         {attachment.mimeType?.startsWith('video/') ? <FiVideo className="text-gray-400 w-8 h-8" /> : <FiFile className="text-gray-400 w-8 h-8" />}
+       </div>
+    );
+  }
+
+  return (
+    <div className="h-24 w-full bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden relative mb-2">
+      {loading ? (
+        <div className="w-5 h-5 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
+      ) : thumbUrl ? (
+        <img src={thumbUrl} alt="Thumbnail" className="w-full h-full object-cover" />
+      ) : (
+        <FiImage className="text-gray-400 w-8 h-8" />
+      )}
+    </div>
+  );
+};
+
 export default function Complaints() {
   const [complaintType, setComplaintType] = useState("");
   const [subject, setSubject] = useState("");
@@ -317,7 +363,7 @@ export default function Complaints() {
         filename: filename || 'attachment'
       });
     } catch (error) {
-      console.error("Failed to fetch attachment:", error);
+      // Silently ignore 404s in console to prevent Next.js error overlay, but show toast
       toast.error("Failed to load the attachment. Please try again later.");
     }
   };
@@ -341,7 +387,7 @@ export default function Complaints() {
     if (!dateStr) return "-";
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return "-";
-    return d.toLocaleDateString();
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
   };
 
   return (
@@ -811,7 +857,7 @@ export default function Complaints() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-opacity-50 backdrop-blur-sm">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
             {/* Modal Header */}
-            <div className="bg-[#4F8DCF] px-6 py-4 flex justify-between items-center">
+            <div className="bg-[#A4B494] px-6 py-4 flex justify-between items-center">
               <h3 className="text-white font-bold text-lg">Complaint Details</h3>
               <button
                 onClick={() => setShowModal(false)}
@@ -840,7 +886,7 @@ export default function Complaints() {
                 </div>
                 <div>
                   <label className="text-xs font-bold text-gray-500 uppercase">Filed Date</label>
-                  <p className="text-gray-800">{new Date(selectedComplaint.createdAt).toLocaleDateString("en-IN")}</p>
+                  <p className="text-gray-800">{new Date(selectedComplaint.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</p>
                 </div>
               </div>
 
@@ -900,14 +946,8 @@ export default function Complaints() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {selectedComplaint.attachments.map((attachment, idx) => (
                       <div key={idx} className="border rounded-xl p-3 hover:bg-gray-50 transition-all flex flex-col gap-2 shadow-sm">
+                        <AttachmentThumbnail complaintId={selectedComplaint._id} attachment={attachment} />
                         <div className="flex items-center gap-2">
-                          {attachment.mimeType?.startsWith('image/') ? (
-                            <FiImage className="text-blue-500 shrink-0" />
-                          ) : attachment.mimeType?.startsWith('video/') ? (
-                            <FiVideo className="text-purple-500 shrink-0" />
-                          ) : (
-                            <FiFile className="text-gray-500 shrink-0" />
-                          )}
                           <span className="text-xs font-medium text-gray-700 truncate flex-1" title={attachment.originalName}>
                             {attachment.originalName || attachment.filename}
                           </span>

@@ -243,7 +243,7 @@ export default function Profile() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
                 <InfoItem icon={<FiMail />} label="Email Address" value={profile.email} />
                 <InfoItem icon={<FiPhone />} label="Phone Number" value={profile.contactNumber} />
-                <InfoItem icon={<FiCalendar />} label="Admission Date" value={new Date(profile.admissionDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' })} />
+                <InfoItem icon={<FiCalendar />} label="Admission Date" value={new Date(profile.admissionDate).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })} />
                 <InfoItem icon={<FiMapPin />} label="Floor Level" value={profile.floor || 'N/A'} />
               </div>
             </div>
