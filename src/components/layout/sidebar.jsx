@@ -194,6 +194,7 @@ export default function Sidebar() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
   const [active, setActive] = useState("");
+  const [studentId, setStudentId] = useState("");
 
   // current page active
   useEffect(() => {
@@ -202,6 +203,10 @@ export default function Sidebar() {
   }, [pathname]);
 
   useEffect(() => {
+    const id = localStorage.getItem("studentId");
+    if (id) {
+      setStudentId(id);
+    }
     const handleToggle = () => setSidebarOpen(prev => !prev);
     window.addEventListener("toggleSidebar", handleToggle);
     return () => window.removeEventListener("toggleSidebar", handleToggle);
@@ -229,6 +234,7 @@ export default function Sidebar() {
     { name: "Dashboard", icon: "dashboard.png", href: "/dashboard" },
     { name: "Attendance", icon: "calendar.png", href: "/attendance" },
     { name: "Fees Status", icon: "account_balance_wallet.png", href: "/fees-status" },
+    ...(studentId?.startsWith("STUW-001") ? [{ name: "Make Payment", icon: "account_balance_wallet.png", href: "/make-payment" }] : []),
     { name: "Leaves", icon: "calendar.png", href: "/leaves" },
     { name: "Notices", icon: "filter_frames.png", href: "/notices" },
     { name: "Complaints", icon: "chat_bubble.png", href: "/complaints" },

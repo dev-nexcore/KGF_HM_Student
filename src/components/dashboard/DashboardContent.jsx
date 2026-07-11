@@ -33,10 +33,7 @@ export default function DashboardContent() {
   const [fees, setFees] = useState([]);
   const [latestLeave, setLatestLeave] = useState(null);
   const [inspection, setInspection] = useState(null);
-  const [attendanceData, setAttendanceData] = useState({
-    present: 0,
-    absent: 0,
-  });
+  const [attendanceData, setAttendanceData] = useState({ present: 0, absent: 0, leaves: 0 });
   const [totalDays, setTotalDays] = useState(0);
   const [selectedRange, setSelectedRange] = useState("month");
   const [barcodeId, setBarcodeId] = useState("");
@@ -270,8 +267,9 @@ export default function DashboardContent() {
           setAttendanceData({
             present: res.data.present ?? 0,
             absent: res.data.absent ?? 0,
+            leaves: res.data.leaves ?? 0,
           });
-          setTotalDays((res.data.present ?? 0) + (res.data.absent ?? 0));
+          setTotalDays((res.data.present ?? 0) + (res.data.absent ?? 0) + (res.data.leaves ?? 0));
         }
       })
       .catch((err) => {
@@ -280,11 +278,11 @@ export default function DashboardContent() {
   }, [studentId, selectedRange]);
 
   const chartData = {
-    labels: ["Present", "Absent"],
+    labels: ["Present", "Absent", "Leave"],
     datasets: [
       {
-        data: [attendanceData.present ?? 0, attendanceData.absent ?? 0],
-        backgroundColor: ["#4F8DCF", "#FF0000"],
+        data: [attendanceData.present ?? 0, attendanceData.absent ?? 0, attendanceData.leaves ?? 0],
+        backgroundColor: ["#4F8DCF", "#FF0000", "#F97316"], // F97316 is orange-500
         borderWidth: 0,
       },
     ],
@@ -539,6 +537,18 @@ export default function DashboardContent() {
                   <div className="relative bg-gray-900 text-white text-xs px-3 py-1 rounded-md shadow-md">
                     {attendanceData.absent ?? 0} day
                     {attendanceData.absent === 1 ? "" : "s"}
+                    <div className="absolute left-[-6px] top-1/2 -translate-y-1/2 w-0 h-0 border-t-6 border-t-transparent border-b-6 border-b-transparent border-r-6 border-r-gray-900"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 relative group/tip">
+                <span className="w-4 h-4 rounded-full bg-orange-500"></span>
+                <span className="text-black font-medium">Leave</span>
+                <div className="absolute left-28 top-1 opacity-0 group-hover/tip:opacity-100 transition-opacity duration-200">
+                  <div className="relative bg-gray-900 text-white text-xs px-3 py-1 rounded-md shadow-md">
+                    {attendanceData.leaves ?? 0} day
+                    {attendanceData.leaves === 1 ? "" : "s"}
                     <div className="absolute left-[-6px] top-1/2 -translate-y-1/2 w-0 h-0 border-t-6 border-t-transparent border-b-6 border-b-transparent border-r-6 border-r-gray-900"></div>
                   </div>
                 </div>

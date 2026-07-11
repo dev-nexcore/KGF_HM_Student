@@ -12,8 +12,8 @@ export default function AttendanceLog() {
   const [currentStatus, setCurrentStatus] = useState('OUT'); // 'IN' or 'OUT'
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [attendanceStats, setAttendanceStats] = useState({ present: 0, absent: 0 });
-  
+  const [attendanceStats, setAttendanceStats] = useState({ present: 0, absent: 0, leaves: 0 });
+  const [leaves, setLeaves] = useState([]);
   // Camera & Location states
   const [showScanner, setShowScanner] = useState(false);
   const [selfie, setSelfie] = useState(null);
@@ -61,6 +61,7 @@ export default function AttendanceLog() {
         setAttendanceStats({
           present: res.data.present ?? 0,
           absent: res.data.absent ?? 0,
+          leaves: res.data.leaves ?? 0,
         });
       }
     } catch (err) {
@@ -68,9 +69,22 @@ export default function AttendanceLog() {
     }
   };
 
+  const fetchLeaves = async () => {
+    if (!studentId) return;
+    try {
+      const res = await api.get(`/leaves`);
+      if (res.data && res.data.leaves) {
+        setLeaves(res.data.leaves);
+      }
+    } catch (err) {
+      console.error("Failed to fetch leaves", err);
+    }
+  };
+
   useEffect(() => {
     fetchLogs();
     fetchStats();
+    fetchLeaves();
   }, [studentId]);
 
   // --- Attendance Logic ---
@@ -169,6 +183,19 @@ export default function AttendanceLog() {
     const d = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
     const dateStr = d.toDateString();
     return logs.some(log => new Date(log.checkInDate).toDateString() === dateStr);
+  };
+
+  const isOnLeave = (day) => {
+    const d = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+    d.setHours(0, 0, 0, 0);
+    return leaves.some(leave => {
+      if (leave.status !== 'approved' && leave.status !== 'warden_approved') return false;
+      const start = new Date(leave.startDate);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(leave.endDate);
+      end.setHours(23, 59, 59, 999);
+      return d >= start && d <= end;
+    });
   };
 
   return (
@@ -286,13 +313,14 @@ export default function AttendanceLog() {
                   const day = i + 1;
                   const iterDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
                   const marked = hasAttendance(day);
+                  const onLeave = isOnLeave(day);
                   const isToday = iterDate.toDateString() === new Date().toDateString();
                   const isSelected = iterDate.toDateString() === selectedDate.toDateString();
                   
                   // Calculate if absent (past day, not Sunday, and not marked)
                   const now = new Date();
                   now.setHours(0, 0, 0, 0);
-                  const isAbsent = !marked && iterDate < now && iterDate.getDay() !== 0;
+                  const isAbsent = !marked && !onLeave && iterDate < now;
 
                   return (
                     <div 
@@ -301,7 +329,8 @@ export default function AttendanceLog() {
                       className={`aspect-square flex items-center justify-center text-sm font-semibold rounded-lg transition-all relative cursor-pointer ${
                         isSelected ? 'ring-2 ring-offset-2 ring-blue-500 ' : ''
                       }${
-                        marked ? 'bg-blue-50 text-blue-600 border border-blue-500' : 
+                        marked ? 'bg-blue-500 text-white' : 
+                        onLeave ? 'bg-orange-500 text-white' :
                         isAbsent ? 'bg-red-500 text-white' :
                         isToday ? 'bg-gray-100 text-black border border-[#4F8CCF]' : 'text-black hover:bg-gray-100'
                       }`}
@@ -313,8 +342,9 @@ export default function AttendanceLog() {
               </div>
               
               <div className="mt-6 pt-6 border-t border-gray-200 flex flex-wrap items-center gap-4 text-sm font-semibold text-gray-600">
-                <div className="flex items-center gap-2"><div className="w-3 h-3 bg-blue-50 border border-blue-500 rounded-full"></div> Present</div>
+                <div className="flex items-center gap-2"><div className="w-3 h-3 bg-blue-500 rounded-full"></div> Present</div>
                 <div className="flex items-center gap-2"><div className="w-3 h-3 bg-red-500 rounded-full"></div> Absent</div>
+                <div className="flex items-center gap-2"><div className="w-3 h-3 bg-orange-500 rounded-full"></div> On Leave</div>
                 <div className="flex items-center gap-2"><div className="w-3 h-3 bg-gray-100 border border-[#4F8CCF] rounded-full"></div> Today</div>
               </div>
             </div>
