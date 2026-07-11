@@ -160,7 +160,7 @@ export default function MakePaymentsPage({ onPayNowClick }) {
     // Add Logo
     try {
       const img = new window.Image();
-      img.src = '/student/logo.png';
+      img.src = '/student/logo2.png';
       await new Promise((resolve, reject) => {
         img.onload = resolve;
         img.onerror = () => reject(new Error("Image failed to load"));
@@ -302,7 +302,7 @@ export default function MakePaymentsPage({ onPayNowClick }) {
       doc.text(`One-Time Refundable Payment`, 60, startY + 15);
       doc.text(`Formula: Rs. ${monthlyBase.toLocaleString('en-IN')} (monthly base) × 3 months`, 60, startY + 30);
     } else {
-      const baseDate = new Date(studentProfile?.admissionDate || studentProfile?.createdAt || row.dueDate || row.paidDate || Date.now());
+      const baseDate = new Date(studentProfile?.admissionDate || studentProfile?.createdAt || row.paidDate || row.dueDate || Date.now());
       const m1Start = new Date(baseDate);
       const m1End = new Date(baseDate); m1End.setMonth(m1End.getMonth() + 1); m1End.setDate(m1End.getDate() - 1);
       const m2Start = new Date(baseDate); m2Start.setMonth(m2Start.getMonth() + 1);
@@ -321,7 +321,7 @@ export default function MakePaymentsPage({ onPayNowClick }) {
     startY += 85;
 
     // Removed parent notes from description
-    doc.text(`Ref: ${studentProfile?.email || '-'}`, 60, startY);
+    doc.text(`UTR / Ref: ${row.transactionId || row.utr || row.razorpayPaymentId || (row._id ? 'TRX-' + row._id.substring(0,8).toUpperCase() : '-')}`, 60, startY);
 
     startY += 20;
 
@@ -489,7 +489,7 @@ export default function MakePaymentsPage({ onPayNowClick }) {
                       </td>
                       <td className="p-4 text-gray-700">{item.feeType}</td>
                       <td className="p-4 text-gray-900 font-bold">₹{item.amount?.toLocaleString('en-IN')}</td>
-                      <td className="p-4 text-gray-500 text-sm">{studentProfile?.email}</td>
+                      <td className="p-4 text-gray-500 text-sm">{item.transactionId || item.utr || item.razorpayPaymentId || (item._id ? `TRX-${item._id.substring(0, 8).toUpperCase()}` : '-')}</td>
                       <td className="p-4">
                         <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold uppercase">
                           Paid
@@ -541,7 +541,7 @@ export default function MakePaymentsPage({ onPayNowClick }) {
                   </div>
                   <div className="mt-4 pt-4 border-t border-gray-50 space-y-3">
                     <div className="text-xs text-gray-500 flex justify-between items-center">
-                      <span>Ref: {studentProfile?.email}</span>
+                      <span>Ref: {item.transactionId || item.utr || item.razorpayPaymentId || (item._id ? `TRX-${item._id.substring(0, 8).toUpperCase()}` : '-')}</span>
                       <span className="text-lg font-bold text-gray-900">₹{item.amount?.toLocaleString('en-IN')}</span>
                     </div>
                     <div className="flex gap-2">

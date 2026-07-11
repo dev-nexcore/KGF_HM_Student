@@ -18,6 +18,7 @@ export default function AttendanceLog() {
   const [showScanner, setShowScanner] = useState(false);
   const [selfie, setSelfie] = useState(null);
   const [location, setLocation] = useState(null);
+  const [admissionDate, setAdmissionDate] = useState(null);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
 
@@ -53,21 +54,52 @@ export default function AttendanceLog() {
     }
   };
 
-  const fetchStats = async () => {
-    if (!studentId) return;
-    try {
-      const res = await api.get(`/attendanceSummary/${studentId}?range=month`);
-      if (res.data) {
-        setAttendanceStats({
-          present: res.data.present ?? 0,
-          absent: res.data.absent ?? 0,
-          leaves: res.data.leaves ?? 0,
-        });
-      }
-    } catch (err) {
-      console.error("Failed to fetch attendance stats", err);
-    }
+  const fetchStats = () => {
+    // We will calculate this dynamically based on the currentDate in a useEffect
   };
+
+  useEffect(() => {
+    if (!currentDate) return;
+    let presentCount = 0;
+    let absentCount = 0;
+    
+    const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const iterDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+      
+      // Check if marked
+      const dateStr = iterDate.toDateString();
+      const marked = logs.some(log => new Date(log.checkInDate).toDateString() === dateStr);
+      
+      // Check if on leave
+      const onLeave = leaves.some(leave => {
+        if (leave.status !== 'approved' && leave.status !== 'warden_approved') return false;
+        const start = new Date(leave.startDate);
+        start.setHours(0, 0, 0, 0);
+        const end = new Date(leave.endDate);
+        end.setHours(23, 59, 59, 999);
+        return iterDate >= start && iterDate <= end;
+      });
+
+      const isBeforeAdmission = admissionDate ? iterDate < admissionDate : false;
+      const isAbsent = !marked && !onLeave && iterDate < now && !isBeforeAdmission;
+
+      if (marked) {
+        presentCount++;
+      } else if (isAbsent) {
+        absentCount++;
+      }
+    }
+
+    setAttendanceStats({
+      present: presentCount,
+      absent: absentCount,
+      leaves: 0
+    });
+  }, [currentDate, logs, leaves, admissionDate]);
 
   const fetchLeaves = async () => {
     if (!studentId) return;
@@ -81,10 +113,29 @@ export default function AttendanceLog() {
     }
   };
 
+  const fetchProfile = async () => {
+    if (!studentId) return;
+    try {
+      const res = await api.get(`/profile`);
+      if (res.data) {
+        // Find admissionDate or fallback to createdAt
+        const adDate = res.data.admissionDate || res.data.createdAt;
+        if (adDate) {
+          const d = new Date(adDate);
+          d.setHours(0, 0, 0, 0);
+          setAdmissionDate(d);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to fetch profile", err);
+    }
+  };
+
   useEffect(() => {
     fetchLogs();
     fetchStats();
     fetchLeaves();
+    fetchProfile();
   }, [studentId]);
 
   // --- Attendance Logic ---
@@ -320,7 +371,8 @@ export default function AttendanceLog() {
                   // Calculate if absent (past day, not Sunday, and not marked)
                   const now = new Date();
                   now.setHours(0, 0, 0, 0);
-                  const isAbsent = !marked && !onLeave && iterDate < now;
+                  const isBeforeAdmission = admissionDate ? iterDate < admissionDate : false;
+                  const isAbsent = !marked && !onLeave && iterDate < now && !isBeforeAdmission;
 
                   return (
                     <div 
